@@ -19,15 +19,18 @@
 
 typedef struct Vertex
 {
-    glm::vec2 pos;
-    glm::vec3 col;
+    glm::vec2 pos;      // position   or "float x, y"
+    glm::vec3 col;      // Colour     or "float x, y, z"
+    // Colour range is 0.0 to 1.0
+    // 0.0 = black (Red, Green, Blue)
+    // 1.0 = white 
 } Vertex;
 
 static const Vertex vertices[3] =
 {
-    { { -0.6f, -0.4f }, { 1.f, 0.f, 0.f } },
-    { {  0.6f, -0.4f }, { 0.f, 1.f, 0.f } },
-    { {   0.f,  0.6f }, { 0.f, 0.f, 1.f } }
+    { { -0.6f, -0.4f }, { 1.0f, 0.0f, 0.0f } },
+    { {  0.6f, -0.4f }, { 0.0f, 1.0f, 0.0f } },
+    { {  0.0f,  0.6f }, { 0.0f, 0.0f, 1.0f } }
 };
 
 static const char* vertex_shader_text =
@@ -51,6 +54,11 @@ static const char* fragment_shader_text =
 "    fragment = vec4(color, 1.0);\n"
 "}\n";
 
+
+glm::vec3 cameraEye = glm::vec3(0.0, 0.0, 4.0f);
+
+
+
 static void error_callback(int error, const char* description)
 {
     fprintf(stderr, "Error: %s\n", description);
@@ -60,10 +68,35 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GLFW_TRUE);
+
+    const float CAMERA_MOVE_SPEED = 0.1f;
+
+    if (key == GLFW_KEY_A)
+    {
+        cameraEye.x -= CAMERA_MOVE_SPEED;
+    }
+
+    if (key == GLFW_KEY_D)
+    {
+        cameraEye.x += CAMERA_MOVE_SPEED;
+    }
+
+    if (key == GLFW_KEY_W)
+    {
+        cameraEye.z += CAMERA_MOVE_SPEED;
+    }
+
+    if (key == GLFW_KEY_S)
+    {
+        cameraEye.z -= CAMERA_MOVE_SPEED;
+    }
 }
 
 int main(void)
 {
+
+   
+
     glfwSetErrorCallback(error_callback);
 
     if (!glfwInit())
@@ -135,9 +168,10 @@ int main(void)
         m = glm::mat4(1.0f);
 
         //mat4x4_rotate_Z(m, m, (float) glfwGetTime());
-        glm::mat4 rotateZ = glm::rotate(glm::mat4(1.0f),
-            (float)glfwGetTime(),
-            glm::vec3(0.0f, 0.0, 1.0f));
+        glm::mat4 rotateZ = 
+            glm::rotate(glm::mat4(1.0f),    // Ignore this
+            0.0f, // (float)glfwGetTime(),           // Angle in radians
+            glm::vec3(0.0f, 0.0, 1.0f));    // Around the z
 
         m = m * rotateZ;
 
@@ -149,13 +183,14 @@ int main(void)
 
         v = glm::mat4(1.0f);
 
-        glm::vec3 cameraEye = glm::vec3(0.0, 0.0, -4.0f);
+//        glm::vec3 cameraEye = glm::vec3(0.0, 0.0, 4.0f);
         glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
         glm::vec3 upVector = glm::vec3(0.0f, 1.0f, 0.0f);
 
-        v = glm::lookAt(cameraEye,
-            cameraTarget,
-            upVector);
+        v = glm::lookAt(
+                cameraEye,
+                cameraTarget,
+                upVector);
 
         //mat4x4_mul(mvp, p, m);
         mvp = p * v * m;

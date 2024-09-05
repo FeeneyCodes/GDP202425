@@ -17,7 +17,9 @@
 #include <stddef.h>
 #include <stdio.h>
 
-#include <iostream>
+#include <iostream>     // "input output" stream
+#include <fstream>      // "file" stream
+#include <string>
 
 struct sVertex
 {
@@ -95,8 +97,13 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
     }
 }
 
+void ConsoleStuff(void);
+
 int main(void)
 {   
+
+    ConsoleStuff();
+
     // On the stack, at compile time.
     // Limited by the size of the stack.
     // Also: Can't change the size.
@@ -112,13 +119,18 @@ int main(void)
 //    std::cout << "vertices: " << vertices << '\n';
 //    std::cout << (*(vertices + 1)).
 
-    // On the HEAP, so dynamically allocated at run tim
-    sVertex* pVertices = new sVertex[3];
+    // On the HEAP, so dynamically allocated at run time
+//    sVertex* pVertices = new sVertex[3];
+//
+//    pVertices[0] = { { -0.6f, -0.4f }, { 1.0f, 0.0f, 0.0f } };
+//    pVertices[1] = { {  0.6f, -0.4f }, { 0.0f, 1.0f, 0.0f } };
+//    pVertices[2] = { {  0.0f,  0.6f }, { 0.0f, 0.0f, 1.0f } };
 
-    pVertices[0] = { { -0.6f, -0.4f }, { 1.0f, 0.0f, 0.0f } };
-    pVertices[1] = { {  0.6f, -0.4f }, { 0.0f, 1.0f, 0.0f } };
-    pVertices[2] = { {  0.0f,  0.6f }, { 0.0f, 0.0f, 1.0f } };
+    int numberOfVertices = 0;
+    
+    // Load the file...
 
+    sVertex* pVertices = new sVertex[numberOfVertices];
 
     //int x = 6;
     //int* px = &x;   // Stores the location of "X" into "px"
@@ -246,4 +258,66 @@ int main(void)
 
     glfwTerminate();
     exit(EXIT_SUCCESS);
+}
+
+//using namespace std;
+
+void ConsoleStuff(void)
+{
+    // "o" for output
+//    std::ofstream myFile("someData.txt");
+    // Write something
+    //myFile << "Hello" << std::endl;
+    //myFile << "there";
+    //myFile.close();
+
+    // Now read this file
+//    std::ifstream myFile2("someData.txt");
+//    std::string someString;
+//    myFile2 >> someString;
+//    std::cout << someString << std::endl;
+//
+    //std::string aword;
+    //while (aword != "END_OF_FILE")
+    //{
+    //    myFile2 >> aword;
+    //    std::cout << aword << std::endl;
+    //};
+
+    //std::string aword;
+    //while (myFile2 >> aword)
+    //{
+    //    std::cout << aword << std::endl;
+    //};
+
+    std::ifstream myFile2("assets/models/bun_zipper_res3.ply");
+    if (myFile2.is_open())
+    {
+
+        std::string aword;
+        while (myFile2 >> aword)
+        {
+            std::cout << aword << std::endl;
+        };
+    }
+    else
+    {
+        std::cout << "Can't find file" << std::endl;
+    }
+
+
+    // iostream
+    std::cout << "Type a number:" << std::endl;
+
+    int x = 0;
+    std::cin >> x;
+
+    std::cout << "You typed: " << x << std::endl;
+
+    std::cout << "Type your name:" << std::endl;
+    std::string name;
+    std::cin >> name;
+
+    std::cout << "Hello " << name << std::endl;
+    return;
 }

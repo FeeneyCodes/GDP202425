@@ -95,6 +95,18 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
     {
         cameraEye.z -= CAMERA_MOVE_SPEED;
     }
+
+    if (key == GLFW_KEY_Q)
+    {
+        cameraEye.y -= CAMERA_MOVE_SPEED;
+    }
+    if (key == GLFW_KEY_E)
+    {
+        cameraEye.y += CAMERA_MOVE_SPEED;
+    }
+
+
+    return;
 }
 
 void ConsoleStuff(void);
@@ -102,7 +114,7 @@ void ConsoleStuff(void);
 int main(void)
 {   
 
-    ConsoleStuff();
+//    ConsoleStuff();
 
     // On the stack, at compile time.
     // Limited by the size of the stack.
@@ -126,18 +138,149 @@ int main(void)
 //    pVertices[1] = { {  0.6f, -0.4f }, { 0.0f, 1.0f, 0.0f } };
 //    pVertices[2] = { {  0.0f,  0.6f }, { 0.0f, 0.0f, 1.0f } };
 
+
+// ************************************************************
+    // Read the top of the file to get some info.
+
+    // Read all the text until I get to the word "vertex"
+    std::ifstream plyFile("assets/models/bun_zipper_res3.ply");
+    std::string token = "";
+
+    //element vertex 1889
+    while (token != "vertex")
+    {
+        plyFile >> token;
+    };
+    // Next info is the number of vertices
     int numberOfVertices = 0;
-    
-    // Load the file...
+    plyFile >> numberOfVertices;
 
-    sVertex* pVertices = new sVertex[numberOfVertices];
 
-    //int x = 6;
-    //int* px = &x;   // Stores the location of "X" into "px"
+    //element face 3851
+    while (token != "face")
+    {
+        plyFile >> token;
+    };
+    // Next info is the number of vertices
+    int numberOfTriangles = 0;
+    plyFile >> numberOfTriangles;
 
-    //std::cout << x << '\n';
-    //std::cout << px << '\n';
-    //std::cout << *px << '\n';
+    //end_header
+    // -0.0369122 0.127512 0.00276757 0.850855 0.5 
+    while (token != "end_header")
+    {
+        plyFile >> token;
+    };
+
+
+    // 
+    std::cout << numberOfVertices << std::endl;
+    std::cout << numberOfTriangles << std::endl;
+
+//property float x
+//property float y
+//property float z
+//property float confidence
+//property float intensity
+    struct sPlyVertex
+    {
+        float x, y, z, confidence, intensity;
+    };
+//
+// and 
+// 
+// 3 572 584 1040 
+    struct sTriangle
+    {
+        unsigned int vertIndex_0;
+        unsigned int vertIndex_1;
+        unsigned int vertIndex_2;
+    };
+
+    // Load the data from the file
+    sPlyVertex* pPlyVertices = new sPlyVertex[numberOfVertices];
+
+    // end_header
+    // -0.0369122 0.127512 0.00276757 0.850855 0.5
+    for (unsigned index = 0; index != numberOfVertices; index++)
+    {
+        plyFile >> pPlyVertices[index].x;
+        plyFile >> pPlyVertices[index].y;
+        plyFile >> pPlyVertices[index].z;
+        plyFile >> pPlyVertices[index].confidence;
+        plyFile >> pPlyVertices[index].intensity;
+    }
+
+    // Load the triangle info from the file
+    sTriangle* pPlyTriangles = new sTriangle[numberOfTriangles];
+    for (unsigned int index = 0; index != numberOfTriangles; index++)
+    {
+        // 3 737 103 17 
+        int discard = 0;
+        plyFile >> discard;
+        plyFile >> pPlyTriangles[index].vertIndex_0;
+        plyFile >> pPlyTriangles[index].vertIndex_1;
+        plyFile >> pPlyTriangles[index].vertIndex_2;
+    }
+
+
+// ******************************************************
+
+    // This is the array we are giving the GPU 
+    unsigned int numberOfVertices_TO_DRAW = numberOfTriangles * 3;
+    // Each triangle has 3 vertices
+
+    sVertex* pVertices = new sVertex[numberOfVertices_TO_DRAW];
+
+    // Copy the data form the "ply" (i.e. file) arrays
+    // to the format that the GPU expects
+//     struct sPlyVertex
+//    {
+//        float x, y, z, confidence, intensity;
+//    };
+//
+//    struct sTriangle
+//    {
+//        unsigned int vertIndex_0;
+//        unsigned int vertIndex_1;
+//        unsigned int vertIndex_2;
+//    };
+//
+//  to... 
+// 
+//    struct sVertex
+//    {
+//        glm::vec2 pos;      // position   or "float x, y"
+//        glm::vec3 col;      //
+
+    unsigned int vertexIndex = 0;
+
+    for (unsigned int triIndex = 0; triIndex != numberOfTriangles; triIndex++)
+    {
+//        { { -0.6f, -0.4f }, { 1.0f, 0.0f, 0.0f } },
+//        { {  0.6f, -0.4f }, { 0.0f, 1.0f, 0.0f } },
+//        { {  0.0f,  0.6f }, { 0.0f, 0.0f, 1.0f } }
+
+        pVertices[vertexIndex + 0].pos.x = pPlyVertices[ pPlyTriangles[triIndex].vertIndex_0 ].x;
+        pVertices[vertexIndex + 0].pos.y = pPlyVertices[ pPlyTriangles[triIndex].vertIndex_0 ].y;
+        pVertices[vertexIndex + 0].col.r = 1.0f;
+        pVertices[vertexIndex + 0].col.g = 1.0f;
+        pVertices[vertexIndex + 0].col.b = 1.0f;
+
+        pVertices[vertexIndex + 1].pos.x = pPlyVertices[ pPlyTriangles[triIndex].vertIndex_1 ].x;
+        pVertices[vertexIndex + 1].pos.y = pPlyVertices[ pPlyTriangles[triIndex].vertIndex_1 ].y;
+        pVertices[vertexIndex + 1].col.r = 1.0f;
+        pVertices[vertexIndex + 1].col.g = 1.0f;
+        pVertices[vertexIndex + 1].col.b = 1.0f;
+
+        pVertices[vertexIndex + 2].pos.x = pPlyVertices[ pPlyTriangles[triIndex].vertIndex_2 ].x;
+        pVertices[vertexIndex + 2].pos.y = pPlyVertices[ pPlyTriangles[triIndex].vertIndex_2 ].y;
+        pVertices[vertexIndex + 2].col.r = 1.0f;
+        pVertices[vertexIndex + 2].col.g = 1.0f;
+        pVertices[vertexIndex + 2].col.b = 1.0f;
+
+        vertexIndex += 3;
+    }
 
 
 
@@ -169,7 +312,8 @@ int main(void)
     glGenBuffers(1, &vertex_buffer);
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
 
-    int size_in_bytes_of_vertex_array = sizeof(sVertex) * 3;
+//    int size_in_bytes_of_vertex_array = sizeof(sVertex) * 3;
+    int size_in_bytes_of_vertex_array = sizeof(sVertex) * numberOfVertices_TO_DRAW;
 
     glBufferData(GL_ARRAY_BUFFER,
                  size_in_bytes_of_vertex_array,     // sizeof(vertices),
@@ -247,8 +391,14 @@ int main(void)
         glUseProgram(program);
         glUniformMatrix4fv(mvp_location, 1, GL_FALSE, (const GLfloat*)&mvp);
         glBindVertexArray(vertex_array);
+
+
+        // solid or wireframe, etc.
 //        glPointSize(10.0f);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+//        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawArrays(GL_TRIANGLES, 0, numberOfVertices_TO_DRAW);
 
         glfwSwapBuffers(window);
         glfwPollEvents();

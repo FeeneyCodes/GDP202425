@@ -23,7 +23,7 @@
 
 struct sVertex
 {
-    glm::vec2 pos;      // position   or "float x, y"
+    glm::vec3 pos;          // glm::vec2 pos;      // position   or "float x, y"
     glm::vec3 col;      // Colour     or "float x, y, z"
     // Colour range is 0.0 to 1.0
     // 0.0 = black (Red, Green, Blue)
@@ -42,11 +42,11 @@ static const char* vertex_shader_text =
 "#version 330\n"
 "uniform mat4 MVP;\n"
 "in vec3 vCol;\n"
-"in vec2 vPos;\n"
+"in vec3 vPos;\n"
 "out vec3 color;\n"
 "void main()\n"
 "{\n"
-"    gl_Position = MVP * vec4(vPos, 0.0, 1.0);\n"
+"    gl_Position = MVP * vec4(vPos, 1.0);\n"
 "    color = vCol;\n"
 "}\n";
 
@@ -263,18 +263,21 @@ int main(void)
 
         pVertices[vertexIndex + 0].pos.x = pPlyVertices[ pPlyTriangles[triIndex].vertIndex_0 ].x;
         pVertices[vertexIndex + 0].pos.y = pPlyVertices[ pPlyTriangles[triIndex].vertIndex_0 ].y;
+        pVertices[vertexIndex + 0].pos.z = pPlyVertices[ pPlyTriangles[triIndex].vertIndex_0 ].z;
         pVertices[vertexIndex + 0].col.r = 1.0f;
         pVertices[vertexIndex + 0].col.g = 1.0f;
         pVertices[vertexIndex + 0].col.b = 1.0f;
 
         pVertices[vertexIndex + 1].pos.x = pPlyVertices[ pPlyTriangles[triIndex].vertIndex_1 ].x;
         pVertices[vertexIndex + 1].pos.y = pPlyVertices[ pPlyTriangles[triIndex].vertIndex_1 ].y;
+        pVertices[vertexIndex + 1].pos.z = pPlyVertices[ pPlyTriangles[triIndex].vertIndex_1 ].z;
         pVertices[vertexIndex + 1].col.r = 1.0f;
         pVertices[vertexIndex + 1].col.g = 1.0f;
         pVertices[vertexIndex + 1].col.b = 1.0f;
 
         pVertices[vertexIndex + 2].pos.x = pPlyVertices[ pPlyTriangles[triIndex].vertIndex_2 ].x;
         pVertices[vertexIndex + 2].pos.y = pPlyVertices[ pPlyTriangles[triIndex].vertIndex_2 ].y;
+        pVertices[vertexIndex + 2].pos.z = pPlyVertices[ pPlyTriangles[triIndex].vertIndex_2 ].z;
         pVertices[vertexIndex + 2].col.r = 1.0f;
         pVertices[vertexIndex + 2].col.g = 1.0f;
         pVertices[vertexIndex + 2].col.b = 1.0f;
@@ -334,18 +337,41 @@ int main(void)
     glLinkProgram(program);
 
     const GLint mvp_location = glGetUniformLocation(program, "MVP");
-    const GLint vpos_location = glGetAttribLocation(program, "vPos");
+
+    const GLint vpos_location = glGetAttribLocation(program, "vPos");   
     const GLint vcol_location = glGetAttribLocation(program, "vCol");
 
     GLuint vertex_array;
     glGenVertexArrays(1, &vertex_array);
     glBindVertexArray(vertex_array);
+
+    // Where the data specifically is.
+    // Called the "vertex layout"
+
+    //glm::vec3 pos;       
+    //glm::vec3 col;    
+//    { { -0.6f, -0.4f, 0.0f }, { 1.0f, 0.0f, 0.0f } },
+//    { {  0.6f, -0.4f, 0.0f }, { 0.0f, 1.0f, 0.0f } },
+//    { {  0.0f,  0.6f, 0.0f }, { 0.0f, 0.0f, 1.0f } }
+
+
     glEnableVertexAttribArray(vpos_location);
-    glVertexAttribPointer(vpos_location, 2, GL_FLOAT, GL_FALSE,
-        sizeof(sVertex), (void*)offsetof(sVertex, pos));
+    glVertexAttribPointer(
+        vpos_location, 
+        3, 
+        GL_FLOAT, 
+        GL_FALSE,
+        sizeof(sVertex),                        // 6 floats or 24 bytes
+        (void*)offsetof(sVertex, pos));         // 0 bytes into the sVertex structure
+
     glEnableVertexAttribArray(vcol_location);
-    glVertexAttribPointer(vcol_location, 3, GL_FLOAT, GL_FALSE,
-        sizeof(sVertex), (void*)offsetof(sVertex, col));
+    glVertexAttribPointer(
+        vcol_location, 
+        3, 
+        GL_FLOAT, 
+        GL_FALSE,
+        sizeof(sVertex), 
+        (void*)offsetof(sVertex, col));     // 3 floats or 12 bytes into the sVertex structure
 
     while (!glfwWindowShouldClose(window))
     {

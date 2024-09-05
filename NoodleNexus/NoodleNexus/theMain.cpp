@@ -17,21 +17,24 @@
 #include <stddef.h>
 #include <stdio.h>
 
-typedef struct Vertex
+#include <iostream>
+
+struct sVertex
 {
     glm::vec2 pos;      // position   or "float x, y"
     glm::vec3 col;      // Colour     or "float x, y, z"
     // Colour range is 0.0 to 1.0
     // 0.0 = black (Red, Green, Blue)
     // 1.0 = white 
-} Vertex;
-
-static const Vertex vertices[3] =
-{
-    { { -0.6f, -0.4f }, { 1.0f, 0.0f, 0.0f } },
-    { {  0.6f, -0.4f }, { 0.0f, 1.0f, 0.0f } },
-    { {  0.0f,  0.6f }, { 0.0f, 0.0f, 1.0f } }
 };
+
+//sVertex vertices[3] =
+//{
+//    { { -0.6f, -0.4f }, { 1.0f, 0.0f, 0.0f } },
+//    { {  0.6f, -0.4f }, { 0.0f, 1.0f, 0.0f } },
+//    { {  0.0f,  0.6f }, { 0.0f, 0.0f, 1.0f } }
+//};
+
 
 static const char* vertex_shader_text =
 "#version 330\n"
@@ -93,9 +96,38 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 }
 
 int main(void)
-{
+{   
+    // On the stack, at compile time.
+    // Limited by the size of the stack.
+    // Also: Can't change the size.
+//    sVertex vertices[3] =
+//    {
+//        { { -0.6f, -0.4f }, { 1.0f, 0.0f, 0.0f } },
+//        { {  0.6f, -0.4f }, { 0.0f, 1.0f, 0.0f } },
+//       { {  0.0f,  0.6f }, { 0.0f, 0.0f, 1.0f } }
+//  };
 
-   
+//    sizeof(sVertex) * 3;
+
+//    std::cout << "vertices: " << vertices << '\n';
+//    std::cout << (*(vertices + 1)).
+
+    // On the HEAP, so dynamically allocated at run tim
+    sVertex* pVertices = new sVertex[3];
+
+    pVertices[0] = { { -0.6f, -0.4f }, { 1.0f, 0.0f, 0.0f } };
+    pVertices[1] = { {  0.6f, -0.4f }, { 0.0f, 1.0f, 0.0f } };
+    pVertices[2] = { {  0.0f,  0.6f }, { 0.0f, 0.0f, 1.0f } };
+
+
+    //int x = 6;
+    //int* px = &x;   // Stores the location of "X" into "px"
+
+    //std::cout << x << '\n';
+    //std::cout << px << '\n';
+    //std::cout << *px << '\n';
+
+
 
     glfwSetErrorCallback(error_callback);
 
@@ -124,7 +156,13 @@ int main(void)
     GLuint vertex_buffer;
     glGenBuffers(1, &vertex_buffer);
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    int size_in_bytes_of_vertex_array = sizeof(sVertex) * 3;
+
+    glBufferData(GL_ARRAY_BUFFER,
+                 size_in_bytes_of_vertex_array,     // sizeof(vertices),
+                 pVertices,                         // vertices,
+                 GL_STATIC_DRAW);
 
     const GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertex_shader, 1, &vertex_shader_text, NULL);
@@ -148,10 +186,10 @@ int main(void)
     glBindVertexArray(vertex_array);
     glEnableVertexAttribArray(vpos_location);
     glVertexAttribPointer(vpos_location, 2, GL_FLOAT, GL_FALSE,
-        sizeof(Vertex), (void*)offsetof(Vertex, pos));
+        sizeof(sVertex), (void*)offsetof(sVertex, pos));
     glEnableVertexAttribArray(vcol_location);
     glVertexAttribPointer(vcol_location, 3, GL_FLOAT, GL_FALSE,
-        sizeof(Vertex), (void*)offsetof(Vertex, col));
+        sizeof(sVertex), (void*)offsetof(sVertex, col));
 
     while (!glfwWindowShouldClose(window))
     {
@@ -197,6 +235,7 @@ int main(void)
         glUseProgram(program);
         glUniformMatrix4fv(mvp_location, 1, GL_FALSE, (const GLfloat*)&mvp);
         glBindVertexArray(vertex_array);
+//        glPointSize(10.0f);
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
         glfwSwapBuffers(window);

@@ -21,6 +21,11 @@
 #include <fstream>      // "file" stream
 #include <string>
 
+
+//void ReadPlyModelFromFile(std::string plyFileName);
+#include "PlyFileLoaders.h"
+
+
 struct sVertex
 {
     glm::vec3 pos;          // glm::vec2 pos;      // position   or "float x, y"
@@ -46,7 +51,11 @@ static const char* vertex_shader_text =
 "out vec3 color;\n"
 "void main()\n"
 "{\n"
-"    gl_Position = MVP * vec4(vPos, 1.0);\n"
+"   vec3 finalVert = vPos;\n"
+"   finalVert.x = vPos.x * 1.0f;\n"
+"   finalVert.y = vPos.y * 1.0f;\n"
+"   finalVert.z = vPos.z * 1.0f;\n"
+"    gl_Position = MVP * vec4(finalVert, 1.0);\n"
 "    color = vCol;\n"
 "}\n";
 
@@ -56,7 +65,7 @@ static const char* fragment_shader_text =
 "out vec4 fragment;\n"
 "void main()\n"
 "{\n"
-"    fragment = vec4(color, 1.0);\n"
+"    fragment = vec4(0.0f, 1.0f, 0.0f, 1.0);\n"
 "}\n";
 
 
@@ -138,96 +147,23 @@ int main(void)
 //    pVertices[1] = { {  0.6f, -0.4f }, { 0.0f, 1.0f, 0.0f } };
 //    pVertices[2] = { {  0.0f,  0.6f }, { 0.0f, 0.0f, 1.0f } };
 
+    s3DFileData plyFileInfoBunny;
+    plyFileInfoBunny.fileName = "assets/models/bun_zipper_res3.ply";
+    ReadPlyModelFromFile_xyz_ci(plyFileInfoBunny);
 
-// ************************************************************
-    // Read the top of the file to get some info.
+    s3DFileData plyFileInfoCar;
+    plyFileInfoCar.fileName = "assets/models/VintageRacingCar_xyz_only.ply";
+    ReadPlyModelFromFile_xyz(plyFileInfoCar);
 
-    // Read all the text until I get to the word "vertex"
-    std::ifstream plyFile("assets/models/bun_zipper_res3.ply");
-    std::string token = "";
-
-    //element vertex 1889
-    while (token != "vertex")
-    {
-        plyFile >> token;
-    };
-    // Next info is the number of vertices
-    int numberOfVertices = 0;
-    plyFile >> numberOfVertices;
-
-
-    //element face 3851
-    while (token != "face")
-    {
-        plyFile >> token;
-    };
-    // Next info is the number of vertices
-    int numberOfTriangles = 0;
-    plyFile >> numberOfTriangles;
-
-    //end_header
-    // -0.0369122 0.127512 0.00276757 0.850855 0.5 
-    while (token != "end_header")
-    {
-        plyFile >> token;
-    };
-
-
-    // 
-    std::cout << numberOfVertices << std::endl;
-    std::cout << numberOfTriangles << std::endl;
-
-//property float x
-//property float y
-//property float z
-//property float confidence
-//property float intensity
-    struct sPlyVertex
-    {
-        float x, y, z, confidence, intensity;
-    };
-//
-// and 
-// 
-// 3 572 584 1040 
-    struct sTriangle
-    {
-        unsigned int vertIndex_0;
-        unsigned int vertIndex_1;
-        unsigned int vertIndex_2;
-    };
-
-    // Load the data from the file
-    sPlyVertex* pPlyVertices = new sPlyVertex[numberOfVertices];
-
-    // end_header
-    // -0.0369122 0.127512 0.00276757 0.850855 0.5
-    for (unsigned index = 0; index != numberOfVertices; index++)
-    {
-        plyFile >> pPlyVertices[index].x;
-        plyFile >> pPlyVertices[index].y;
-        plyFile >> pPlyVertices[index].z;
-        plyFile >> pPlyVertices[index].confidence;
-        plyFile >> pPlyVertices[index].intensity;
-    }
-
-    // Load the triangle info from the file
-    sTriangle* pPlyTriangles = new sTriangle[numberOfTriangles];
-    for (unsigned int index = 0; index != numberOfTriangles; index++)
-    {
-        // 3 737 103 17 
-        int discard = 0;
-        plyFile >> discard;
-        plyFile >> pPlyTriangles[index].vertIndex_0;
-        plyFile >> pPlyTriangles[index].vertIndex_1;
-        plyFile >> pPlyTriangles[index].vertIndex_2;
-    }
-
+    s3DFileData plyFileInfo;
+    plyFileInfo.fileName = "assets/models/Dragon 2.5Edited_xyz_only.ply";
+    ReadPlyModelFromFile_xyz(plyFileInfo);
 
 // ******************************************************
 
     // This is the array we are giving the GPU 
-    unsigned int numberOfVertices_TO_DRAW = numberOfTriangles * 3;
+//    unsigned int numberOfVertices_TO_DRAW = numberOfTriangles * 3;
+    unsigned int numberOfVertices_TO_DRAW = plyFileInfo.numberOfTriangles * 3;
     // Each triangle has 3 vertices
 
     sVertex* pVertices = new sVertex[numberOfVertices_TO_DRAW];
@@ -255,35 +191,52 @@ int main(void)
 
     unsigned int vertexIndex = 0;
 
-    for (unsigned int triIndex = 0; triIndex != numberOfTriangles; triIndex++)
+//    for (unsigned int triIndex = 0; triIndex != numberOfTriangles; triIndex++)
+    for (unsigned int triIndex = 0; triIndex != plyFileInfo.numberOfTriangles; triIndex++)
     {
 //        { { -0.6f, -0.4f }, { 1.0f, 0.0f, 0.0f } },
 //        { {  0.6f, -0.4f }, { 0.0f, 1.0f, 0.0f } },
 //        { {  0.0f,  0.6f }, { 0.0f, 0.0f, 1.0f } }
 
-        pVertices[vertexIndex + 0].pos.x = pPlyVertices[ pPlyTriangles[triIndex].vertIndex_0 ].x;
-        pVertices[vertexIndex + 0].pos.y = pPlyVertices[ pPlyTriangles[triIndex].vertIndex_0 ].y;
-        pVertices[vertexIndex + 0].pos.z = pPlyVertices[ pPlyTriangles[triIndex].vertIndex_0 ].z;
+//        pVertices[vertexIndex + 0].pos.x = pPlyVertices[ pPlyTriangles[triIndex].vertIndex_0 ].x;
+        pVertices[vertexIndex + 0].pos.x = plyFileInfo.pPlyVertices[plyFileInfo.pPlyTriangles[triIndex].vertIndex_0 ].x;
+        pVertices[vertexIndex + 0].pos.y = plyFileInfo.pPlyVertices[plyFileInfo.pPlyTriangles[triIndex].vertIndex_0 ].y;
+        pVertices[vertexIndex + 0].pos.z = plyFileInfo.pPlyVertices[plyFileInfo.pPlyTriangles[triIndex].vertIndex_0 ].z;
         pVertices[vertexIndex + 0].col.r = 1.0f;
         pVertices[vertexIndex + 0].col.g = 1.0f;
         pVertices[vertexIndex + 0].col.b = 1.0f;
 
-        pVertices[vertexIndex + 1].pos.x = pPlyVertices[ pPlyTriangles[triIndex].vertIndex_1 ].x;
-        pVertices[vertexIndex + 1].pos.y = pPlyVertices[ pPlyTriangles[triIndex].vertIndex_1 ].y;
-        pVertices[vertexIndex + 1].pos.z = pPlyVertices[ pPlyTriangles[triIndex].vertIndex_1 ].z;
+        pVertices[vertexIndex + 1].pos.x = plyFileInfo.pPlyVertices[plyFileInfo.pPlyTriangles[triIndex].vertIndex_1 ].x;
+        pVertices[vertexIndex + 1].pos.y = plyFileInfo.pPlyVertices[plyFileInfo.pPlyTriangles[triIndex].vertIndex_1 ].y;
+        pVertices[vertexIndex + 1].pos.z = plyFileInfo.pPlyVertices[plyFileInfo.pPlyTriangles[triIndex].vertIndex_1 ].z;
         pVertices[vertexIndex + 1].col.r = 1.0f;
         pVertices[vertexIndex + 1].col.g = 1.0f;
         pVertices[vertexIndex + 1].col.b = 1.0f;
 
-        pVertices[vertexIndex + 2].pos.x = pPlyVertices[ pPlyTriangles[triIndex].vertIndex_2 ].x;
-        pVertices[vertexIndex + 2].pos.y = pPlyVertices[ pPlyTriangles[triIndex].vertIndex_2 ].y;
-        pVertices[vertexIndex + 2].pos.z = pPlyVertices[ pPlyTriangles[triIndex].vertIndex_2 ].z;
+        pVertices[vertexIndex + 2].pos.x = plyFileInfo.pPlyVertices[plyFileInfo.pPlyTriangles[triIndex].vertIndex_2 ].x;
+        pVertices[vertexIndex + 2].pos.y = plyFileInfo.pPlyVertices[plyFileInfo.pPlyTriangles[triIndex].vertIndex_2 ].y;
+        pVertices[vertexIndex + 2].pos.z = plyFileInfo.pPlyVertices[plyFileInfo.pPlyTriangles[triIndex].vertIndex_2 ].z;
         pVertices[vertexIndex + 2].col.r = 1.0f;
         pVertices[vertexIndex + 2].col.g = 1.0f;
         pVertices[vertexIndex + 2].col.b = 1.0f;
 
         vertexIndex += 3;
     }
+
+
+    // Scale the dragon
+//    for (unsigned int index = 0; index != numberOfVertices_TO_DRAW; index++)
+//    {
+//        pVertices[index].pos.x *= 0.01f;
+//        pVertices[index].pos.y *= 0.01f;
+//        pVertices[index].pos.z *= 0.01f;
+//    }
+
+//    for (unsigned int index = 0; index != numberOfVertices_TO_DRAW; index++)
+//    {
+//        pVertices[index].pos.x += 1.0f;
+//    }
+
 
 
 
@@ -428,7 +381,13 @@ int main(void)
 
         glfwSwapBuffers(window);
         glfwPollEvents();
-    }
+
+        std::cout << "Camera: "
+            << cameraEye.x << ", "
+            << cameraEye.y << ", "
+            << cameraEye.z << std::endl;
+
+    }// End of the draw loop
 
     glfwDestroyWindow(window);
 

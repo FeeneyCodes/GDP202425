@@ -1,8 +1,9 @@
-#define GLAD_GL_IMPLEMENTATION
-#include <glad/glad.h>
-
-#define GLFW_INCLUDE_NONE
-#include <GLFW/glfw3.h>
+//#define GLAD_GL_IMPLEMENTATION
+//#include <glad/glad.h>
+//
+//#define GLFW_INCLUDE_NONE
+//#include <GLFW/glfw3.h>
+#include "GLCommon.h"
 
 //#include "linmath.h"
 #include <glm/glm.hpp>
@@ -25,6 +26,7 @@
 //void ReadPlyModelFromFile(std::string plyFileName);
 #include "PlyFileLoaders.h"
 
+#include "Basic_Shader_Manager/cShaderManager.h"
 
 struct sVertex
 {
@@ -43,30 +45,30 @@ struct sVertex
 //};
 
 
-static const char* vertex_shader_text =
-"#version 330\n"
-"uniform mat4 MVP;\n"
-"in vec3 vCol;\n"
-"in vec3 vPos;\n"
-"out vec3 color;\n"
-"void main()\n"
-"{\n"
-"   vec3 finalVert = vPos;\n"
-"   finalVert.x = vPos.x * 1.0f;\n"
-"   finalVert.y = vPos.y * 1.0f;\n"
-"   finalVert.z = vPos.z * 1.0f;\n"
-"    gl_Position = MVP * vec4(finalVert, 1.0);\n"
-"    color = vCol;\n"
-"}\n";
-
-static const char* fragment_shader_text =
-"#version 330\n"
-"in vec3 color;\n"
-"out vec4 fragment;\n"
-"void main()\n"
-"{\n"
-"    fragment = vec4(0.0f, 1.0f, 0.0f, 1.0);\n"
-"}\n";
+//static const char* vertex_shader_text =
+//"#version 330\n"
+//"uniform mat4 MVP;\n"
+//"in vec3 vCol;\n"
+//"in vec3 vPos;\n"
+//"out vec3 color;\n"
+//"void main()\n"
+//"{\n"
+//"   vec3 finalVert = vPos;\n"
+//"   finalVert.x = vPos.x * 1.0f;\n"
+//"   finalVert.y = vPos.y * 1.0f;\n"
+//"   finalVert.z = vPos.z * 1.0f;\n"
+//"    gl_Position = MVP * vec4(finalVert, 1.0);\n"
+//"    color = vCol;\n"
+//"}\n";
+//
+//static const char* fragment_shader_text =
+//"#version 330\n"
+//"in vec3 color;\n"
+//"out vec4 fragment;\n"
+//"void main()\n"
+//"{\n"
+//"    fragment = vec4(0.0f, 1.0f, 0.0f, 1.0);\n"
+//"}\n";
 
 
 glm::vec3 cameraEye = glm::vec3(0.0, 0.0, 4.0f);
@@ -276,20 +278,42 @@ int main(void)
                  pVertices,                         // vertices,
                  GL_STATIC_DRAW);
 
-    const GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertex_shader, 1, &vertex_shader_text, NULL);
-    glCompileShader(vertex_shader);
+    cShaderManager* pShaderManager = new cShaderManager();
 
-    const GLuint fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragment_shader, 1, &fragment_shader_text, NULL);
-    glCompileShader(fragment_shader);
+    cShaderManager::cShader vertexShader;
+    vertexShader.fileName = "assets/shaders/vertex01.glsl";
 
-    const GLuint program = glCreateProgram();
-    glAttachShader(program, vertex_shader);
-    glAttachShader(program, fragment_shader);
-    glLinkProgram(program);
+    cShaderManager::cShader fragmentShader;
+    fragmentShader.fileName = "assets/shaders/fragment01.glsl";
 
-    const GLint mvp_location = glGetUniformLocation(program, "MVP");
+    if ( ! pShaderManager->createProgramFromFile("shader01",
+                                                 vertexShader, fragmentShader))
+    {
+        std::cout << "Error: " << pShaderManager->getLastError() << std::endl;
+    }
+    else
+    {
+        std::cout << "Shader built OK" << std::endl;
+    }
+
+    const GLuint program = pShaderManager->getIDFromFriendlyName("shader01");
+
+    glUseProgram(program);
+
+//    const GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
+//    glShaderSource(vertex_shader, 1, &vertex_shader_text, NULL);
+//    glCompileShader(vertex_shader);
+//
+//    const GLuint fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
+//    glShaderSource(fragment_shader, 1, &fragment_shader_text, NULL);
+//    glCompileShader(fragment_shader);
+//
+//    const GLuint program = glCreateProgram();
+//    glAttachShader(program, vertex_shader);
+//    glAttachShader(program, fragment_shader);
+//    glLinkProgram(program);
+
+//    const GLint mvp_location = glGetUniformLocation(program, "MVP");
 
     const GLint vpos_location = glGetAttribLocation(program, "vPos");   
     const GLint vcol_location = glGetAttribLocation(program, "vCol");
@@ -341,18 +365,30 @@ int main(void)
         m = glm::mat4(1.0f);
 
         //mat4x4_rotate_Z(m, m, (float) glfwGetTime());
+
+        float angleInRadians = (float)glfwGetTime() / 5.0f;
+
         glm::mat4 rotateZ = 
             glm::rotate(glm::mat4(1.0f),    // Ignore this
-            0.0f, // (float)glfwGetTime(),           // Angle in radians
+            angleInRadians,           // Angle in radians
             glm::vec3(0.0f, 0.0, 1.0f));    // Around the z
-
         m = m * rotateZ;
 
+        glm::mat4 translate = glm::translate(glm::mat4(1.0f),
+                                     glm::vec3(5.0f, 0.0f, 0.0f));
+        m = m * translate;
+
+
+        glm::mat4 scale = glm::scale(glm::mat4(1.0f),
+                                     glm::vec3(0.2f, 0.2f, 0.02f));
+        m = m * scale;
+
         //mat4x4_ortho(p, -ratio, ratio, -1.f, 1.f, 1.f, -1.f);
-        p = glm::perspective(0.6f,
-            ratio,
-            0.1f,
-            1000.0f);
+        p = glm::perspective(
+            0.6f,           // FOV
+            ratio,          // Aspect ratio of screen
+            0.1f,           // Near plane
+            1000.0f);       // Far plane
 
         v = glm::mat4(1.0f);
 
@@ -367,8 +403,17 @@ int main(void)
 
         //mat4x4_mul(mvp, p, m);
         mvp = p * v * m;
+
         glUseProgram(program);
-        glUniformMatrix4fv(mvp_location, 1, GL_FALSE, (const GLfloat*)&mvp);
+
+        const GLint mvp_location = glGetUniformLocation(program, "MVP");
+
+
+        glUniformMatrix4fv(mvp_location, 
+                           1, 
+                           GL_FALSE,    
+                           (const GLfloat*)&mvp);
+
         glBindVertexArray(vertex_array);
 
 
@@ -382,10 +427,10 @@ int main(void)
         glfwSwapBuffers(window);
         glfwPollEvents();
 
-        std::cout << "Camera: "
-            << cameraEye.x << ", "
-            << cameraEye.y << ", "
-            << cameraEye.z << std::endl;
+        //std::cout << "Camera: "
+        //    << cameraEye.x << ", "
+        //    << cameraEye.y << ", "
+        //    << cameraEye.z << std::endl;
 
     }// End of the draw loop
 

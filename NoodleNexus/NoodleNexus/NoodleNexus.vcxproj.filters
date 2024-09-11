@@ -15,6 +15,9 @@
     <Filter Include="Shaders">
       <UniqueIdentifier>{b440479f-ec7e-48cc-9e27-1ee18139ccd5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Meshes, etc.">
+      <UniqueIdentifier>{ddd01867-c616-4681-aa72-e7ff5b4b1098}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="theMain.cpp">
@@ -32,6 +35,9 @@
     <ClCompile Include="Basic_Shader_Manager\cShaderManager.cpp">
       <Filter>Basic Shader Manager</Filter>
     </ClCompile>
+    <ClCompile Include="cVAOManager\cVAOManager.cpp">
+      <Filter>Meshes, etc.</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PlyFileLoaders.h">
@@ -44,7 +50,10 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="sMesh.h">
-      <Filter>Header Files</Filter>
+      <Filter>Meshes, etc.</Filter>
+    </ClInclude>
+    <ClInclude Include="cVAOManager\cVAOManager.h">
+      <Filter>Meshes, etc.</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

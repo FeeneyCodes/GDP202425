@@ -1,11 +1,15 @@
 #include "cVAOManager.h"
 
+#include "../GLCommon.h"	// All the GLFW, etc. (OpenGL stuff)
+
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
 
 #include <vector>
 
 #include <sstream>
+
+#include <fstream>
 
 sModelDrawInfo::sModelDrawInfo()
 {
@@ -26,15 +30,144 @@ sModelDrawInfo::sModelDrawInfo()
 
 	// You could store the max and min values of the 
 	//  vertices here (determined when you load them):
-	glm::vec3 maxValues;
-	glm::vec3 minValues;
+//	glm::vec3 maxValues;
+//	glm::vec3 minValues;
 
 //	scale = 5.0/maxExtent;		-> 5x5x5
-	float maxExtent;
+//	float maxExtent;
 
 	return;
 }
 
+// Takes:
+// * 
+// Returns: true if the file is loaded
+bool readPlyFile_XYZ(sModelDrawInfo& modelDrawInfo)
+{
+
+	// ************************************************************
+		// Read the top of the file to get some info.
+
+		// Read all the text until I get to the word "vertex"
+//    std::ifstream plyFile("assets/models/bun_zipper_res3.ply");
+	std::ifstream plyFile(modelDrawInfo.meshName);     // May also see .c_str() "c style string, char*"
+
+	if ( ! plyFile.is_open()) 
+	{
+		return false;
+	}
+
+	std::string token = "";
+
+	if (!plyFile.is_open())
+	{
+		return false;
+	}
+
+	//element vertex 1889
+	while (token != "vertex")
+	{
+		plyFile >> token;
+	};
+	// Next info is the number of vertices
+	//int numberOfVertices = 0;
+	plyFile >> modelDrawInfo.numberOfVertices;
+
+
+	//element face 3851
+	while (token != "face")
+	{
+		plyFile >> token;
+	};
+	// Next info is the number of vertices
+	//int numberOfTriangles = 0;
+	plyFile >> modelDrawInfo.numberOfTriangles;
+
+	//end_header
+	// -0.0369122 0.127512 0.00276757 0.850855 0.5 
+	while (token != "end_header")
+	{
+		plyFile >> token;
+	};
+
+
+	// 
+//    std::cout << numberOfVertices << std::endl;
+//    std::cout << numberOfTriangles << std::endl;
+
+	//property float x
+	//property float y
+	//property float z
+
+	//struct sPlyVertex
+	//{
+	//    float x, y, z, confidence, intensity;
+	//};
+	////
+	//// and 
+	//// 
+	//// 3 572 584 1040 
+	//struct sTriangle
+	//{
+	//    unsigned int vertIndex_0;
+	//    unsigned int vertIndex_1;
+	//    unsigned int vertIndex_2;
+	//};
+
+	// Load the data from the file
+//    sPlyVertex* pPlyVertices = new sPlyVertex[numberOfVertices];
+	modelDrawInfo.pVertices = new sVertex[modelDrawInfo.numberOfVertices];
+
+	// end_header
+	// -0.0369122 0.127512 0.00276757 0.850855 0.5
+	for (unsigned index = 0; index != modelDrawInfo.numberOfVertices; index++)
+	{
+		plyFile >> modelDrawInfo.pVertices[index].x;
+		plyFile >> modelDrawInfo.pVertices[index].y;
+		plyFile >> modelDrawInfo.pVertices[index].z;
+
+		// Only has xyz, so stop here
+//        plyFile >> allFileInfo.pPlyVertices[index].confidence;
+//        plyFile >> allFileInfo.pPlyVertices[index].intensity;
+//		modelDrawInfo.pVertices[index].confidence = 0;
+//		modelDrawInfo.pVertices[index].intensity = 0;
+	}
+
+	// Load the triangle info from the file
+	struct sPlyFileTriangle
+	{
+		unsigned int vertIndex_0;
+		unsigned int vertIndex_1;
+		unsigned int vertIndex_2;
+	};
+//    sTriangle* pPlyTriangles = new sTriangle[numberOfTriangles];
+	sPlyFileTriangle* pPlyFileTriangles = new sPlyFileTriangle[modelDrawInfo.numberOfTriangles];
+	for (unsigned int index = 0; index != modelDrawInfo.numberOfTriangles; index++)
+	{
+		// 3 737 103 17 
+		int discard = 0;
+		plyFile >> discard;
+		plyFile >> pPlyFileTriangles[index].vertIndex_0;
+		plyFile >> pPlyFileTriangles[index].vertIndex_1;
+		plyFile >> pPlyFileTriangles[index].vertIndex_2;
+	}
+
+	// Copy the triangle data to a 1D array...
+	modelDrawInfo.numberOfIndices = modelDrawInfo.numberOfTriangles * 3;
+
+	modelDrawInfo.pIndices = new unsigned int[modelDrawInfo.numberOfIndices];
+
+	unsigned int index = 0;
+	for (unsigned int triIndex = 0; triIndex != modelDrawInfo.numberOfTriangles; triIndex++)
+	{
+		modelDrawInfo.pIndices[index + 0] = pPlyFileTriangles[triIndex].vertIndex_0;
+		modelDrawInfo.pIndices[index + 1] = pPlyFileTriangles[triIndex].vertIndex_1;
+		modelDrawInfo.pIndices[index + 2] = pPlyFileTriangles[triIndex].vertIndex_1;
+	}
+
+
+	return true;
+}
 
 bool cVAOManager::LoadModelIntoVAO(
 		std::string fileName, 
@@ -49,6 +182,11 @@ bool cVAOManager::LoadModelIntoVAO(
 	drawInfo.meshName = fileName;
 
 	// TODO: Load the model from file
+	if (!readPlyFile_XYZ(drawInfo))
+	{
+		return false;
+	}
+
 
 	// 
 	// Model is loaded and the vertices and indices are in the drawInfo struct

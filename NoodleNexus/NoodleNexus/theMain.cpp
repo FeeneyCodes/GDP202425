@@ -31,18 +31,20 @@
 
 #include "sMesh.h"
 
+#include "cVAOManager/cVAOManager.h"
+//
 const unsigned int MAX_NUMBER_OF_MESHES = 1000;
 unsigned int g_NumberOfMeshesToDraw;
 sMesh* g_myMeshes[MAX_NUMBER_OF_MESHES] = { 0 };    // All zeros
 
-struct sVertex
-{
-    glm::vec3 pos;          // glm::vec2 pos;      // position   or "float x, y"
-    glm::vec3 col;      // Colour     or "float x, y, z"
-    // Colour range is 0.0 to 1.0
-    // 0.0 = black (Red, Green, Blue)
-    // 1.0 = white 
-};
+//struct sVertex
+//{
+//    glm::vec3 pos;          // glm::vec2 pos;      // position   or "float x, y"
+//    glm::vec3 col;      // Colour     or "float x, y, z"
+//    // Colour range is 0.0 to 1.0
+//    // 0.0 = black (Red, Green, Blue)
+//    // 1.0 = white 
+//};
 
 //sVertex vertices[3] =
 //{
@@ -168,92 +170,92 @@ int main(void)
     //plyFileInfoBunny.fileName = "assets/models/bun_zipper_res3.ply";
     //ReadPlyModelFromFile_xyz_ci(plyFileInfoBunny);
 
-    s3DFileData plyFileInfo;
-    plyFileInfo.fileName = "assets/models/VintageRacingCar_xyz_only.ply";
-    ReadPlyModelFromFile_xyz(plyFileInfo);
+    //s3DFileData plyFileInfo;
+    //plyFileInfo.fileName = "assets/models/VintageRacingCar_xyz_only.ply";
+    //ReadPlyModelFromFile_xyz(plyFileInfo);
 
     //s3DFileData plyFileInfo;
     //plyFileInfo.fileName = "assets/models/Dragon 2.5Edited_xyz_only.ply";
     //ReadPlyModelFromFile_xyz(plyFileInfo);
 
 // ******************************************************
-
-    // This is the array we are giving the GPU 
-//    unsigned int numberOfVertices_TO_DRAW = numberOfTriangles * 3;
-    unsigned int numberOfVertices_TO_DRAW = plyFileInfo.numberOfTriangles * 3;
-    // Each triangle has 3 vertices
-
-    sVertex* pVertices = new sVertex[numberOfVertices_TO_DRAW];
-
-    // Copy the data form the "ply" (i.e. file) arrays
-    // to the format that the GPU expects
-//     struct sPlyVertex
-//    {
-//        float x, y, z, confidence, intensity;
-//    };
 //
-//    struct sTriangle
-//    {
-//        unsigned int vertIndex_0;
-//        unsigned int vertIndex_1;
-//        unsigned int vertIndex_2;
-//    };
+//    // This is the array we are giving the GPU 
+////    unsigned int numberOfVertices_TO_DRAW = numberOfTriangles * 3;
+//    unsigned int numberOfVertices_TO_DRAW = plyFileInfo.numberOfTriangles * 3;
+//    // Each triangle has 3 vertices
 //
-//  to... 
-// 
-//    struct sVertex
+//    sVertex* pVertices = new sVertex[numberOfVertices_TO_DRAW];
+//
+//    // Copy the data form the "ply" (i.e. file) arrays
+//    // to the format that the GPU expects
+////     struct sPlyVertex
+////    {
+////        float x, y, z, confidence, intensity;
+////    };
+////
+////    struct sTriangle
+////    {
+////        unsigned int vertIndex_0;
+////        unsigned int vertIndex_1;
+////        unsigned int vertIndex_2;
+////    };
+////
+////  to... 
+//// 
+////    struct sVertex
+////    {
+////        glm::vec2 pos;      // position   or "float x, y"
+////        glm::vec3 col;      //
+//
+//    unsigned int vertexIndex = 0;
+//
+////    for (unsigned int triIndex = 0; triIndex != numberOfTriangles; triIndex++)
+//    for (unsigned int triIndex = 0; triIndex != plyFileInfo.numberOfTriangles; triIndex++)
 //    {
-//        glm::vec2 pos;      // position   or "float x, y"
-//        glm::vec3 col;      //
-
-    unsigned int vertexIndex = 0;
-
-//    for (unsigned int triIndex = 0; triIndex != numberOfTriangles; triIndex++)
-    for (unsigned int triIndex = 0; triIndex != plyFileInfo.numberOfTriangles; triIndex++)
-    {
-//        { { -0.6f, -0.4f }, { 1.0f, 0.0f, 0.0f } },
-//        { {  0.6f, -0.4f }, { 0.0f, 1.0f, 0.0f } },
-//        { {  0.0f,  0.6f }, { 0.0f, 0.0f, 1.0f } }
-
-//        pVertices[vertexIndex + 0].pos.x = pPlyVertices[ pPlyTriangles[triIndex].vertIndex_0 ].x;
-        pVertices[vertexIndex + 0].pos.x = plyFileInfo.pPlyVertices[plyFileInfo.pPlyTriangles[triIndex].vertIndex_0 ].x;
-        pVertices[vertexIndex + 0].pos.y = plyFileInfo.pPlyVertices[plyFileInfo.pPlyTriangles[triIndex].vertIndex_0 ].y;
-        pVertices[vertexIndex + 0].pos.z = plyFileInfo.pPlyVertices[plyFileInfo.pPlyTriangles[triIndex].vertIndex_0 ].z;
-        pVertices[vertexIndex + 0].col.r = 1.0f;
-        pVertices[vertexIndex + 0].col.g = 1.0f;
-        pVertices[vertexIndex + 0].col.b = 1.0f;
-
-        pVertices[vertexIndex + 1].pos.x = plyFileInfo.pPlyVertices[plyFileInfo.pPlyTriangles[triIndex].vertIndex_1 ].x;
-        pVertices[vertexIndex + 1].pos.y = plyFileInfo.pPlyVertices[plyFileInfo.pPlyTriangles[triIndex].vertIndex_1 ].y;
-        pVertices[vertexIndex + 1].pos.z = plyFileInfo.pPlyVertices[plyFileInfo.pPlyTriangles[triIndex].vertIndex_1 ].z;
-        pVertices[vertexIndex + 1].col.r = 1.0f;
-        pVertices[vertexIndex + 1].col.g = 1.0f;
-        pVertices[vertexIndex + 1].col.b = 1.0f;
-
-        pVertices[vertexIndex + 2].pos.x = plyFileInfo.pPlyVertices[plyFileInfo.pPlyTriangles[triIndex].vertIndex_2 ].x;
-        pVertices[vertexIndex + 2].pos.y = plyFileInfo.pPlyVertices[plyFileInfo.pPlyTriangles[triIndex].vertIndex_2 ].y;
-        pVertices[vertexIndex + 2].pos.z = plyFileInfo.pPlyVertices[plyFileInfo.pPlyTriangles[triIndex].vertIndex_2 ].z;
-        pVertices[vertexIndex + 2].col.r = 1.0f;
-        pVertices[vertexIndex + 2].col.g = 1.0f;
-        pVertices[vertexIndex + 2].col.b = 1.0f;
-
-        vertexIndex += 3;
-    }
-
-
-    // Scale the dragon
-//    for (unsigned int index = 0; index != numberOfVertices_TO_DRAW; index++)
-//    {
-//        pVertices[index].pos.x *= 0.01f;
-//        pVertices[index].pos.y *= 0.01f;
-//        pVertices[index].pos.z *= 0.01f;
+////        { { -0.6f, -0.4f }, { 1.0f, 0.0f, 0.0f } },
+////        { {  0.6f, -0.4f }, { 0.0f, 1.0f, 0.0f } },
+////        { {  0.0f,  0.6f }, { 0.0f, 0.0f, 1.0f } }
+//
+////        pVertices[vertexIndex + 0].pos.x = pPlyVertices[ pPlyTriangles[triIndex].vertIndex_0 ].x;
+//        pVertices[vertexIndex + 0].pos.x = plyFileInfo.pPlyVertices[plyFileInfo.pPlyTriangles[triIndex].vertIndex_0 ].x;
+//        pVertices[vertexIndex + 0].pos.y = plyFileInfo.pPlyVertices[plyFileInfo.pPlyTriangles[triIndex].vertIndex_0 ].y;
+//        pVertices[vertexIndex + 0].pos.z = plyFileInfo.pPlyVertices[plyFileInfo.pPlyTriangles[triIndex].vertIndex_0 ].z;
+//        pVertices[vertexIndex + 0].col.r = 1.0f;
+//        pVertices[vertexIndex + 0].col.g = 1.0f;
+//        pVertices[vertexIndex + 0].col.b = 1.0f;
+//
+//        pVertices[vertexIndex + 1].pos.x = plyFileInfo.pPlyVertices[plyFileInfo.pPlyTriangles[triIndex].vertIndex_1 ].x;
+//        pVertices[vertexIndex + 1].pos.y = plyFileInfo.pPlyVertices[plyFileInfo.pPlyTriangles[triIndex].vertIndex_1 ].y;
+//        pVertices[vertexIndex + 1].pos.z = plyFileInfo.pPlyVertices[plyFileInfo.pPlyTriangles[triIndex].vertIndex_1 ].z;
+//        pVertices[vertexIndex + 1].col.r = 1.0f;
+//        pVertices[vertexIndex + 1].col.g = 1.0f;
+//        pVertices[vertexIndex + 1].col.b = 1.0f;
+//
+//        pVertices[vertexIndex + 2].pos.x = plyFileInfo.pPlyVertices[plyFileInfo.pPlyTriangles[triIndex].vertIndex_2 ].x;
+//        pVertices[vertexIndex + 2].pos.y = plyFileInfo.pPlyVertices[plyFileInfo.pPlyTriangles[triIndex].vertIndex_2 ].y;
+//        pVertices[vertexIndex + 2].pos.z = plyFileInfo.pPlyVertices[plyFileInfo.pPlyTriangles[triIndex].vertIndex_2 ].z;
+//        pVertices[vertexIndex + 2].col.r = 1.0f;
+//        pVertices[vertexIndex + 2].col.g = 1.0f;
+//        pVertices[vertexIndex + 2].col.b = 1.0f;
+//
+//        vertexIndex += 3;
 //    }
-
-//    for (unsigned int index = 0; index != numberOfVertices_TO_DRAW; index++)
-//    {
-//        pVertices[index].pos.x += 1.0f;
-//    }
-
+//
+//
+//    // Scale the dragon
+////    for (unsigned int index = 0; index != numberOfVertices_TO_DRAW; index++)
+////    {
+////        pVertices[index].pos.x *= 0.01f;
+////        pVertices[index].pos.y *= 0.01f;
+////        pVertices[index].pos.z *= 0.01f;
+////    }
+//
+////    for (unsigned int index = 0; index != numberOfVertices_TO_DRAW; index++)
+////    {
+////        pVertices[index].pos.x += 1.0f;
+////    }
+//
 
 
 
@@ -281,17 +283,20 @@ int main(void)
 
     // NOTE: OpenGL error checks have been omitted for brevity
 
-    GLuint vertex_buffer;
-    glGenBuffers(1, &vertex_buffer);
-    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
 
-//    int size_in_bytes_of_vertex_array = sizeof(sVertex) * 3;
-    int size_in_bytes_of_vertex_array = sizeof(sVertex) * numberOfVertices_TO_DRAW;
 
-    glBufferData(GL_ARRAY_BUFFER,
-                 size_in_bytes_of_vertex_array,     // sizeof(vertices),
-                 pVertices,                         // vertices,
-                 GL_STATIC_DRAW);
+
+//    GLuint vertex_buffer;
+//    glGenBuffers(1, &vertex_buffer);
+//    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+//
+////    int size_in_bytes_of_vertex_array = sizeof(sVertex) * 3;
+//    int size_in_bytes_of_vertex_array = sizeof(sVertex) * numberOfVertices_TO_DRAW;
+//
+//    glBufferData(GL_ARRAY_BUFFER,
+//                 size_in_bytes_of_vertex_array,     // sizeof(vertices),
+//                 pVertices,                         // vertices,
+//                 GL_STATIC_DRAW);
 
     cShaderManager* pShaderManager = new cShaderManager();
 
@@ -330,42 +335,53 @@ int main(void)
 
 //    const GLint mvp_location = glGetUniformLocation(program, "MVP");
 
-    const GLint vpos_location = glGetAttribLocation(program, "vPos");   
-    const GLint vcol_location = glGetAttribLocation(program, "vCol");
+//    const GLint vpos_location = glGetAttribLocation(program, "vPos");   
+//    const GLint vcol_location = glGetAttribLocation(program, "vCol");
+//
+//    GLuint vertex_array;
+//    glGenVertexArrays(1, &vertex_array);
+//    glBindVertexArray(vertex_array);
+//
+//
+//
+//    // Where the data specifically is.
+//    // Called the "vertex layout"
+//
+//    //glm::vec3 pos;       
+//    //glm::vec3 col;    
+////    { { -0.6f, -0.4f, 0.0f }, { 1.0f, 0.0f, 0.0f } },
+////    { {  0.6f, -0.4f, 0.0f }, { 0.0f, 1.0f, 0.0f } },
+////    { {  0.0f,  0.6f, 0.0f }, { 0.0f, 0.0f, 1.0f } }
+//
+//
+//    glEnableVertexAttribArray(vpos_location);
+//    glVertexAttribPointer(
+//        vpos_location, 
+//        3, 
+//        GL_FLOAT, 
+//        GL_FALSE,
+//        sizeof(sVertex),                        // 6 floats or 24 bytes
+//        (void*)offsetof(sVertex, pos));         // 0 bytes into the sVertex structure
+//
+//    glEnableVertexAttribArray(vcol_location);
+//    glVertexAttribPointer(
+//        vcol_location, 
+//        3, 
+//        GL_FLOAT, 
+//        GL_FALSE,
+//        sizeof(sVertex), 
+//        (void*)offsetof(sVertex, col));     // 3 floats or 12 bytes into the sVertex structure
 
-    GLuint vertex_array;
-    glGenVertexArrays(1, &vertex_array);
-    glBindVertexArray(vertex_array);
+
+    cVAOManager* pMeshManager = new cVAOManager();
+
+    sModelDrawInfo carModelInfo;
+    pMeshManager->LoadModelIntoVAO("assets/models/VintageRacingCar_xyz_only.ply", 
+                                   carModelInfo, program);
+    std::cout << carModelInfo.numberOfVertices << " vertices loaded" << std::endl;
 
 
 
-    // Where the data specifically is.
-    // Called the "vertex layout"
-
-    //glm::vec3 pos;       
-    //glm::vec3 col;    
-//    { { -0.6f, -0.4f, 0.0f }, { 1.0f, 0.0f, 0.0f } },
-//    { {  0.6f, -0.4f, 0.0f }, { 0.0f, 1.0f, 0.0f } },
-//    { {  0.0f,  0.6f, 0.0f }, { 0.0f, 0.0f, 1.0f } }
-
-
-    glEnableVertexAttribArray(vpos_location);
-    glVertexAttribPointer(
-        vpos_location, 
-        3, 
-        GL_FLOAT, 
-        GL_FALSE,
-        sizeof(sVertex),                        // 6 floats or 24 bytes
-        (void*)offsetof(sVertex, pos));         // 0 bytes into the sVertex structure
-
-    glEnableVertexAttribArray(vcol_location);
-    glVertexAttribPointer(
-        vcol_location, 
-        3, 
-        GL_FLOAT, 
-        GL_FALSE,
-        sizeof(sVertex), 
-        (void*)offsetof(sVertex, col));     // 3 floats or 12 bytes into the sVertex structure
 
 
 
@@ -505,7 +521,7 @@ int main(void)
                 GL_FALSE,
                 (const GLfloat*) &matMVP );
 
-            glBindVertexArray(vertex_array);
+            //glBindVertexArray(vertex_array);
 
 
             // solid or wireframe, etc.
@@ -513,7 +529,17 @@ int main(void)
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
             //        glDrawArrays(GL_TRIANGLES, 0, 3);
-            glDrawArrays(GL_TRIANGLES, 0, numberOfVertices_TO_DRAW);
+//            glDrawArrays(GL_TRIANGLES, 0, numberOfVertices_TO_DRAW);
+
+            sModelDrawInfo meshToDrawInfo;
+            if (pMeshManager->FindDrawInfoByModelName(pCurMesh->modelFileName, meshToDrawInfo))
+            {
+                // Found the model
+                glBindVertexArray(meshToDrawInfo.VAO_ID); 		// enable VAO(and everything else)
+                glDrawElements(GL_TRIANGLES, meshToDrawInfo.numberOfTriangles);
+                glBindVertexArray(0); 			//disable VAO(and everything else)
+            }
+
 
 
         }//for (unsigned int meshIndex..

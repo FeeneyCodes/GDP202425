@@ -28,6 +28,12 @@
 
 #include "Basic_Shader_Manager/cShaderManager.h"
 
+#include "sMesh.h"
+
+const unsigned int MAX_NUMBER_OF_MESHES = 1000;
+unsigned int g_NumberOfMeshesToDraw;
+sMesh* g_myMeshes[MAX_NUMBER_OF_MESHES] = { 0 };    // All zeros
+
 struct sVertex
 {
     glm::vec3 pos;          // glm::vec2 pos;      // position   or "float x, y"
@@ -322,6 +328,8 @@ int main(void)
     glGenVertexArrays(1, &vertex_array);
     glBindVertexArray(vertex_array);
 
+
+
     // Where the data specifically is.
     // Called the "vertex layout"
 
@@ -350,6 +358,35 @@ int main(void)
         sizeof(sVertex), 
         (void*)offsetof(sVertex, col));     // 3 floats or 12 bytes into the sVertex structure
 
+
+
+    // Load some models to draw
+
+    sMesh* pDragon = new sMesh();
+    pDragon->modelFileName = "assets/models/Dragon 2.5Edited_xyz_only.ply";
+    pDragon->positionXYZ = glm::vec3(10.0f, 0.0f, 0.0f);
+    pDragon->rotationEulerXYZ.x = glm::radians(-90.0f);
+    pDragon->uniformScale = 0.1f;
+    pDragon->objectColourRGBA = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f); 
+
+    ::g_myMeshes[0] = pDragon;
+
+
+    sMesh* pDragon2 = new sMesh();
+    pDragon2->modelFileName = "assets/models/Dragon 2.5Edited_xyz_only.ply";
+    pDragon2->positionXYZ = glm::vec3(-10.0f, 0.0f, 0.0f);
+    pDragon2->rotationEulerXYZ.x = glm::radians(90.0f);
+    pDragon2->objectColourRGBA = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
+    pDragon2->uniformScale = 0.2f;
+
+    ::g_myMeshes[1] = pDragon2;
+
+    ::g_NumberOfMeshesToDraw = 2;
+
+
+
+
+
     while (!glfwWindowShouldClose(window))
     {
         float ratio;
@@ -363,6 +400,13 @@ int main(void)
 
         //         mat4x4_identity(m);
         m = glm::mat4(1.0f);
+
+        //m[0][0] = 1.0f;
+        //m[1][0] = 0.0f;
+        //m[2][0] = 0.0f;
+        //m[3][0] = 0.0f;
+        //m[1][0] = cos(90.0f);
+        //m[1][1] = -sin(90.0f);
 
         //mat4x4_rotate_Z(m, m, (float) glfwGetTime());
 

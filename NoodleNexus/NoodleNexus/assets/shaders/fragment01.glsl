@@ -1,5 +1,5 @@
 #version 330
-
+// Pixel fragment
 in vec3 color;
 
 out vec4 fragment;

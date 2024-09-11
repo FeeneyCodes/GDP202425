@@ -12,6 +12,9 @@
     <Filter Include="Basic Shader Manager">
       <UniqueIdentifier>{520673ef-3672-4d15-bb1b-adab8add79bc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{b440479f-ec7e-48cc-9e27-1ee18139ccd5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="theMain.cpp">
@@ -40,5 +43,16 @@
     <ClInclude Include="GLCommon.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="sMesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="assets\shaders\fragment01.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="assets\shaders\vertex01.glsl">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

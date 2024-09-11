@@ -145,8 +145,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Basic_Shader_Manager\cShaderManager.h" />
+    <ClInclude Include="sMesh.h" />
     <ClInclude Include="GLCommon.h" />
     <ClInclude Include="PlyFileLoaders.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="assets\shaders\fragment01.glsl" />
+    <None Include="assets\shaders\vertex01.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

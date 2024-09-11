@@ -129,6 +129,14 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 
 void ConsoleStuff(void);
 
+// https://stackoverflow.com/questions/5289613/generate-random-float-between-two-floats
+float getRandomFloat(float a, float b) {
+    float random = ((float)rand()) / (float)RAND_MAX;
+    float diff = b - a;
+    float r = random * diff;
+    return a + r;
+}
+
 int main(void)
 {   
 
@@ -383,6 +391,25 @@ int main(void)
     ::g_myMeshes[1] = pDragon2;
 
     ::g_NumberOfMeshesToDraw = 2;
+
+    for (int count = 0; count != 100; count++)
+    {
+        sMesh* pDragon = new sMesh();
+        pDragon->modelFileName = "assets/models/Dragon 2.5Edited_xyz_only.ply";
+        pDragon->positionXYZ = glm::vec3(getRandomFloat(-5.0f, 5.0f),
+                                         getRandomFloat(-5.0f, 5.0f),
+                                         getRandomFloat(-5.0f, 5.0f));
+        pDragon->rotationEulerXYZ.x = 90.0f;
+        pDragon->objectColourRGBA = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
+        pDragon->uniformScale = 0.2f;
+
+        ::g_myMeshes[::g_NumberOfMeshesToDraw] = pDragon;
+
+        ::g_NumberOfMeshesToDraw++;
+    }
+
+
+
 
 
     glUseProgram(program);

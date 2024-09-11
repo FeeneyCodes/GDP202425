@@ -20,6 +20,7 @@
 
 #include <iostream>     // "input output" stream
 #include <fstream>      // "file" stream
+#include <sstream>      // "string" stream ("string builder" in Java c#, etc.)
 #include <string>
 
 
@@ -155,17 +156,17 @@ int main(void)
 //    pVertices[1] = { {  0.6f, -0.4f }, { 0.0f, 1.0f, 0.0f } };
 //    pVertices[2] = { {  0.0f,  0.6f }, { 0.0f, 0.0f, 1.0f } };
 
-    s3DFileData plyFileInfoBunny;
-    plyFileInfoBunny.fileName = "assets/models/bun_zipper_res3.ply";
-    ReadPlyModelFromFile_xyz_ci(plyFileInfoBunny);
-
-    s3DFileData plyFileInfoCar;
-    plyFileInfoCar.fileName = "assets/models/VintageRacingCar_xyz_only.ply";
-    ReadPlyModelFromFile_xyz(plyFileInfoCar);
+    //s3DFileData plyFileInfoBunny;
+    //plyFileInfoBunny.fileName = "assets/models/bun_zipper_res3.ply";
+    //ReadPlyModelFromFile_xyz_ci(plyFileInfoBunny);
 
     s3DFileData plyFileInfo;
-    plyFileInfo.fileName = "assets/models/Dragon 2.5Edited_xyz_only.ply";
+    plyFileInfo.fileName = "assets/models/VintageRacingCar_xyz_only.ply";
     ReadPlyModelFromFile_xyz(plyFileInfo);
+
+    //s3DFileData plyFileInfo;
+    //plyFileInfo.fileName = "assets/models/Dragon 2.5Edited_xyz_only.ply";
+    //ReadPlyModelFromFile_xyz(plyFileInfo);
 
 // ******************************************************
 
@@ -364,8 +365,8 @@ int main(void)
 
     sMesh* pDragon = new sMesh();
     pDragon->modelFileName = "assets/models/Dragon 2.5Edited_xyz_only.ply";
-    pDragon->positionXYZ = glm::vec3(10.0f, 0.0f, 0.0f);
-    pDragon->rotationEulerXYZ.x = glm::radians(-90.0f);
+    pDragon->positionXYZ = glm::vec3(2.0f, 0.0f, 0.0f);
+    pDragon->rotationEulerXYZ.x = -90.0f;
     pDragon->uniformScale = 0.1f;
     pDragon->objectColourRGBA = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f); 
 
@@ -374,8 +375,8 @@ int main(void)
 
     sMesh* pDragon2 = new sMesh();
     pDragon2->modelFileName = "assets/models/Dragon 2.5Edited_xyz_only.ply";
-    pDragon2->positionXYZ = glm::vec3(-10.0f, 0.0f, 0.0f);
-    pDragon2->rotationEulerXYZ.x = glm::radians(90.0f);
+    pDragon2->positionXYZ = glm::vec3(-2.0f, 0.0f, 0.0f);
+    pDragon2->rotationEulerXYZ.x = 90.0f;
     pDragon2->objectColourRGBA = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
     pDragon2->uniformScale = 0.2f;
 
@@ -384,6 +385,7 @@ int main(void)
     ::g_NumberOfMeshesToDraw = 2;
 
 
+    glUseProgram(program);
 
 
 
@@ -391,90 +393,120 @@ int main(void)
     {
         float ratio;
         int width, height;
-        //       mat4x4 m, p, mvp;
-        glm::mat4 m, p, v, mvp;
         glfwGetFramebufferSize(window, &width, &height);
         ratio = width / (float)height;
         glViewport(0, 0, width, height);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        //         mat4x4_identity(m);
-        m = glm::mat4(1.0f);
+//        glm::mat4 m, p, v, mvp;
+        glm::mat4 matProjection = glm::mat4(1.0f);
 
-        //m[0][0] = 1.0f;
-        //m[1][0] = 0.0f;
-        //m[2][0] = 0.0f;
-        //m[3][0] = 0.0f;
-        //m[1][0] = cos(90.0f);
-        //m[1][1] = -sin(90.0f);
+        matProjection = glm::perspective( 0.6f,           // FOV
+                                          ratio,          // Aspect ratio of screen
+                                          0.1f,           // Near plane
+                                          1000.0f);       // Far plane
 
-        //mat4x4_rotate_Z(m, m, (float) glfwGetTime());
+        // View or "camera"
+        glm::mat4 matView = glm::mat4(1.0f);
 
-        float angleInRadians = (float)glfwGetTime() / 5.0f;
-
-        glm::mat4 rotateZ = 
-            glm::rotate(glm::mat4(1.0f),    // Ignore this
-            angleInRadians,           // Angle in radians
-            glm::vec3(0.0f, 0.0, 1.0f));    // Around the z
-        m = m * rotateZ;
-
-        glm::mat4 translate = glm::translate(glm::mat4(1.0f),
-                                     glm::vec3(5.0f, 0.0f, 0.0f));
-        m = m * translate;
-
-
-        glm::mat4 scale = glm::scale(glm::mat4(1.0f),
-                                     glm::vec3(0.2f, 0.2f, 0.02f));
-        m = m * scale;
-
-        //mat4x4_ortho(p, -ratio, ratio, -1.f, 1.f, 1.f, -1.f);
-        p = glm::perspective(
-            0.6f,           // FOV
-            ratio,          // Aspect ratio of screen
-            0.1f,           // Near plane
-            1000.0f);       // Far plane
-
-        v = glm::mat4(1.0f);
-
-//        glm::vec3 cameraEye = glm::vec3(0.0, 0.0, 4.0f);
+        //        glm::vec3 cameraEye = glm::vec3(0.0, 0.0, 4.0f);
         glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
         glm::vec3 upVector = glm::vec3(0.0f, 1.0f, 0.0f);
 
-        v = glm::lookAt(
-                cameraEye,
-                cameraTarget,
-                upVector);
-
-        //mat4x4_mul(mvp, p, m);
-        mvp = p * v * m;
-
-        glUseProgram(program);
-
-        const GLint mvp_location = glGetUniformLocation(program, "MVP");
+        matView = glm::lookAt( cameraEye,
+                               cameraTarget,
+                               upVector);
 
 
-        glUniformMatrix4fv(mvp_location, 
-                           1, 
-                           GL_FALSE,    
-                           (const GLfloat*)&mvp);
+        // Draw all the objects
+        for (unsigned int meshIndex = 0; meshIndex != ::g_NumberOfMeshesToDraw; meshIndex++)
+        {
+            sMesh* pCurMesh = ::g_myMeshes[meshIndex];
 
-        glBindVertexArray(vertex_array);
+            // Could be called the "model" or "world" matrix
+            glm::mat4 matModel = glm::mat4(1.0f);
+
+            // Translation (movement, position, placement...)
+            glm::mat4 matTranslate
+                = glm::translate(glm::mat4(1.0f),
+                    glm::vec3(pCurMesh->positionXYZ.x,
+                        pCurMesh->positionXYZ.y,
+                        pCurMesh->positionXYZ.z));
+
+            // Rotation...
+            // Caculate 3 Euler acix matrices...
+            glm::mat4 matRotateX =
+                glm::rotate(glm::mat4(1.0f),    
+                    glm::radians(pCurMesh->rotationEulerXYZ.x), // Angle in radians
+                    glm::vec3(1.0f, 0.0, 0.0f));   
+
+            glm::mat4 matRotateY =
+                glm::rotate(glm::mat4(1.0f),    
+                    glm::radians(pCurMesh->rotationEulerXYZ.y), // Angle in radians
+                    glm::vec3(0.0f, 1.0, 0.0f));   
+
+            glm::mat4 matRotateZ =
+                glm::rotate(glm::mat4(1.0f),    
+                    glm::radians(pCurMesh->rotationEulerXYZ.z), // Angle in radians
+                    glm::vec3(0.0f, 0.0, 1.0f));   
 
 
-        // solid or wireframe, etc.
-//        glPointSize(10.0f);
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            // Scale
+            glm::mat4 matScale = glm::scale(glm::mat4(1.0f),
+                glm::vec3(pCurMesh->uniformScale,
+                          pCurMesh->uniformScale,
+                          pCurMesh->uniformScale));
 
-//        glDrawArrays(GL_TRIANGLES, 0, 3);
-        glDrawArrays(GL_TRIANGLES, 0, numberOfVertices_TO_DRAW);
+
+            // Calculate the final model/world matrix
+            matModel *= matTranslate;     // matModel = matModel * matTranslate;
+            matModel *= matRotateX;
+            matModel *= matRotateY;
+            matModel *= matRotateZ;
+            matModel *= matScale;
+
+            //mat4x4_mul(mvp, p, m);
+            //mvp = p * v * m;
+            glm::mat4 matMVP = matProjection * matView * matModel;
+
+
+            const GLint mvp_location = glGetUniformLocation(program, "MVP");
+
+
+            glUniformMatrix4fv(mvp_location,
+                1,
+                GL_FALSE,
+                (const GLfloat*) &matMVP );
+
+            glBindVertexArray(vertex_array);
+
+
+            // solid or wireframe, etc.
+    //        glPointSize(10.0f);
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+            //        glDrawArrays(GL_TRIANGLES, 0, 3);
+            glDrawArrays(GL_TRIANGLES, 0, numberOfVertices_TO_DRAW);
+
+
+        }//for (unsigned int meshIndex..
+
+
 
         glfwSwapBuffers(window);
         glfwPollEvents();
 
+
         //std::cout << "Camera: "
-        //    << cameraEye.x << ", "
-        //    << cameraEye.y << ", "
-        //    << cameraEye.z << std::endl;
+        std::stringstream ssTitle;
+        ssTitle << "Camera: "
+            << cameraEye.x << ", "
+            << cameraEye.y << ", "
+            << cameraEye.z << std::endl;
+
+//        glfwSetWindowTitle(window, "Hey!");
+        glfwSetWindowTitle(window, ssTitle.str().c_str());
+
 
     }// End of the draw loop
 

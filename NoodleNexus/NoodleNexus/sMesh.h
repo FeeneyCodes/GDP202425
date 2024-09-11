@@ -20,4 +20,6 @@ struct sMesh
 	glm::vec4 objectColourRGBA;
 
 	unsigned int uniqueID = 0;
+
+//	sMesh* pChildMeshes[100];
 };

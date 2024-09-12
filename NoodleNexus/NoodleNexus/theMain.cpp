@@ -284,7 +284,6 @@ int main(void)
 
 
 
-
 //    GLuint vertex_buffer;
 //    glGenBuffers(1, &vertex_buffer);
 //    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
@@ -372,6 +371,8 @@ int main(void)
 //        (void*)offsetof(sVertex, col));     // 3 floats or 12 bytes into the sVertex structure
 
 
+    // Loading the TYPES of models I can draw...
+
     cVAOManager* pMeshManager = new cVAOManager();
 
     sModelDrawInfo carModelInfo;
@@ -384,11 +385,16 @@ int main(void)
         dragonModel, program);
     std::cout << dragonModel.numberOfVertices << " vertices loaded" << std::endl;
 
+    sModelDrawInfo terrainModel;
+    pMeshManager->LoadModelIntoVAO("assets/models/Simple_MeshLab_terrain_xyz_only.ply", 
+        terrainModel, program);
+    std::cout << terrainModel.numberOfVertices << " vertices loaded" << std::endl;
 
-
+//    pMeshManager->LoadTheListOfModelsIWantFromASexyFile("MyModels.sexy");
 
 
     // Load some models to draw
+
 
     sMesh* pDragon = new sMesh();
     pDragon->modelFileName = "assets/models/Dragon 2.5Edited_xyz_only.ply";
@@ -407,9 +413,22 @@ int main(void)
     pDragon2->objectColourRGBA = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
     pDragon2->uniformScale = 0.2f;
 
+
     ::g_myMeshes[1] = pDragon2;
 
     ::g_NumberOfMeshesToDraw = 2;
+
+
+    sMesh* pTerrainMesh = new sMesh();
+    pTerrainMesh->modelFileName = "assets/models/Simple_MeshLab_terrain_xyz_only.ply";
+    pTerrainMesh->positionXYZ = glm::vec3(0.0f, -25.0f, 0.0f);
+    //pTerrainMesh->rotationEulerXYZ.x = 90.0f;
+    pTerrainMesh->objectColourRGBA = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+    pTerrainMesh->bOverrideObjectColour = true;
+//    pTerrainMesh->bIsWireframe = true;
+    ::g_myMeshes[::g_NumberOfMeshesToDraw] = pTerrainMesh;
+    ::g_NumberOfMeshesToDraw++;
+
 
     for (int count = 0; count != 100; count++)
     {
@@ -419,13 +438,26 @@ int main(void)
                                          getRandomFloat(-5.0f, 5.0f),
                                          getRandomFloat(-5.0f, 5.0f));
         pDragon->rotationEulerXYZ.x = 90.0f;
-        pDragon->objectColourRGBA = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
+        pDragon->objectColourRGBA
+            = glm::vec4(getRandomFloat(0.0f, 1.0f),
+                        getRandomFloat(0.0f, 1.0f),
+                        getRandomFloat(0.0f, 1.0f),
+                        1.0f);
+
+
         pDragon->uniformScale = 0.2f;
+
+        // This is evil, nasty code. 
+        // Do this if you hate humanity...
+//        pDragon->bIsWireframe = rand() % 2;
 
         ::g_myMeshes[::g_NumberOfMeshesToDraw] = pDragon;
 
         ::g_NumberOfMeshesToDraw++;
     }
+
+    
+
 
 
 
@@ -433,6 +465,9 @@ int main(void)
 
     glUseProgram(program);
 
+    // Enable depth buffering (z buffering)
+    // https://registry.khronos.org/OpenGL-Refpages/gl4/html/glEnable.xhtml
+    glEnable(GL_DEPTH_TEST);
 
 
     while (!glfwWindowShouldClose(window))
@@ -442,7 +477,7 @@ int main(void)
         glfwGetFramebufferSize(window, &width, &height);
         ratio = width / (float)height;
         glViewport(0, 0, width, height);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 //        glm::mat4 m, p, v, mvp;
         glm::mat4 matProjection = glm::mat4(1.0f);
@@ -468,6 +503,14 @@ int main(void)
         for (unsigned int meshIndex = 0; meshIndex != ::g_NumberOfMeshesToDraw; meshIndex++)
         {
             sMesh* pCurMesh = ::g_myMeshes[meshIndex];
+
+            // Is it visible? 
+            if ( ! pCurMesh->bIsVisible )
+            {
+                // Continue in loops jumps to the end of this loop
+                // (for, while, do)
+                continue;
+            }
 
             // Could be called the "model" or "world" matrix
             glm::mat4 matModel = glm::mat4(1.0f);
@@ -515,21 +558,45 @@ int main(void)
             //mvp = p * v * m;
             glm::mat4 matMVP = matProjection * matView * matModel;
 
-
             const GLint mvp_location = glGetUniformLocation(program, "MVP");
-
-
             glUniformMatrix4fv(mvp_location,
                 1,
                 GL_FALSE,
                 (const GLfloat*) &matMVP );
 
-            //glBindVertexArray(vertex_array);
+            // uniform bool bUseObjectColour;
+            GLint bUseObjectColour = glGetUniformLocation(program, "bUseObjectColour");
+
+            if (pCurMesh->bOverrideObjectColour)
+            {
+                // bool doesn't really exist, it's a float...
+                glUniform1f(bUseObjectColour, (GLfloat)GL_TRUE);    // or 1.0f
+            }
+            else
+            {
+                glUniform1f(bUseObjectColour, (GLfloat)GL_FALSE);   // or 0.0f
+            }
+
+            // Set the object colour
+            // uniform vec4 objectColour;
+            GLint objectColour_UL = glGetUniformLocation(program, "objectColour");
+            glUniform4f(objectColour_UL,
+                        pCurMesh->objectColourRGBA.r,
+                        pCurMesh->objectColourRGBA.g,
+                        pCurMesh->objectColourRGBA.b,
+                        1.0f);
 
 
             // solid or wireframe, etc.
     //        glPointSize(10.0f);
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            if (pCurMesh->bIsWireframe)
+            {
+                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            }
+            else
+            {
+                glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+            }
 
             //        glDrawArrays(GL_TRIANGLES, 0, 3);
 //            glDrawArrays(GL_TRIANGLES, 0, numberOfVertices_TO_DRAW);
@@ -541,14 +608,12 @@ int main(void)
                 glBindVertexArray(meshToDrawInfo.VAO_ID); 		// enable VAO(and everything else)
                 //https://registry.khronos.org/OpenGL-Refpages/gl4/html/glDrawElements.xhtml
                 glDrawElements(GL_TRIANGLES, 
-                    meshToDrawInfo.numberOfTriangles,
+                    meshToDrawInfo.numberOfIndices,
                     GL_UNSIGNED_INT, 
                     (void*)0);
 
                 glBindVertexArray(0); 			//disable VAO(and everything else)
             }
-
-
 
         }//for (unsigned int meshIndex..
 

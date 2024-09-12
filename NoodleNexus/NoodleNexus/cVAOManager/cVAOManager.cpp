@@ -126,6 +126,7 @@ bool readPlyFile_XYZ(sModelDrawInfo& modelDrawInfo)
 		plyFile >> modelDrawInfo.pVertices[index].y;
 		plyFile >> modelDrawInfo.pVertices[index].z;
 
+		// Set all the vertices to white (1,1,1)
 		modelDrawInfo.pVertices->r = 1.0f;
 		modelDrawInfo.pVertices->g = 1.0f;
 		modelDrawInfo.pVertices->b = 1.0f;
@@ -238,22 +239,35 @@ bool cVAOManager::LoadModelIntoVAO(
                   GL_STATIC_DRAW );
 
 	// Set the vertex attributes.
-
+// ************************************************************
+// 	   SPECIFIC TO THE SHADER.
+// 	   If the shader changes or the vertex layout changes,
+// 		you have to change this part...
+// ************************************************************
 	GLint vpos_location = glGetAttribLocation(shaderProgramID, "vPos");	// program
 	GLint vcol_location = glGetAttribLocation(shaderProgramID, "vCol");	// program;
 
+
+	//struct sVertex_SHADER_FORMAT_xyz_rgb
+	//{
+	//	float x, y, z;
+	//	float r, g, b;
+	//};
+
 	// Set the vertex attributes for this shader
 	glEnableVertexAttribArray(vpos_location);	// vPos
-	glVertexAttribPointer( vpos_location, 3,		// vPos
+	glVertexAttribPointer( vpos_location, 
+		                   3,		// vPos
 						   GL_FLOAT, GL_FALSE,
-						   sizeof(float) * 6, 
-						   ( void* )0);
+						   sizeof(sVertex_SHADER_FORMAT_xyz_rgb),	//  sizeof(float) * 6,		// Stride
+						   ( void* )offsetof(sVertex_SHADER_FORMAT_xyz_rgb, x) );				// Offset
 
 	glEnableVertexAttribArray(vcol_location);	// vCol
-	glVertexAttribPointer( vcol_location, 3,		// vCol
+	glVertexAttribPointer( vcol_location, 
+		                   3,		// vCol
 						   GL_FLOAT, GL_FALSE,
-						   sizeof(float) * 6, 
-						   ( void* )( sizeof(float) * 3 ));
+		                   sizeof(sVertex_SHADER_FORMAT_xyz_rgb),						// sizeof(float) * 6,
+		                   (void*)offsetof(sVertex_SHADER_FORMAT_xyz_rgb, r));			//( void* )( sizeof(float) * 3 ));
 
 	// Now that all the parts are set up, set the VAO to zero
 	glBindVertexArray(0);

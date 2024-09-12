@@ -15,9 +15,14 @@ struct sMesh
 
 	glm::vec3 positionXYZ;
 	glm::vec3 rotationEulerXYZ;		// 90 degrees around the x axis
-	float uniformScale;				// Same for each axis
+	float uniformScale = 1.0f;				// Same for each axis
 
 	glm::vec4 objectColourRGBA;
+	// If true, it uses the colour above
+	bool bOverrideObjectColour = true;
+
+	bool bIsWireframe = false;
+	bool bIsVisible = true;
 
 	unsigned int uniqueID = 0;
 

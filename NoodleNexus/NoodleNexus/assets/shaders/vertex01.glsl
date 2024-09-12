@@ -1,5 +1,5 @@
 #version 330
-
+// Vertex shader
 uniform mat4 MVP;
 
 in vec3 vCol;

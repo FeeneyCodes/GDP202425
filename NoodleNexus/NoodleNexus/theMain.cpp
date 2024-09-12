@@ -32,56 +32,17 @@
 #include "sMesh.h"
 
 #include "cVAOManager/cVAOManager.h"
+
+#include "sharedThings.h"       // Fly camera
+
 //
 const unsigned int MAX_NUMBER_OF_MESHES = 1000;
 unsigned int g_NumberOfMeshesToDraw;
 sMesh* g_myMeshes[MAX_NUMBER_OF_MESHES] = { 0 };    // All zeros
 
-//struct sVertex
-//{
-//    glm::vec3 pos;          // glm::vec2 pos;      // position   or "float x, y"
-//    glm::vec3 col;      // Colour     or "float x, y, z"
-//    // Colour range is 0.0 to 1.0
-//    // 0.0 = black (Red, Green, Blue)
-//    // 1.0 = white 
-//};
-
-//sVertex vertices[3] =
-//{
-//    { { -0.6f, -0.4f }, { 1.0f, 0.0f, 0.0f } },
-//    { {  0.6f, -0.4f }, { 0.0f, 1.0f, 0.0f } },
-//    { {  0.0f,  0.6f }, { 0.0f, 0.0f, 1.0f } }
-//};
 
 
-//static const char* vertex_shader_text =
-//"#version 330\n"
-//"uniform mat4 MVP;\n"
-//"in vec3 vCol;\n"
-//"in vec3 vPos;\n"
-//"out vec3 color;\n"
-//"void main()\n"
-//"{\n"
-//"   vec3 finalVert = vPos;\n"
-//"   finalVert.x = vPos.x * 1.0f;\n"
-//"   finalVert.y = vPos.y * 1.0f;\n"
-//"   finalVert.z = vPos.z * 1.0f;\n"
-//"    gl_Position = MVP * vec4(finalVert, 1.0);\n"
-//"    color = vCol;\n"
-//"}\n";
-//
-//static const char* fragment_shader_text =
-//"#version 330\n"
-//"in vec3 color;\n"
-//"out vec4 fragment;\n"
-//"void main()\n"
-//"{\n"
-//"    fragment = vec4(0.0f, 1.0f, 0.0f, 1.0);\n"
-//"}\n";
-
-
-glm::vec3 cameraEye = glm::vec3(0.0, 0.0, 4.0f);
-
+//glm::vec3 cameraEye = glm::vec3(0.0, 0.0, 4.0f);
 
 
 static void error_callback(int error, const char* description)
@@ -96,34 +57,41 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 
     const float CAMERA_MOVE_SPEED = 0.1f;
 
-    if (key == GLFW_KEY_A)
+    if (mods == GLFW_MOD_SHIFT)
     {
-        cameraEye.x -= CAMERA_MOVE_SPEED;
+
     }
 
-    if (key == GLFW_KEY_D)
-    {
-        cameraEye.x += CAMERA_MOVE_SPEED;
-    }
-
-    if (key == GLFW_KEY_W)
-    {
-        cameraEye.z += CAMERA_MOVE_SPEED;
-    }
-
-    if (key == GLFW_KEY_S)
-    {
-        cameraEye.z -= CAMERA_MOVE_SPEED;
-    }
-
-    if (key == GLFW_KEY_Q)
-    {
-        cameraEye.y -= CAMERA_MOVE_SPEED;
-    }
-    if (key == GLFW_KEY_E)
-    {
-        cameraEye.y += CAMERA_MOVE_SPEED;
-    }
+//    if (key == GLFW_KEY_A)
+//    {
+//        cameraEye.x -= CAMERA_MOVE_SPEED;
+////        g_myMeshes[::g_SelectedObjectIndex]->positionXYZ.x += CAMERA_MOVE_SPEED;
+//    }
+//
+//    if (key == GLFW_KEY_D)
+//    {
+//        cameraEye.x += CAMERA_MOVE_SPEED;
+////        g_myMeshes[0]->positionXYZ.x -= CAMERA_MOVE_SPEED;
+//    }
+//
+//    if (key == GLFW_KEY_W)
+//    {
+//        cameraEye.z += CAMERA_MOVE_SPEED;
+//    }
+//
+//    if (key == GLFW_KEY_S)
+//    {
+//        cameraEye.z -= CAMERA_MOVE_SPEED;
+//    }
+//
+//    if (key == GLFW_KEY_Q)
+//    {
+//        cameraEye.y -= CAMERA_MOVE_SPEED;
+//    }
+//    if (key == GLFW_KEY_E)
+//    {
+//        cameraEye.y += CAMERA_MOVE_SPEED;
+//    }
 
 
     return;
@@ -274,7 +242,17 @@ int main(void)
         exit(EXIT_FAILURE);
     }
 
+    // Callback for keyboard, but for "typing"
+    // Like it captures the press and release and repeat
     glfwSetKeyCallback(window, key_callback);
+
+    // 
+    glfwSetCursorPosCallback(window, cursor_position_callback);
+    glfwSetWindowFocusCallback(window, cursor_enter_callback);
+    glfwSetMouseButtonCallback(window, mouse_button_callback);
+    glfwSetScrollCallback(window, scroll_callback);
+
+
 
     glfwMakeContextCurrent(window);
     gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
@@ -456,10 +434,9 @@ int main(void)
         ::g_NumberOfMeshesToDraw++;
     }
 
-    
-
-
-
+   
+    ::g_pFlyCamera = new cBasicFlyCamera();
+    ::g_pFlyCamera->setEyeLocation(glm::vec3(0.0f, 0.0f, -10.0f));
 
 
 
@@ -494,9 +471,12 @@ int main(void)
         glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
         glm::vec3 upVector = glm::vec3(0.0f, 1.0f, 0.0f);
 
-        matView = glm::lookAt( cameraEye,
-                               cameraTarget,
+        matView = glm::lookAt(::g_pFlyCamera->getEyeLocation(),
+                              ::g_pFlyCamera->getTargetLocation(),
                                upVector);
+//        matView = glm::lookAt( cameraEye,
+//                               cameraTarget,
+//                               upVector);
 
 
         // Draw all the objects
@@ -617,7 +597,9 @@ int main(void)
 
         }//for (unsigned int meshIndex..
 
-
+        // Handle async IO stuff
+        handleKeyboardAsync(window);
+        handleMouseAsync(window);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -626,15 +608,23 @@ int main(void)
         //std::cout << "Camera: "
         std::stringstream ssTitle;
         ssTitle << "Camera: "
-            << cameraEye.x << ", "
-            << cameraEye.y << ", "
-            << cameraEye.z << std::endl;
+            << ::g_pFlyCamera->getEyeLocation().x << ", "
+            << ::g_pFlyCamera->getEyeLocation().y << ", "
+            << ::g_pFlyCamera->getEyeLocation().z << std::endl;
+//        ssTitle << "Camera: "
+//            << cameraEye.x << ", "
+//            << cameraEye.y << ", "
+//            << cameraEye.z << std::endl;
 
 //        glfwSetWindowTitle(window, "Hey!");
         glfwSetWindowTitle(window, ssTitle.str().c_str());
 
 
     }// End of the draw loop
+
+
+    // Delete everything
+    delete ::g_pFlyCamera;
 
     glfwDestroyWindow(window);
 

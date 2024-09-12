@@ -18,6 +18,12 @@
     <Filter Include="Meshes, etc.">
       <UniqueIdentifier>{ddd01867-c616-4681-aa72-e7ff5b4b1098}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Mouse, Keyboard, FlyCamera">
+      <UniqueIdentifier>{184a305d-7e4d-47ca-bfc6-6c2064ef481a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Global things">
+      <UniqueIdentifier>{78450d70-4cd5-41ff-ad02-690efd0d05be}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="theMain.cpp">
@@ -38,6 +44,15 @@
     <ClCompile Include="cVAOManager\cVAOManager.cpp">
       <Filter>Meshes, etc.</Filter>
     </ClCompile>
+    <ClCompile Include="cBasicFlyCamera\cBasicFlyCamera.cpp">
+      <Filter>Mouse, Keyboard, FlyCamera</Filter>
+    </ClCompile>
+    <ClCompile Include="mouse_keyboard_async.cpp">
+      <Filter>Mouse, Keyboard, FlyCamera</Filter>
+    </ClCompile>
+    <ClCompile Include="sharedThings.cpp">
+      <Filter>Global things</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PlyFileLoaders.h">
@@ -46,14 +61,20 @@
     <ClInclude Include="Basic_Shader_Manager\cShaderManager.h">
       <Filter>Basic Shader Manager</Filter>
     </ClInclude>
-    <ClInclude Include="GLCommon.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="sMesh.h">
       <Filter>Meshes, etc.</Filter>
     </ClInclude>
     <ClInclude Include="cVAOManager\cVAOManager.h">
       <Filter>Meshes, etc.</Filter>
+    </ClInclude>
+    <ClInclude Include="cBasicFlyCamera\cBasicFlyCamera.h">
+      <Filter>Mouse, Keyboard, FlyCamera</Filter>
+    </ClInclude>
+    <ClInclude Include="GLCommon.h">
+      <Filter>Global things</Filter>
+    </ClInclude>
+    <ClInclude Include="sharedThings.h">
+      <Filter>Global things</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

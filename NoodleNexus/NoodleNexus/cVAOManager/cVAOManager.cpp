@@ -116,7 +116,7 @@ bool readPlyFile_XYZ(sModelDrawInfo& modelDrawInfo)
 
 	// Load the data from the file
 //    sPlyVertex* pPlyVertices = new sPlyVertex[numberOfVertices];
-	modelDrawInfo.pVertices = new sVertex[modelDrawInfo.numberOfVertices];
+	modelDrawInfo.pVertices = new sVertex_SHADER_FORMAT_xyz_rgb[modelDrawInfo.numberOfVertices];
 
 	// end_header
 	// -0.0369122 0.127512 0.00276757 0.850855 0.5
@@ -125,6 +125,11 @@ bool readPlyFile_XYZ(sModelDrawInfo& modelDrawInfo)
 		plyFile >> modelDrawInfo.pVertices[index].x;
 		plyFile >> modelDrawInfo.pVertices[index].y;
 		plyFile >> modelDrawInfo.pVertices[index].z;
+
+		modelDrawInfo.pVertices->r = 1.0f;
+		modelDrawInfo.pVertices->g = 1.0f;
+		modelDrawInfo.pVertices->b = 1.0f;
+
 
 		// Only has xyz, so stop here
 //        plyFile >> allFileInfo.pPlyVertices[index].confidence;
@@ -162,7 +167,8 @@ bool readPlyFile_XYZ(sModelDrawInfo& modelDrawInfo)
 	{
 		modelDrawInfo.pIndices[index + 0] = pPlyFileTriangles[triIndex].vertIndex_0;
 		modelDrawInfo.pIndices[index + 1] = pPlyFileTriangles[triIndex].vertIndex_1;
-		modelDrawInfo.pIndices[index + 2] = pPlyFileTriangles[triIndex].vertIndex_1;
+		modelDrawInfo.pIndices[index + 2] = pPlyFileTriangles[triIndex].vertIndex_2;
+		index += 3;
 	}
 
 
@@ -215,7 +221,7 @@ bool cVAOManager::LoadModelIntoVAO(
 	glBindBuffer(GL_ARRAY_BUFFER, drawInfo.VertexBufferID);
 	// sVert vertices[3]
 	glBufferData( GL_ARRAY_BUFFER, 
-				  sizeof(sVert) * drawInfo.numberOfVertices,	// ::g_NumberOfVertsToDraw,	// sizeof(vertices), 
+				  sizeof(sVertex_SHADER_FORMAT_xyz_rgb) * drawInfo.numberOfVertices,	// ::g_NumberOfVertsToDraw,	// sizeof(vertices), 
 				  (GLvoid*) drawInfo.pVertices,							// pVertices,			//vertices, 
 				  GL_STATIC_DRAW );
 

@@ -143,7 +143,7 @@ int main(void)
 {   
 
 //    ConsoleStuff();
-
+//
     // On the stack, at compile time.
     // Limited by the size of the stack.
     // Also: Can't change the size.
@@ -153,31 +153,30 @@ int main(void)
 //        { {  0.6f, -0.4f }, { 0.0f, 1.0f, 0.0f } },
 //       { {  0.0f,  0.6f }, { 0.0f, 0.0f, 1.0f } }
 //  };
-
+//
 //    sizeof(sVertex) * 3;
-
-//    std::cout << "vertices: " << vertices << '\n';
+////    std::cout << "vertices: " << vertices << '\n';
 //    std::cout << (*(vertices + 1)).
-
+//
     // On the HEAP, so dynamically allocated at run time
 //    sVertex* pVertices = new sVertex[3];
 //
 //    pVertices[0] = { { -0.6f, -0.4f }, { 1.0f, 0.0f, 0.0f } };
 //    pVertices[1] = { {  0.6f, -0.4f }, { 0.0f, 1.0f, 0.0f } };
 //    pVertices[2] = { {  0.0f,  0.6f }, { 0.0f, 0.0f, 1.0f } };
-
+//
     //s3DFileData plyFileInfoBunny;
     //plyFileInfoBunny.fileName = "assets/models/bun_zipper_res3.ply";
     //ReadPlyModelFromFile_xyz_ci(plyFileInfoBunny);
-
+//
     //s3DFileData plyFileInfo;
     //plyFileInfo.fileName = "assets/models/VintageRacingCar_xyz_only.ply";
     //ReadPlyModelFromFile_xyz(plyFileInfo);
-
+//
     //s3DFileData plyFileInfo;
     //plyFileInfo.fileName = "assets/models/Dragon 2.5Edited_xyz_only.ply";
     //ReadPlyModelFromFile_xyz(plyFileInfo);
-
+//
 // ******************************************************
 //
 //    // This is the array we are giving the GPU 
@@ -332,9 +331,9 @@ int main(void)
 //    glAttachShader(program, vertex_shader);
 //    glAttachShader(program, fragment_shader);
 //    glLinkProgram(program);
-
+//
 //    const GLint mvp_location = glGetUniformLocation(program, "MVP");
-
+//
 //    const GLint vpos_location = glGetAttribLocation(program, "vPos");   
 //    const GLint vcol_location = glGetAttribLocation(program, "vCol");
 //
@@ -380,6 +379,10 @@ int main(void)
                                    carModelInfo, program);
     std::cout << carModelInfo.numberOfVertices << " vertices loaded" << std::endl;
 
+    sModelDrawInfo dragonModel;
+    pMeshManager->LoadModelIntoVAO("assets/models/Dragon 2.5Edited_xyz_only.ply", 
+        dragonModel, program);
+    std::cout << dragonModel.numberOfVertices << " vertices loaded" << std::endl;
 
 
 
@@ -389,7 +392,7 @@ int main(void)
 
     sMesh* pDragon = new sMesh();
     pDragon->modelFileName = "assets/models/Dragon 2.5Edited_xyz_only.ply";
-    pDragon->positionXYZ = glm::vec3(2.0f, 0.0f, 0.0f);
+    pDragon->positionXYZ = glm::vec3(20.0f, 0.0f, 0.0f);
     pDragon->rotationEulerXYZ.x = -90.0f;
     pDragon->uniformScale = 0.1f;
     pDragon->objectColourRGBA = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f); 
@@ -399,7 +402,7 @@ int main(void)
 
     sMesh* pDragon2 = new sMesh();
     pDragon2->modelFileName = "assets/models/Dragon 2.5Edited_xyz_only.ply";
-    pDragon2->positionXYZ = glm::vec3(-2.0f, 0.0f, 0.0f);
+    pDragon2->positionXYZ = glm::vec3(-20.0f, 0.0f, 0.0f);
     pDragon2->rotationEulerXYZ.x = 90.0f;
     pDragon2->objectColourRGBA = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
     pDragon2->uniformScale = 0.2f;
@@ -411,7 +414,7 @@ int main(void)
     for (int count = 0; count != 100; count++)
     {
         sMesh* pDragon = new sMesh();
-        pDragon->modelFileName = "assets/models/Dragon 2.5Edited_xyz_only.ply";
+        pDragon->modelFileName = "assets/models/VintageRacingCar_xyz_only.ply";
         pDragon->positionXYZ = glm::vec3(getRandomFloat(-5.0f, 5.0f),
                                          getRandomFloat(-5.0f, 5.0f),
                                          getRandomFloat(-5.0f, 5.0f));
@@ -536,7 +539,12 @@ int main(void)
             {
                 // Found the model
                 glBindVertexArray(meshToDrawInfo.VAO_ID); 		// enable VAO(and everything else)
-                glDrawElements(GL_TRIANGLES, meshToDrawInfo.numberOfTriangles);
+                //https://registry.khronos.org/OpenGL-Refpages/gl4/html/glDrawElements.xhtml
+                glDrawElements(GL_TRIANGLES, 
+                    meshToDrawInfo.numberOfTriangles,
+                    GL_UNSIGNED_INT, 
+                    (void*)0);
+
                 glBindVertexArray(0); 			//disable VAO(and everything else)
             }
 

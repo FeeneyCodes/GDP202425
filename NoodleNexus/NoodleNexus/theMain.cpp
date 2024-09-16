@@ -473,7 +473,7 @@ int main(void)
 
         matView = glm::lookAt(::g_pFlyCamera->getEyeLocation(),
                               ::g_pFlyCamera->getTargetLocation(),
-                               upVector);
+                               upVector);       
 //        matView = glm::lookAt( cameraEye,
 //                               cameraTarget,
 //                               upVector);

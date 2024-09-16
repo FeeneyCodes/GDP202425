@@ -75,8 +75,8 @@ void handleMouseAsync(GLFWwindow* window)
 //        glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
 
 
-//    double xpos, ypos;
-//    glfwGetCursorPos(window, &xpos, &ypos);
+    double xpos, ypos;
+    glfwGetCursorPos(window, &xpos, &ypos);
 
 //    std::cout << "Async mouse location (x,y): " << xpos << ", " << ypos << std::endl;
 
@@ -250,7 +250,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
     // For most mice, the value is the DIFFERENCE between the last time this was called!
     // (i.e. it's not an absolute value)
     // It also goes up and down along the Y axis and is an integer
-    std::cout << "xoffset, yoffset: " << xoffset << ", " << yoffset << std::endl;
+//    std::cout << "xoffset, yoffset: " << xoffset << ", " << yoffset << std::endl;
 
     const float MOUSE_WHEEL_RATIO = 0.1f;
 

@@ -137,17 +137,17 @@ bool cMonsterCreator::LoadNames(
 }
 
 
-cMonster cMonsterCreator::CreateMonster(void)
+cMonster* cMonsterCreator::CreateMonster(void)
 {
 //	std::vector<std::string> m_vecLastNames;
 //	std::vector<std::string> m_vecBoysNames;
 //	std::vector<std::string> m_vecGirlsNames;
 
-	cMonster newMonster;
-	newMonster.health = 100;
-	newMonster.location.x = 0.0f;
-	newMonster.location.y = 0.0f;
-	newMonster.location.z = 0.0f;
+	cMonster* pMonster = new cMonster();
+	pMonster->health = 100;
+	pMonster->location.x = 0.0f;
+	pMonster->location.y = 0.0f;
+	pMonster->location.z = 0.0f;
 
 	// TODO: Pick a random first and last name
 	// Some thoughts:
@@ -174,20 +174,23 @@ cMonster cMonsterCreator::CreateMonster(void)
 	if (rand() % 2)		// Modulus
 	{
 		size_t index = rand() % this->m_vecBoysNames.size();
-		newMonster.firstName = this->m_vecBoysNames[index];
+		pMonster->firstName = this->m_vecBoysNames[index];
 	}
 	else
 	{
 		size_t index = rand() % this->m_vecGirlsNames.size();
-		newMonster.firstName = this->m_vecGirlsNames[index];
+		pMonster->firstName = this->m_vecGirlsNames[index];
 	}
 	// Last name
 	size_t index = rand() % this->m_vecLastNames.size();
-	newMonster.lastName = this->m_vecLastNames[index];
+	pMonster->lastName = this->m_vecLastNames[index];
 
-	newMonster.name = newMonster.firstName + " " + newMonster.lastName;
+	pMonster->name = pMonster->firstName + " " + pMonster->lastName;
 
-	return newMonster;
+	// Add the monster to the list of monsters
+	this->m_vec_pTheMonsters.push_back(pMonster);
+
+	return pMonster;
 }
 
 

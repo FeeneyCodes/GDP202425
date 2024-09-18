@@ -16,7 +16,10 @@ public:
 
 	// This will make a monster
 	// Health 100. It'll pick a ransom first and last name
-	cMonster CreateMonster(void);
+	// NOTE: We are returning a pointer to the monster, not a stack copy
+	cMonster* CreateMonster(void);
+
+//	void AttackMonster(unsigned int targetID, float damage);
 
 
 //	static const unsigned int MAX_SIZE_OF_ARRAY = 100'000;
@@ -28,6 +31,9 @@ private:
 	std::vector<std::string> m_vecLastNames;
 	std::vector<std::string> m_vecBoysNames;
 	std::vector<std::string> m_vecGirlsNames;
+
+
+	std::vector< cMonster* > m_vec_pTheMonsters;
 
 
 };

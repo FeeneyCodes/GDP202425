@@ -20,6 +20,11 @@ public:
 	cVector3 location;
 	void KillAllHumans(void);
 	void PrintStats(void);
+	unsigned int uniqueID;
+
+	void AttackThisMonster(cMonster* pTarget);
+	void AttackThisMonster(unsigned int uniqueID);
+
 };
 
 

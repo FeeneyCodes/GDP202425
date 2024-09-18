@@ -58,18 +58,29 @@ int main( int argc, char* argv[] )
 
 	// On the stack (stack based variable)
 	// Returning by copying on the stack
-	cMonster Monster_01 = pMC->CreateMonster();
+	cMonster* pMonster_01 = pMC->CreateMonster();
+	cMonster* pMonster_02 = pMC->CreateMonster();
 
-	Monster_01.PrintStats();
+	pMonster_01->PrintStats();
+	pMonster_02->PrintStats();
 
 	// What do I do with this monster?? 
-	std::vector<cMonster> vecTheMonsters;
-	vecTheMonsters.push_back(Monster_01);
+	//std::vector< cMonster* > vec_pTheMonsters;
+	//vec_pTheMonsters.push_back(pMonster_01);
+	//vec_pTheMonsters.push_back(pMonster_02);
 
-	Monster_01.health = 50.0f;
+	//pMonster_01->health = 50.0f;
 
-	vecTheMonsters[0].PrintStats();
+	//vec_pTheMonsters[0]->PrintStats();
 
+
+	pMonster_01->AttackThisMonster(pMonster_02);
+	if (pMonster_02->health <= 0.0f)
+	{
+		// 1. Find the monster in the vector...
+		// 2. Remove it from the vector..
+		delete pMonster_02;
+	}
 
 
 

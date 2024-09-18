@@ -128,11 +128,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="cMonster.cpp" />
+    <ClCompile Include="cMonsterCreator.cpp" />
     <ClCompile Include="GameLoop.cpp" />
     <ClCompile Include="theMain.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cMonster.h" />
+    <ClInclude Include="cMonsterCreator.h" />
     <ClInclude Include="cVector3.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

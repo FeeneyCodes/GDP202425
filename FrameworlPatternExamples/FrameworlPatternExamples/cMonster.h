@@ -1,5 +1,5 @@
-//#ifndef cMonster_HG_
-//#define cMonster_HG_
+#ifndef cMonster_HG_
+#define cMonster_HG_
 
 #define defaultHealth 100.0f
 
@@ -23,5 +23,5 @@ public:
 
 
 
-//#endif
+#endif
 

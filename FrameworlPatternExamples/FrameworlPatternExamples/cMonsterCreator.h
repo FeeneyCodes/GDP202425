@@ -18,6 +18,15 @@ public:
 	// Health 100. It'll pick a ransom first and last name
 	// NOTE: We are returning a pointer to the monster, not a stack copy
 	cMonster* CreateMonster(void);
+	cMonster* CreateMonster(int typeID);
+	bool CreteMonster(int typeID, std::vector<cMonster> &vecMonsters);
+
+	// TODO:
+	// ?? FindMonstersWithThisFirstName( std::string firstName );
+
+	//std::vector<cMonster> GetAllMonsters(void);
+	//bool GetAllMonsters(vector<cMonster> &vecMonsters);
+	//bool GetAllMonsters(vector<cMonster> *vecMonsters);
 
 //	void AttackMonster(unsigned int targetID, float damage);
 

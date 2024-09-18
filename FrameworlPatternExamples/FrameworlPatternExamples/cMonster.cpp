@@ -7,7 +7,6 @@ cMonster::cMonster()
 	std::cout << "A cMonster is created!" << std::endl;
 
 //	health = defaultHealth;
-
 }
 
 // destructor (d'tor)

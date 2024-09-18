@@ -21,3 +21,10 @@ void cMonster::KillAllHumans(void)
 	std::cout << "I will hill all the humans!" << std::endl;
 	return;
 }
+
+void cMonster::PrintStats(void)
+{
+	std::cout << this->name << " : " << this->health << std::endl;
+	// TODO: Print location, too? 
+	return;
+}

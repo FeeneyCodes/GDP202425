@@ -57,10 +57,18 @@ int main( int argc, char* argv[] )
 	// Assume that the monster loader has loaded the files OK.
 
 	// On the stack (stack based variable)
+	// Returning by copying on the stack
 	cMonster Monster_01 = pMC->CreateMonster();
 
+	Monster_01.PrintStats();
 
+	// What do I do with this monster?? 
+	std::vector<cMonster> vecTheMonsters;
+	vecTheMonsters.push_back(Monster_01);
 
+	Monster_01.health = 50.0f;
+
+	vecTheMonsters[0].PrintStats();
 
 
 

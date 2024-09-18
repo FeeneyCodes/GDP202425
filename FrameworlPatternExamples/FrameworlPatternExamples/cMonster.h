@@ -15,9 +15,11 @@ public:
 	~cMonster();		// destructor (d'tor)
 	std::string firstName;
 	std::string lastName;
+	std::string name;		// First and last
 	float health = defaultHealth;
 	cVector3 location;
 	void KillAllHumans(void);
+	void PrintStats(void);
 };
 
 

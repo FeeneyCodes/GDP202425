@@ -353,86 +353,126 @@ int main(void)
 
     cVAOManager* pMeshManager = new cVAOManager();
 
-    sModelDrawInfo carModelInfo;
-    pMeshManager->LoadModelIntoVAO("assets/models/VintageRacingCar_xyz_only.ply", 
-                                   carModelInfo, program);
-    std::cout << carModelInfo.numberOfVertices << " vertices loaded" << std::endl;
+    //sModelDrawInfo carModelInfo;
+    //pMeshManager->LoadModelIntoVAO("assets/models/VintageRacingCar_xyz_only.ply", 
+    //                               carModelInfo, program);
+    //std::cout << carModelInfo.numberOfVertices << " vertices loaded" << std::endl;
 
-    sModelDrawInfo dragonModel;
-    pMeshManager->LoadModelIntoVAO("assets/models/Dragon 2.5Edited_xyz_only.ply", 
-        dragonModel, program);
-    std::cout << dragonModel.numberOfVertices << " vertices loaded" << std::endl;
+    //sModelDrawInfo dragonModel;
+    //pMeshManager->LoadModelIntoVAO("assets/models/Dragon 2.5Edited_xyz_only.ply", 
+    //    dragonModel, program);
+    //std::cout << dragonModel.numberOfVertices << " vertices loaded" << std::endl;
 
-    sModelDrawInfo terrainModel;
-    pMeshManager->LoadModelIntoVAO("assets/models/Simple_MeshLab_terrain_xyz_only.ply", 
-        terrainModel, program);
-    std::cout << terrainModel.numberOfVertices << " vertices loaded" << std::endl;
+    //sModelDrawInfo terrainModel;
+    //pMeshManager->LoadModelIntoVAO("assets/models/Simple_MeshLab_terrain_xyz_only.ply", 
+    //    terrainModel, program);
+    //std::cout << terrainModel.numberOfVertices << " vertices loaded" << std::endl;
+
+    sModelDrawInfo platPlaneDrawInfo;
+    pMeshManager->LoadModelIntoVAO("assets/models/Flat_Plane_xyz.ply", 
+        platPlaneDrawInfo, program);
+    std::cout << platPlaneDrawInfo.numberOfVertices << " vertices loaded" << std::endl;
+    
+    sModelDrawInfo sphereMesh;
+    pMeshManager->LoadModelIntoVAO("assets/models/Sphere_radius_1_xyz.ply", 
+        sphereMesh, program);
+    std::cout << sphereMesh.numberOfVertices << " vertices loaded" << std::endl;
 
 //    pMeshManager->LoadTheListOfModelsIWantFromASexyFile("MyModels.sexy");
 
 
     // Load some models to draw
 
-
-    sMesh* pDragon = new sMesh();
-    pDragon->modelFileName = "assets/models/Dragon 2.5Edited_xyz_only.ply";
-    pDragon->positionXYZ = glm::vec3(20.0f, 0.0f, 0.0f);
-    pDragon->rotationEulerXYZ.x = -90.0f;
-    pDragon->uniformScale = 0.1f;
-    pDragon->objectColourRGBA = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f); 
-
-    ::g_myMeshes[0] = pDragon;
-
-
-    sMesh* pDragon2 = new sMesh();
-    pDragon2->modelFileName = "assets/models/Dragon 2.5Edited_xyz_only.ply";
-    pDragon2->positionXYZ = glm::vec3(-20.0f, 0.0f, 0.0f);
-    pDragon2->rotationEulerXYZ.x = 90.0f;
-    pDragon2->objectColourRGBA = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
-    pDragon2->uniformScale = 0.2f;
-
-
-    ::g_myMeshes[1] = pDragon2;
-
-    ::g_NumberOfMeshesToDraw = 2;
-
-
-    sMesh* pTerrainMesh = new sMesh();
-    pTerrainMesh->modelFileName = "assets/models/Simple_MeshLab_terrain_xyz_only.ply";
-    pTerrainMesh->positionXYZ = glm::vec3(0.0f, -25.0f, 0.0f);
-    //pTerrainMesh->rotationEulerXYZ.x = 90.0f;
-    pTerrainMesh->objectColourRGBA = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-    pTerrainMesh->bOverrideObjectColour = true;
-//    pTerrainMesh->bIsWireframe = true;
-    ::g_myMeshes[::g_NumberOfMeshesToDraw] = pTerrainMesh;
-    ::g_NumberOfMeshesToDraw++;
-
-
-    for (int count = 0; count != 100; count++)
     {
-        sMesh* pDragon = new sMesh();
-        pDragon->modelFileName = "assets/models/VintageRacingCar_xyz_only.ply";
-        pDragon->positionXYZ = glm::vec3(getRandomFloat(-5.0f, 5.0f),
-                                         getRandomFloat(-5.0f, 5.0f),
-                                         getRandomFloat(-5.0f, 5.0f));
-        pDragon->rotationEulerXYZ.x = 90.0f;
-        pDragon->objectColourRGBA
-            = glm::vec4(getRandomFloat(0.0f, 1.0f),
-                        getRandomFloat(0.0f, 1.0f),
-                        getRandomFloat(0.0f, 1.0f),
-                        1.0f);
-
-
-        pDragon->uniformScale = 0.2f;
-
-        // This is evil, nasty code. 
-        // Do this if you hate humanity...
-//        pDragon->bIsWireframe = rand() % 2;
-
-        ::g_myMeshes[::g_NumberOfMeshesToDraw] = pDragon;
-
+        sMesh* pFlatPlane = new sMesh();
+        pFlatPlane->modelFileName = "assets/models/Flat_Plane_xyz.ply";
+        pFlatPlane->positionXYZ = glm::vec3(0.0f, 0.0f, 0.0f);
+        pFlatPlane->objectColourRGBA = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+//        pFlatPlane->bIsWireframe = true;
+        ::g_myMeshes[::g_NumberOfMeshesToDraw] = pFlatPlane;
         ::g_NumberOfMeshesToDraw++;
     }
+    {
+        sMesh* pFlatPlane = new sMesh();
+        pFlatPlane->modelFileName = "assets/models/Flat_Plane_xyz.ply";
+        pFlatPlane->positionXYZ = glm::vec3(0.0f, 0.0f, 0.0f);
+        pFlatPlane->bIsWireframe = true;
+        pFlatPlane->uniformScale = 1.01f;
+        pFlatPlane->objectColourRGBA = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+
+        ::g_myMeshes[::g_NumberOfMeshesToDraw] = pFlatPlane;
+        ::g_NumberOfMeshesToDraw++;
+    }
+
+    {
+        sMesh* pSphere = new sMesh();
+        pSphere->modelFileName = "assets/models/Sphere_radius_1_xyz.ply";
+        pSphere->positionXYZ = glm::vec3(0.0f, 5.0f, 0.0f);
+        pSphere->bIsWireframe = true;
+        pSphere->objectColourRGBA = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
+
+        ::g_myMeshes[::g_NumberOfMeshesToDraw] = pSphere;
+        ::g_NumberOfMeshesToDraw++;
+    }
+//    sMesh* pDragon = new sMesh();
+//    pDragon->modelFileName = "assets/models/Dragon 2.5Edited_xyz_only.ply";
+//    pDragon->positionXYZ = glm::vec3(20.0f, 0.0f, 0.0f);
+//    pDragon->rotationEulerXYZ.x = -90.0f;
+//    pDragon->uniformScale = 0.1f;
+//    pDragon->objectColourRGBA = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f); 
+//
+//    ::g_myMeshes[0] = pDragon;
+//
+//
+//    sMesh* pDragon2 = new sMesh();
+//    pDragon2->modelFileName = "assets/models/Dragon 2.5Edited_xyz_only.ply";
+//    pDragon2->positionXYZ = glm::vec3(-20.0f, 0.0f, 0.0f);
+//    pDragon2->rotationEulerXYZ.x = 90.0f;
+//    pDragon2->objectColourRGBA = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
+//    pDragon2->uniformScale = 0.2f;
+//
+//
+//    ::g_myMeshes[1] = pDragon2;
+//
+//    ::g_NumberOfMeshesToDraw = 2;
+//
+//
+//    sMesh* pTerrainMesh = new sMesh();
+//    pTerrainMesh->modelFileName = "assets/models/Simple_MeshLab_terrain_xyz_only.ply";
+//    pTerrainMesh->positionXYZ = glm::vec3(0.0f, -25.0f, 0.0f);
+//    //pTerrainMesh->rotationEulerXYZ.x = 90.0f;
+//    pTerrainMesh->objectColourRGBA = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+//    pTerrainMesh->bOverrideObjectColour = true;
+////    pTerrainMesh->bIsWireframe = true;
+//    ::g_myMeshes[::g_NumberOfMeshesToDraw] = pTerrainMesh;
+//    ::g_NumberOfMeshesToDraw++;
+//
+//
+//    for (int count = 0; count != 100; count++)
+//    {
+//        sMesh* pDragon = new sMesh();
+//        pDragon->modelFileName = "assets/models/VintageRacingCar_xyz_only.ply";
+//        pDragon->positionXYZ = glm::vec3(getRandomFloat(-5.0f, 5.0f),
+//                                         getRandomFloat(-5.0f, 5.0f),
+//                                         getRandomFloat(-5.0f, 5.0f));
+//        pDragon->rotationEulerXYZ.x = 90.0f;
+//        pDragon->objectColourRGBA
+//            = glm::vec4(getRandomFloat(0.0f, 1.0f),
+//                        getRandomFloat(0.0f, 1.0f),
+//                        getRandomFloat(0.0f, 1.0f),
+//                        1.0f);
+//
+//
+//        pDragon->uniformScale = 0.2f;
+//
+//        // This is evil, nasty code. 
+//        // Do this if you hate humanity...
+////        pDragon->bIsWireframe = rand() % 2;
+//
+//        ::g_myMeshes[::g_NumberOfMeshesToDraw] = pDragon;
+//
+//        ::g_NumberOfMeshesToDraw++;
+//    }
 
    
     ::g_pFlyCamera = new cBasicFlyCamera();

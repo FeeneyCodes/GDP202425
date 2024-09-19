@@ -102,7 +102,7 @@ int main( int argc, char* argv[] )
 //	std::sort(vec_pTheMonsters.begin(), vec_pTheMonsters.end(), ??);
 
 	std::vector< cMonster > vecMonsters;
-	std::sort(vecMonsters.begin(), vecMonsters.end());
+//	std::sort(vecMonsters.begin(), vecMonsters.end());
 
 
 	pMonster_01->AttackThisMonster(pMonster_02);

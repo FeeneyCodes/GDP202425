@@ -194,6 +194,8 @@ bool cVAOManager::LoadModelIntoVAO(
 		return false;
 	}
 
+	// Calculate extents
+	drawInfo.calculateExtents();
 
 	// 
 	// Model is loaded and the vertices and indices are in the drawInfo struct
@@ -307,5 +309,63 @@ bool cVAOManager::FindDrawInfoByModelName(
 	// ...so 'return' that information
 	drawInfo = itDrawInfo->second;
 	return true;
+}
+
+
+//glm::vec3 maxXYZ, minXYZ, extenXYZ, centreXYZ;
+void sModelDrawInfo::calculateExtents(void)
+{
+	// Are there any vertices?
+	if (this->numberOfIndices == 0)
+	{
+		return;
+	}
+
+	// Assume the 1st index is the max and min
+	this->minXYZ.x = this->pVertices[0].x;
+	this->minXYZ.y = this->pVertices[0].y;
+	this->minXYZ.z = this->pVertices[0].z;
+
+	this->maxXYZ.x = this->pVertices[0].x;
+	this->maxXYZ.y = this->pVertices[0].y;
+	this->maxXYZ.z = this->pVertices[0].z;
+
+	for (unsigned int index = 0; index != this->numberOfVertices; index++)
+	{
+		// Compare each axis
+		if (this->pVertices[index].x < this->minXYZ.x)
+		{
+			this->minXYZ.x = this->pVertices[index].x;
+		}
+		if (this->pVertices[index].y < this->minXYZ.y)
+		{
+			this->minXYZ.y = this->pVertices[index].y;
+		}
+		if (this->pVertices[index].z < this->minXYZ.z)
+		{
+			this->minXYZ.z = this->pVertices[index].z;
+		}
+		// 
+		if (this->pVertices[index].x > this->maxXYZ.x)
+		{
+			this->maxXYZ.x = this->pVertices[index].x;
+		}
+		if (this->pVertices[index].y > this->maxXYZ.y)
+		{
+			this->maxXYZ.y = this->pVertices[index].y;
+		}
+		if (this->pVertices[index].z > this->maxXYZ.z)
+		{
+			this->maxXYZ.z = this->pVertices[index].z;
+		}
+	}//for (unsigned int index
+
+	this->extenXYZ.x = this->maxXYZ.x - this->minXYZ.x;
+	this->extenXYZ.y = this->maxXYZ.y - this->minXYZ.y;
+	this->extenXYZ.z = this->maxXYZ.z - this->minXYZ.z;
+	
+	// TODO: Anything else you need calculated
+
+	return;
 }
 

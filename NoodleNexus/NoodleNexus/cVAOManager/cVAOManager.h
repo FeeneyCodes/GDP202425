@@ -6,6 +6,8 @@
 
 #include <string>
 #include <map>
+#include <glm/glm.hpp>
+#include <glm/vec3.hpp>
 
 // The vertex structure 
 //	that's ON THE GPU (eventually) 
@@ -38,6 +40,9 @@ struct sModelDrawInfo
 	sVertex_SHADER_FORMAT_xyz_rgb* pVertices;	//  = 0;
 	// The index buffer (CPU side)
 	unsigned int* pIndices;
+	// 
+	glm::vec3 maxXYZ, minXYZ, extenXYZ, centreXYZ;
+	void calculateExtents(void);
 };
 
 

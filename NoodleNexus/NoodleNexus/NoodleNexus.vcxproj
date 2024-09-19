@@ -140,6 +140,7 @@
     <ClCompile Include="Basic_Shader_Manager\cShader.cpp" />
     <ClCompile Include="Basic_Shader_Manager\cShaderManager.cpp" />
     <ClCompile Include="cBasicFlyCamera\cBasicFlyCamera.cpp" />
+    <ClCompile Include="cPhysics.cpp" />
     <ClCompile Include="cVAOManager\cVAOManager.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="mouse_keyboard_async.cpp" />
@@ -150,6 +151,7 @@
   <ItemGroup>
     <ClInclude Include="Basic_Shader_Manager\cShaderManager.h" />
     <ClInclude Include="cBasicFlyCamera\cBasicFlyCamera.h" />
+    <ClInclude Include="cPhysics.h" />
     <ClInclude Include="cVAOManager\cVAOManager.h" />
     <ClInclude Include="sharedThings.h" />
     <ClInclude Include="sMesh.h" />

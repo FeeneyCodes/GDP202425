@@ -24,6 +24,9 @@
     <Filter Include="Global things">
       <UniqueIdentifier>{78450d70-4cd5-41ff-ad02-690efd0d05be}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Phsyics_Stuff">
+      <UniqueIdentifier>{b50e5ed1-0d30-423d-8675-9d288d42b19b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="theMain.cpp">
@@ -53,6 +56,9 @@
     <ClCompile Include="sharedThings.cpp">
       <Filter>Global things</Filter>
     </ClCompile>
+    <ClCompile Include="cPhysics.cpp">
+      <Filter>Phsyics_Stuff</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PlyFileLoaders.h">
@@ -75,6 +81,9 @@
     </ClInclude>
     <ClInclude Include="sharedThings.h">
       <Filter>Global things</Filter>
+    </ClInclude>
+    <ClInclude Include="cPhysics.h">
+      <Filter>Phsyics_Stuff</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -23,6 +23,8 @@
 #include <sstream>      // "string" stream ("string builder" in Java c#, etc.)
 #include <string>
 
+#include <vector>
+
 
 //void ReadPlyModelFromFile(std::string plyFileName);
 #include "PlyFileLoaders.h"
@@ -35,11 +37,20 @@
 
 #include "sharedThings.h"       // Fly camera
 
-//
-const unsigned int MAX_NUMBER_OF_MESHES = 1000;
-unsigned int g_NumberOfMeshesToDraw;
-sMesh* g_myMeshes[MAX_NUMBER_OF_MESHES] = { 0 };    // All zeros
+#include "cPhysics.h"
 
+//
+//const unsigned int MAX_NUMBER_OF_MESHES = 1000;
+//unsigned int g_NumberOfMeshesToDraw;
+//sMesh* g_myMeshes[MAX_NUMBER_OF_MESHES] = { 0 };    // All zeros
+
+std::vector<sMesh*> g_vecMeshesToDraw;
+
+cPhysics* g_pPhysicEngine = NULL;
+// This loads the 3D models for drawing, etc.
+cVAOManager* g_pMeshManager = NULL;
+
+void AddModelsToScene(void);
 
 
 //glm::vec3 cameraEye = glm::vec3(0.0, 0.0, 4.0f);
@@ -106,6 +117,21 @@ float getRandomFloat(float a, float b) {
     float r = random * diff;
     return a + r;
 }
+
+// Returns NULL if NOT found
+sMesh* pFindMeshByFriendlyName(std::string theNameToFind)
+{
+    for (unsigned int index = 0; index != ::g_vecMeshesToDraw.size(); index++)
+    {
+        if (::g_vecMeshesToDraw[index]->uniqueFriendlyName == theNameToFind)
+        {
+            return ::g_vecMeshesToDraw[index];
+        }
+    }
+    // Didn't find it
+    return NULL;
+}
+
 
 int main(void)
 {   
@@ -351,7 +377,8 @@ int main(void)
 
     // Loading the TYPES of models I can draw...
 
-    cVAOManager* pMeshManager = new cVAOManager();
+//    cVAOManager* pMeshManager = new cVAOManager();
+    ::g_pMeshManager = new cVAOManager();
 
     //sModelDrawInfo carModelInfo;
     //pMeshManager->LoadModelIntoVAO("assets/models/VintageRacingCar_xyz_only.ply", 
@@ -369,114 +396,25 @@ int main(void)
     //std::cout << terrainModel.numberOfVertices << " vertices loaded" << std::endl;
 
     sModelDrawInfo platPlaneDrawInfo;
-    pMeshManager->LoadModelIntoVAO("assets/models/Flat_Plane_xyz.ply", 
+    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Flat_Plane_xyz.ply", 
         platPlaneDrawInfo, program);
     std::cout << platPlaneDrawInfo.numberOfVertices << " vertices loaded" << std::endl;
     
     sModelDrawInfo sphereMesh;
-    pMeshManager->LoadModelIntoVAO("assets/models/Sphere_radius_1_xyz.ply", 
+    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Sphere_radius_1_xyz.ply",
         sphereMesh, program);
     std::cout << sphereMesh.numberOfVertices << " vertices loaded" << std::endl;
 
 //    pMeshManager->LoadTheListOfModelsIWantFromASexyFile("MyModels.sexy");
 
 
-    // Load some models to draw
+    ::g_pPhysicEngine = new cPhysics();
 
-    {
-        sMesh* pFlatPlane = new sMesh();
-        pFlatPlane->modelFileName = "assets/models/Flat_Plane_xyz.ply";
-        pFlatPlane->positionXYZ = glm::vec3(0.0f, 0.0f, 0.0f);
-        pFlatPlane->objectColourRGBA = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-//        pFlatPlane->bIsWireframe = true;
-        ::g_myMeshes[::g_NumberOfMeshesToDraw] = pFlatPlane;
-        ::g_NumberOfMeshesToDraw++;
-    }
-    {
-        sMesh* pFlatPlane = new sMesh();
-        pFlatPlane->modelFileName = "assets/models/Flat_Plane_xyz.ply";
-        pFlatPlane->positionXYZ = glm::vec3(0.0f, 0.0f, 0.0f);
-        pFlatPlane->bIsWireframe = true;
-        pFlatPlane->uniformScale = 1.01f;
-        pFlatPlane->objectColourRGBA = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-
-        ::g_myMeshes[::g_NumberOfMeshesToDraw] = pFlatPlane;
-        ::g_NumberOfMeshesToDraw++;
-    }
-
-    {
-        sMesh* pSphere = new sMesh();
-        pSphere->modelFileName = "assets/models/Sphere_radius_1_xyz.ply";
-        pSphere->positionXYZ = glm::vec3(0.0f, 5.0f, 0.0f);
-        pSphere->bIsWireframe = true;
-        pSphere->objectColourRGBA = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
-
-        ::g_myMeshes[::g_NumberOfMeshesToDraw] = pSphere;
-        ::g_NumberOfMeshesToDraw++;
-    }
-//    sMesh* pDragon = new sMesh();
-//    pDragon->modelFileName = "assets/models/Dragon 2.5Edited_xyz_only.ply";
-//    pDragon->positionXYZ = glm::vec3(20.0f, 0.0f, 0.0f);
-//    pDragon->rotationEulerXYZ.x = -90.0f;
-//    pDragon->uniformScale = 0.1f;
-//    pDragon->objectColourRGBA = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f); 
-//
-//    ::g_myMeshes[0] = pDragon;
-//
-//
-//    sMesh* pDragon2 = new sMesh();
-//    pDragon2->modelFileName = "assets/models/Dragon 2.5Edited_xyz_only.ply";
-//    pDragon2->positionXYZ = glm::vec3(-20.0f, 0.0f, 0.0f);
-//    pDragon2->rotationEulerXYZ.x = 90.0f;
-//    pDragon2->objectColourRGBA = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
-//    pDragon2->uniformScale = 0.2f;
-//
-//
-//    ::g_myMeshes[1] = pDragon2;
-//
-//    ::g_NumberOfMeshesToDraw = 2;
-//
-//
-//    sMesh* pTerrainMesh = new sMesh();
-//    pTerrainMesh->modelFileName = "assets/models/Simple_MeshLab_terrain_xyz_only.ply";
-//    pTerrainMesh->positionXYZ = glm::vec3(0.0f, -25.0f, 0.0f);
-//    //pTerrainMesh->rotationEulerXYZ.x = 90.0f;
-//    pTerrainMesh->objectColourRGBA = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-//    pTerrainMesh->bOverrideObjectColour = true;
-////    pTerrainMesh->bIsWireframe = true;
-//    ::g_myMeshes[::g_NumberOfMeshesToDraw] = pTerrainMesh;
-//    ::g_NumberOfMeshesToDraw++;
-//
-//
-//    for (int count = 0; count != 100; count++)
-//    {
-//        sMesh* pDragon = new sMesh();
-//        pDragon->modelFileName = "assets/models/VintageRacingCar_xyz_only.ply";
-//        pDragon->positionXYZ = glm::vec3(getRandomFloat(-5.0f, 5.0f),
-//                                         getRandomFloat(-5.0f, 5.0f),
-//                                         getRandomFloat(-5.0f, 5.0f));
-//        pDragon->rotationEulerXYZ.x = 90.0f;
-//        pDragon->objectColourRGBA
-//            = glm::vec4(getRandomFloat(0.0f, 1.0f),
-//                        getRandomFloat(0.0f, 1.0f),
-//                        getRandomFloat(0.0f, 1.0f),
-//                        1.0f);
-//
-//
-//        pDragon->uniformScale = 0.2f;
-//
-//        // This is evil, nasty code. 
-//        // Do this if you hate humanity...
-////        pDragon->bIsWireframe = rand() % 2;
-//
-//        ::g_myMeshes[::g_NumberOfMeshesToDraw] = pDragon;
-//
-//        ::g_NumberOfMeshesToDraw++;
-//    }
+    AddModelsToScene();
 
    
     ::g_pFlyCamera = new cBasicFlyCamera();
-    ::g_pFlyCamera->setEyeLocation(glm::vec3(0.0f, 0.0f, -10.0f));
+    ::g_pFlyCamera->setEyeLocation(glm::vec3(0.0f, 0.0f, -20.0f));
 
 
 
@@ -485,6 +423,9 @@ int main(void)
     // Enable depth buffering (z buffering)
     // https://registry.khronos.org/OpenGL-Refpages/gl4/html/glEnable.xhtml
     glEnable(GL_DEPTH_TEST);
+
+    double currentFrameTime = glfwGetTime();
+    double lastFrameTime = glfwGetTime();
 
 
     while (!glfwWindowShouldClose(window))
@@ -496,13 +437,13 @@ int main(void)
         glViewport(0, 0, width, height);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-//        glm::mat4 m, p, v, mvp;
+        //        glm::mat4 m, p, v, mvp;
         glm::mat4 matProjection = glm::mat4(1.0f);
 
-        matProjection = glm::perspective( 0.6f,           // FOV
-                                          ratio,          // Aspect ratio of screen
-                                          0.1f,           // Near plane
-                                          1000.0f);       // Far plane
+        matProjection = glm::perspective(0.6f,           // FOV
+            ratio,          // Aspect ratio of screen
+            0.1f,           // Near plane
+            1000.0f);       // Far plane
 
         // View or "camera"
         glm::mat4 matView = glm::mat4(1.0f);
@@ -512,20 +453,22 @@ int main(void)
         glm::vec3 upVector = glm::vec3(0.0f, 1.0f, 0.0f);
 
         matView = glm::lookAt(::g_pFlyCamera->getEyeLocation(),
-                              ::g_pFlyCamera->getTargetLocation(),
-                               upVector);       
-//        matView = glm::lookAt( cameraEye,
-//                               cameraTarget,
-//                               upVector);
+            ::g_pFlyCamera->getTargetLocation(),
+            upVector);
+        //        matView = glm::lookAt( cameraEye,
+        //                               cameraTarget,
+        //                               upVector);
 
 
-        // Draw all the objects
-        for (unsigned int meshIndex = 0; meshIndex != ::g_NumberOfMeshesToDraw; meshIndex++)
+                // Draw all the objects
+                //for (unsigned int meshIndex = 0; meshIndex != ::g_NumberOfMeshesToDraw; meshIndex++)
+        for (unsigned int meshIndex = 0; meshIndex != ::g_vecMeshesToDraw.size(); meshIndex++)
         {
-            sMesh* pCurMesh = ::g_myMeshes[meshIndex];
+            //            sMesh* pCurMesh = ::g_myMeshes[meshIndex];
+            sMesh* pCurMesh = ::g_vecMeshesToDraw[meshIndex];
 
             // Is it visible? 
-            if ( ! pCurMesh->bIsVisible )
+            if (!pCurMesh->bIsVisible)
             {
                 // Continue in loops jumps to the end of this loop
                 // (for, while, do)
@@ -545,26 +488,26 @@ int main(void)
             // Rotation...
             // Caculate 3 Euler acix matrices...
             glm::mat4 matRotateX =
-                glm::rotate(glm::mat4(1.0f),    
+                glm::rotate(glm::mat4(1.0f),
                     glm::radians(pCurMesh->rotationEulerXYZ.x), // Angle in radians
-                    glm::vec3(1.0f, 0.0, 0.0f));   
+                    glm::vec3(1.0f, 0.0, 0.0f));
 
             glm::mat4 matRotateY =
-                glm::rotate(glm::mat4(1.0f),    
+                glm::rotate(glm::mat4(1.0f),
                     glm::radians(pCurMesh->rotationEulerXYZ.y), // Angle in radians
-                    glm::vec3(0.0f, 1.0, 0.0f));   
+                    glm::vec3(0.0f, 1.0, 0.0f));
 
             glm::mat4 matRotateZ =
-                glm::rotate(glm::mat4(1.0f),    
+                glm::rotate(glm::mat4(1.0f),
                     glm::radians(pCurMesh->rotationEulerXYZ.z), // Angle in radians
-                    glm::vec3(0.0f, 0.0, 1.0f));   
+                    glm::vec3(0.0f, 0.0, 1.0f));
 
 
             // Scale
             glm::mat4 matScale = glm::scale(glm::mat4(1.0f),
                 glm::vec3(pCurMesh->uniformScale,
-                          pCurMesh->uniformScale,
-                          pCurMesh->uniformScale));
+                    pCurMesh->uniformScale,
+                    pCurMesh->uniformScale));
 
 
             // Calculate the final model/world matrix
@@ -582,7 +525,7 @@ int main(void)
             glUniformMatrix4fv(mvp_location,
                 1,
                 GL_FALSE,
-                (const GLfloat*) &matMVP );
+                (const GLfloat*)&matMVP);
 
             // uniform bool bUseObjectColour;
             GLint bUseObjectColour = glGetUniformLocation(program, "bUseObjectColour");
@@ -601,10 +544,10 @@ int main(void)
             // uniform vec4 objectColour;
             GLint objectColour_UL = glGetUniformLocation(program, "objectColour");
             glUniform4f(objectColour_UL,
-                        pCurMesh->objectColourRGBA.r,
-                        pCurMesh->objectColourRGBA.g,
-                        pCurMesh->objectColourRGBA.b,
-                        1.0f);
+                pCurMesh->objectColourRGBA.r,
+                pCurMesh->objectColourRGBA.g,
+                pCurMesh->objectColourRGBA.b,
+                1.0f);
 
 
             // solid or wireframe, etc.
@@ -622,20 +565,36 @@ int main(void)
 //            glDrawArrays(GL_TRIANGLES, 0, numberOfVertices_TO_DRAW);
 
             sModelDrawInfo meshToDrawInfo;
-            if (pMeshManager->FindDrawInfoByModelName(pCurMesh->modelFileName, meshToDrawInfo))
+            if (::g_pMeshManager->FindDrawInfoByModelName(pCurMesh->modelFileName, meshToDrawInfo))
             {
                 // Found the model
                 glBindVertexArray(meshToDrawInfo.VAO_ID); 		// enable VAO(and everything else)
                 //https://registry.khronos.org/OpenGL-Refpages/gl4/html/glDrawElements.xhtml
-                glDrawElements(GL_TRIANGLES, 
+                glDrawElements(GL_TRIANGLES,
                     meshToDrawInfo.numberOfIndices,
-                    GL_UNSIGNED_INT, 
+                    GL_UNSIGNED_INT,
                     (void*)0);
 
                 glBindVertexArray(0); 			//disable VAO(and everything else)
             }
 
         }//for (unsigned int meshIndex..
+
+
+        // Calculate elapsed time
+        // We'll enhance this
+        currentFrameTime = glfwGetTime();
+        double deltaTime = currentFrameTime - lastFrameTime;
+        lastFrameTime = currentFrameTime;
+
+        //sMesh* pBall = pFindMeshByFriendlyName("Ball");
+        //if (pBall)
+        //{
+        //    pBall->positionXYZ.y -= 1.0f * deltaTime;
+        //}
+
+        // Physic update and test 
+        ::g_pPhysicEngine->StepTick(deltaTime);
 
         // Handle async IO stuff
         handleKeyboardAsync(window);
@@ -665,12 +624,174 @@ int main(void)
 
     // Delete everything
     delete ::g_pFlyCamera;
+    delete ::g_pPhysicEngine;
 
     glfwDestroyWindow(window);
 
     glfwTerminate();
     exit(EXIT_SUCCESS);
 }
+
+
+void AddModelsToScene(void)
+{
+
+    // Load some models to draw
+
+    {
+        sMesh* pFlatPlane = new sMesh();
+        pFlatPlane->modelFileName = "assets/models/Flat_Plane_xyz.ply";
+        pFlatPlane->positionXYZ = glm::vec3(0.0f, -5.0f, 0.0f);
+        pFlatPlane->objectColourRGBA = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+        pFlatPlane->uniqueFriendlyName = "Ground";
+        //        pFlatPlane->bIsWireframe = true;
+        //        ::g_myMeshes[::g_NumberOfMeshesToDraw] = pFlatPlane;
+        //        ::g_NumberOfMeshesToDraw++;
+        ::g_vecMeshesToDraw.push_back(pFlatPlane);
+
+
+        // Add the "ground" to the physcs
+        cPhysics::sAABB* pAABBGround = new cPhysics::sAABB();
+        pAABBGround->centreXYZ = pFlatPlane->positionXYZ;
+        sModelDrawInfo planeMeshInfo;
+        ::g_pMeshManager->FindDrawInfoByModelName(pFlatPlane->modelFileName, planeMeshInfo);
+        pAABBGround->extentsXYZ = planeMeshInfo.extenXYZ;
+
+        pAABBGround->physicInfo.pAssociatedDrawingMeshInstance = pFlatPlane;
+
+        ::g_pPhysicEngine->vecAABBs.push_back(pAABBGround);
+    }
+    {
+        sMesh* pFlatPlane = new sMesh();
+        pFlatPlane->modelFileName = "assets/models/Flat_Plane_xyz.ply";
+        pFlatPlane->positionXYZ = glm::vec3(0.0f, -5.0f, 0.0f);
+        pFlatPlane->bIsWireframe = true;
+        pFlatPlane->uniformScale = 1.01f;
+        pFlatPlane->objectColourRGBA = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+
+        //::g_myMeshes[::g_NumberOfMeshesToDraw] = pFlatPlane;
+        //::g_NumberOfMeshesToDraw++;
+        ::g_vecMeshesToDraw.push_back(pFlatPlane);
+    }
+
+
+    {
+        sMesh* pSphereMesh = new sMesh();
+        pSphereMesh->modelFileName = "assets/models/Sphere_radius_1_xyz.ply";
+        pSphereMesh->positionXYZ = glm::vec3(0.0f, 10.0f, 0.0f);
+        pSphereMesh->bIsWireframe = true;
+        pSphereMesh->objectColourRGBA = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
+        pSphereMesh->uniqueFriendlyName = "Ball";
+
+        //::g_myMeshes[::g_NumberOfMeshesToDraw] = pSphere;
+        //::g_NumberOfMeshesToDraw++;
+        ::g_vecMeshesToDraw.push_back(pSphereMesh);
+
+        // Add sphere
+        cPhysics::sSphere* pSphereInfo = new cPhysics::sSphere();
+        pSphereInfo->centre = pSphereMesh->positionXYZ;
+        // HACK: We know this is 1.0 because...?
+        // We could also have pulled that information from the mesh info
+        pSphereInfo->radius = 1.0f;
+
+        pSphereInfo->physicInfo.velocity.y = -0.5f;
+        
+        // Associate this drawing mesh to this physics object
+        pSphereInfo->physicInfo.pAssociatedDrawingMeshInstance = pSphereMesh;
+
+        ::g_pPhysicEngine->vecSpheres.push_back(pSphereInfo);
+    }
+    //    sMesh* pDragon = new sMesh();
+    //    pDragon->modelFileName = "assets/models/Dragon 2.5Edited_xyz_only.ply";
+    //    pDragon->positionXYZ = glm::vec3(20.0f, 0.0f, 0.0f);
+    //    pDragon->rotationEulerXYZ.x = -90.0f;
+    //    pDragon->uniformScale = 0.1f;
+    //    pDragon->objectColourRGBA = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f); 
+    //
+    //    ::g_myMeshes[0] = pDragon;
+    //
+    //
+    //    sMesh* pDragon2 = new sMesh();
+    //    pDragon2->modelFileName = "assets/models/Dragon 2.5Edited_xyz_only.ply";
+    //    pDragon2->positionXYZ = glm::vec3(-20.0f, 0.0f, 0.0f);
+    //    pDragon2->rotationEulerXYZ.x = 90.0f;
+    //    pDragon2->objectColourRGBA = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
+    //    pDragon2->uniformScale = 0.2f;
+    //
+    //
+    //    ::g_myMeshes[1] = pDragon2;
+    //
+    //    ::g_NumberOfMeshesToDraw = 2;
+    //
+    //
+    //    sMesh* pTerrainMesh = new sMesh();
+    //    pTerrainMesh->modelFileName = "assets/models/Simple_MeshLab_terrain_xyz_only.ply";
+    //    pTerrainMesh->positionXYZ = glm::vec3(0.0f, -25.0f, 0.0f);
+    //    //pTerrainMesh->rotationEulerXYZ.x = 90.0f;
+    //    pTerrainMesh->objectColourRGBA = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+    //    pTerrainMesh->bOverrideObjectColour = true;
+    ////    pTerrainMesh->bIsWireframe = true;
+    //    ::g_myMeshes[::g_NumberOfMeshesToDraw] = pTerrainMesh;
+    //    ::g_NumberOfMeshesToDraw++;
+    //
+    //
+    //    for (int count = 0; count != 100; count++)
+    //    {
+    //        sMesh* pDragon = new sMesh();
+    //        pDragon->modelFileName = "assets/models/VintageRacingCar_xyz_only.ply";
+    //        pDragon->positionXYZ = glm::vec3(getRandomFloat(-5.0f, 5.0f),
+    //                                         getRandomFloat(-5.0f, 5.0f),
+    //                                         getRandomFloat(-5.0f, 5.0f));
+    //        pDragon->rotationEulerXYZ.x = 90.0f;
+    //        pDragon->objectColourRGBA
+    //            = glm::vec4(getRandomFloat(0.0f, 1.0f),
+    //                        getRandomFloat(0.0f, 1.0f),
+    //                        getRandomFloat(0.0f, 1.0f),
+    //                        1.0f);
+    //
+    //
+    //        pDragon->uniformScale = 0.2f;
+    //
+    //        // This is evil, nasty code. 
+    //        // Do this if you hate humanity...
+    ////        pDragon->bIsWireframe = rand() % 2;
+    //
+    //        ::g_myMeshes[::g_NumberOfMeshesToDraw] = pDragon;
+    //
+    //        ::g_NumberOfMeshesToDraw++;
+    //    }
+
+
+
+    return;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 //using namespace std;
 

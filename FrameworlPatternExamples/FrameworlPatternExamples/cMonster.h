@@ -8,6 +8,7 @@
 
 // No code in the header (unless it's a template)
 
+
 class cMonster
 {
 public:
@@ -18,6 +19,7 @@ public:
 	std::string name;		// First and last
 	float health = defaultHealth;
 	cVector3 location;
+	int age = -1;
 	void KillAllHumans(void);
 	void PrintStats(void);
 	unsigned int uniqueID;

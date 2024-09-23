@@ -19,6 +19,16 @@ public:
 	// NOTE: We are returning a pointer to the monster, not a stack copy
 	cMonster* CreateMonster(void);
 	cMonster* CreateMonster(int typeID);
+
+	// NEVER do this in C or C++
+	// See below
+//	cMonster& CreateMonster(void);
+
+	// 
+//	bool CreateMonster(cMonster& theMonster);
+//	bool CreateMonster(cMonster* &pMonster);
+//	// 0 is OK, anything else means an error
+//	int CreateMonster(cMonster& theMonster);
 	bool CreteMonster(int typeID, std::vector<cMonster> &vecMonsters);
 
 	// TODO:
@@ -42,8 +52,24 @@ private:
 	std::vector<std::string> m_vecGirlsNames;
 
 
-	std::vector< cMonster* > m_vec_pTheMonsters;
+//	std::vector< cMonster* > m_vec_pTheMonsters;
 
 
 };
 
+
+
+
+///// Comments
+//// NEVER do this in C or C++
+//cMonster& CreateMonster(void)
+//{
+//	cMonster Frank;
+//	return Frank;
+//}
+//
+//// Code
+//cMonster Sally = CreateMonster();		// Actually Frank
+////
+//// ... oh no
+//Sally.KillAllHumans();

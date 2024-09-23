@@ -1,9 +1,12 @@
 #include <iostream>
 #include <string>
 
-#include "cMonster.h"
-#include "cMonsterCreator.h"
+//#include "cMonster.h"
+//#include "cMonsterCreator.h"
+#include "cArena.h"
 #include <algorithm>
+#include <iterator>			// For the back inserter
+#include <sstream>		// string stream or string builder
 
 
 
@@ -19,10 +22,10 @@
 //	return result;
 //}
 
-template <class HelloKitty>
-HelloKitty addTwoThings(HelloKitty a, HelloKitty b)
+template <class T>
+T addTwoThings(T a, T b)
 {
-	HelloKitty result = a + b;
+	T result = a + b;
 	return result;
 }
 
@@ -34,7 +37,86 @@ HelloKitty addTwoThings(HelloKitty a, HelloKitty b)
 //        C has no strings, and a string is a char* 
 //        It's really a 2D array of char
 //         char** argv;
-int main( int argc, char* argv[] )
+//
+// Param 1: Number of monsters	 (argv[1])
+// Param 2: Width of arena		(argv[2])
+// Param 3: Depth of arena		(argv[3])
+int main(int argc, char* argv[])
+{
+	// Check the params
+	if (argc != 4)
+	{
+		std::cout << "Usage: Game.exe n x y " << std::endl;
+		std::cout << "(read the documentation" << std::endl;
+		return -1;
+	}
+	//"50"   "1000"  "2000"
+	// c: atoi()  atof()
+
+	unsigned int numberOfMonsters = atoi(argv[1]);
+	cVector3 arenaSize;
+	arenaSize.x = (float)atof(argv[2]);						// "C style"
+	arenaSize.y = static_cast<float>( atof(argv[3]) );		// "C++ style"
+	arenaSize.z = 0.0f;
+
+
+//	std::cout << argv[1];
+//	std::cin >> numberOfMonsters;
+	std::stringstream ssNumber;
+	ssNumber << argv[1];
+	ssNumber >> numberOfMonsters;
+
+
+	cArena* pTheArena = new cArena();
+
+	pTheArena->InitLevel( numberOfMonsters, arenaSize);
+
+	pTheArena->PrintMonsters();
+
+
+	delete pTheArena;
+
+
+	std::vector<cMonster> vecMonsters_A;
+	// Add some monsters
+	vecMonsters_A.push_back(cMonster());
+	vecMonsters_A.push_back(cMonster());
+	// .. and so on
+
+	std::vector<cMonster> vecMonsters_copy;
+
+//	vecMonsters_copy = vecMonsters_A;
+	//for (int index = 0; index != vecMonsters_A.size(); index++)
+	//{
+	//	vecMonsters_copy[index] = vecMonsters_A[index];
+	//}
+	for (int index = 0; index != vecMonsters_A.size(); index++)
+	{
+		vecMonsters_copy.push_back( vecMonsters_A[index] );
+	}
+
+	// This will only work if the "copy" vector
+	// ALREADY has enough space for the original
+//	std::copy(vecMonsters_A.begin(),
+//	          vecMonsters_A.end(),
+//	          vecMonsters_copy.begin());
+
+	// You need to use a "back inserter" for vector
+	// 
+	std::copy(vecMonsters_A.begin(),
+	          vecMonsters_A.end(),
+			  std::back_inserter(vecMonsters_copy));
+
+
+
+	return 0;
+}
+
+
+
+
+
+void OldCodeMain()
 {
 //	int x = 9;	int y = 17;
 //	int z = addTwoThings(x,y);
@@ -45,6 +127,7 @@ int main( int argc, char* argv[] )
 //		std::cout << index << " : " << argv[index] << std::endl;
 //	}
 
+
 	cMonsterCreator* pMC = new cMonsterCreator();
 
 	if (!pMC->LoadNames("USCen/US_LastNames.txt",
@@ -52,7 +135,7 @@ int main( int argc, char* argv[] )
 	                    "USCen/dist.female.first.txt"))
 	{
 		std::cout << "ERROR: Didn't load the census files." << std::endl;
-		return 1;
+//		return 1;
 	}
 
 	// Assume that the monster loader has loaded the files OK.
@@ -61,6 +144,11 @@ int main( int argc, char* argv[] )
 	// Returning by copying on the stack
 	cMonster* pMonster_01 = pMC->CreateMonster();
 	cMonster* pMonster_02 = pMC->CreateMonster();
+
+//	cMonster myMonster;
+//	pMC->CreateMonster(myMonster);
+//
+//	cMonster Ted = pMC->CreateMonster();
 
 	pMonster_01->PrintStats();
 	pMonster_02->PrintStats();
@@ -163,7 +251,18 @@ int main( int argc, char* argv[] )
 	//}
 
 	std::cout << "*************" << std::endl;
+	//	std::vector<int> myVec = { -1, 3, 6, 2, 4, 7, 2, 16, -9, 99 };
+
+	std::vector<int>::iterator myIterator = myVec.begin();
+	//myIterator++;
+	//myIterator++;
+	//myIterator += 4;
+	//myIterator--;
+	//myVec.erase(myIterator);
+
 	std::sort(myVec.begin(), myVec.end());
+
+
 
 	for (std::vector<int>::iterator itVec = myVec.begin();
 		 itVec != myVec.end();
@@ -190,7 +289,7 @@ int main( int argc, char* argv[] )
 		myVec.erase(it99);
 	}
 
-	return 0;
+//	return 0;
 }
 
 

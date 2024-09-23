@@ -127,12 +127,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="cArena.cpp" />
     <ClCompile Include="cMonster.cpp" />
     <ClCompile Include="cMonsterCreator.cpp" />
     <ClCompile Include="GameLoop.cpp" />
     <ClCompile Include="theMain.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="cArena.h" />
     <ClInclude Include="cMonster.h" />
     <ClInclude Include="cMonsterCreator.h" />
     <ClInclude Include="cVector3.h" />

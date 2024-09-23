@@ -171,7 +171,7 @@ cMonster* cMonsterCreator::CreateMonster(void)
 	// and keeping it around between calls if you like. 
 
 	// Boy or girl list
-	if (rand() % 2)		// Modulus
+	if (rand() % 2)		
 	{
 		size_t index = rand() % this->m_vecBoysNames.size();
 		pMonster->firstName = this->m_vecBoysNames[index];
@@ -187,8 +187,12 @@ cMonster* cMonsterCreator::CreateMonster(void)
 
 	pMonster->name = pMonster->firstName + " " + pMonster->lastName;
 
+
+	// Pick an age
+	pMonster->age = (rand() % 298) + 2;	// 2 to 300 in age
+
 	// Add the monster to the list of monsters
-	this->m_vec_pTheMonsters.push_back(pMonster);
+//	this->m_vec_pTheMonsters.push_back(pMonster);
 
 	return pMonster;
 }

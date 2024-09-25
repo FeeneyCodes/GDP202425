@@ -400,17 +400,20 @@ int main(void)
     //std::cout << terrainModel.numberOfVertices << " vertices loaded" << std::endl;
 
     sModelDrawInfo bunnyModel;
-    ::g_pMeshManager->LoadModelIntoVAO("assets/models/bun_zipper_res2_10x_size_xyz_only.ply",
+//    ::g_pMeshManager->LoadModelIntoVAO("assets/models/bun_zipper_res2_10x_size_xyz_only.ply",
+    ::g_pMeshManager->LoadModelIntoVAO("assets/models/bun_zipper_res2_10x_size_xyz_N_only.ply",
         bunnyModel, program);
     std::cout << bunnyModel.numberOfVertices << " vertices loaded" << std::endl;
 
     sModelDrawInfo platPlaneDrawInfo;
-    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Flat_Plane_xyz.ply", 
+//    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Flat_Plane_xyz.ply", 
+    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Flat_Plane_xyz_N.ply", 
         platPlaneDrawInfo, program);
     std::cout << platPlaneDrawInfo.numberOfVertices << " vertices loaded" << std::endl;
     
     sModelDrawInfo sphereMesh;
-    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Sphere_radius_1_xyz.ply",
+//    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Sphere_radius_1_xyz.ply",
+    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Sphere_radius_1_xyz_N.ply",
         sphereMesh, program);
     std::cout << sphereMesh.numberOfVertices << " vertices loaded" << std::endl;
 
@@ -559,6 +562,9 @@ int main(void)
             matModel *= matRotateZ;
             matModel *= matScale;
 
+ //           matRoationOnly = matModel * matRotateX * matRotateY * matRotateZ;
+
+ 
             //mat4x4_mul(mvp, p, m);
             //mvp = p * v * m;
 //            glm::mat4 matMVP = matProjection * matView * matModel;
@@ -691,7 +697,8 @@ void AddModelsToScene(void)
 
     {
         sMesh* pSphereMesh = new sMesh();
-        pSphereMesh->modelFileName = "assets/models/Sphere_radius_1_xyz.ply";
+//        pSphereMesh->modelFileName = "assets/models/Sphere_radius_1_xyz.ply";
+        pSphereMesh->modelFileName = "assets/models/Sphere_radius_1_xyz_N.ply";
         pSphereMesh->positionXYZ = glm::vec3(0.0f, 7.5f, 0.0f);
         pSphereMesh->bIsWireframe = true;
         pSphereMesh->objectColourRGBA = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
@@ -709,7 +716,8 @@ void AddModelsToScene(void)
         for (float z = -boxLimit; z <= boxLimit; z += boxStep)
         {
             sMesh* pBunny = new sMesh();
-            pBunny->modelFileName = "assets/models/bun_zipper_res2_10x_size_xyz_only.ply";
+//            pBunny->modelFileName = "assets/models/bun_zipper_res2_10x_size_xyz_only.ply";
+            pBunny->modelFileName = "assets/models/bun_zipper_res2_10x_size_xyz_N_only.ply";
             pBunny->positionXYZ = glm::vec3(x, -3.0f, z);
             pBunny->objectColourRGBA 
                 = glm::vec4(getRandomFloat(0.0f, 1.0f),
@@ -724,7 +732,8 @@ void AddModelsToScene(void)
 
     {
         sMesh* pFlatPlane = new sMesh();
-        pFlatPlane->modelFileName = "assets/models/Flat_Plane_xyz.ply";
+//        pFlatPlane->modelFileName = "assets/models/Flat_Plane_xyz.ply";
+        pFlatPlane->modelFileName = "assets/models/Flat_Plane_xyz_N.ply";
         pFlatPlane->positionXYZ = glm::vec3(0.0f, -5.0f, 0.0f);
         pFlatPlane->objectColourRGBA = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
         pFlatPlane->uniqueFriendlyName = "Ground";
@@ -747,7 +756,8 @@ void AddModelsToScene(void)
     }
     {
         sMesh* pFlatPlane = new sMesh();
-        pFlatPlane->modelFileName = "assets/models/Flat_Plane_xyz.ply";
+//        pFlatPlane->modelFileName = "assets/models/Flat_Plane_xyz.ply";
+        pFlatPlane->modelFileName = "assets/models/Flat_Plane_xyz_N.ply";
         pFlatPlane->positionXYZ = glm::vec3(0.0f, -5.0f, 0.0f);
         pFlatPlane->bIsWireframe = true;
         pFlatPlane->uniformScale = 1.01f;
@@ -761,7 +771,8 @@ void AddModelsToScene(void)
 
     {
         sMesh* pSphereMesh = new sMesh();
-        pSphereMesh->modelFileName = "assets/models/Sphere_radius_1_xyz.ply";
+//        pSphereMesh->modelFileName = "assets/models/Sphere_radius_1_xyz.ply";
+        pSphereMesh->modelFileName = "assets/models/Sphere_radius_1_xyz_N.ply";
         pSphereMesh->positionXYZ = glm::vec3(0.0f, 10.0f, 0.0f);
         //pSphereMesh->bIsWireframe = true;
         pSphereMesh->objectColourRGBA = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);

@@ -2,6 +2,7 @@
 // (Pixel) Fragment fragment
 in vec3 fColour;			// Actual 3D model colour (from vertex buffer)
 in vec4 fvertexWorldLocation;
+in vec4 fvertexNormal;
 
 uniform vec4 objectColour;			// Override colour 
 uniform bool bUseObjectColour;
@@ -50,12 +51,12 @@ void main()
 	
 //	finalPixelColour = vec4(finalColour, 1.0);
 
-	vec3 fNormal = vec3(0.0f, 1.0f, 0.0f);
+//	vec3 fvertexNormal = vec3(0.0f, 1.0f, 0.0f);
 	vec4 vertexSpecular = vec4(1.0f, 1.0f, 1.0f, 1.0f);	
 
 
 	vec4 pixelColour = calculateLightContrib( vertexColour.rgb, 
-	                                          fNormal.xyz, 
+	                                          fvertexNormal.xyz, 
 	                                          fvertexWorldLocation.xyz, 
 											  vertexSpecular );
 

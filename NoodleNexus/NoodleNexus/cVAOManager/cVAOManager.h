@@ -12,12 +12,18 @@
 // The vertex structure 
 //	that's ON THE GPU (eventually) 
 // So dictated from THE SHADER
-struct sVertex_SHADER_FORMAT_xyz_rgb
-{
-	float x, y, z;		
-	float r, g, b;
-};
+//struct sVertex_SHADER_FORMAT_xyz_rgb
+//{
+//	float x, y, z;		// in vec3 vPos;
+//	float r, g, b;		// in vec3 vCol;
+//};
 
+struct sVertex_SHADER_FORMAT_xyz_rgb_N
+{
+	float x, y, z;		// in vec3 vPos;
+	float r, g, b;		// in vec3 vCol;
+	float nx, ny, nz;	// in vec3 vNormal;
+};
 
 struct sModelDrawInfo
 {
@@ -37,7 +43,8 @@ struct sModelDrawInfo
 	unsigned int numberOfTriangles;
 
 	// The "local" (i.e. "CPU side" temporary array)
-	sVertex_SHADER_FORMAT_xyz_rgb* pVertices;	//  = 0;
+//	sVertex_SHADER_FORMAT_xyz_rgb* pVertices;	//  = 0;
+	sVertex_SHADER_FORMAT_xyz_rgb_N* pVertices;	//  = 0;
 	// The index buffer (CPU side)
 	unsigned int* pIndices;
 	// 

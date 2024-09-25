@@ -6,7 +6,10 @@
 #include <iostream>
 
 #include "sharedThings.h"   // The camera, etc.
+#include "sMesh.h"
 
+// Defined in theMain.cpp
+sMesh* pFindMeshByFriendlyName(std::string theNameToFind);
 
 struct sMouseState
 {
@@ -91,6 +94,44 @@ void handleKeyboardAsync(GLFWwindow* window)
     if ( isShiftDown(window) )
     {
         // Keys move the target
+    }
+
+    if (isControlDown(window) )
+    {
+        // Find the Light_Sphere
+        sMesh* pLightSphere = pFindMeshByFriendlyName("Light_Sphere");
+
+        const float LIGHT_MOVE_SPEED = 0.01f;
+
+        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        {
+            pLightSphere->positionXYZ.z += LIGHT_MOVE_SPEED;
+        }
+
+        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        {
+            pLightSphere->positionXYZ.z -= LIGHT_MOVE_SPEED;
+        }
+
+        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        {
+            pLightSphere->positionXYZ.x -= LIGHT_MOVE_SPEED;
+        }
+        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        {
+            pLightSphere->positionXYZ.x += LIGHT_MOVE_SPEED;
+        }
+        if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+        {
+            pLightSphere->positionXYZ.y += LIGHT_MOVE_SPEED;
+        }
+        if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+        {
+            pLightSphere->positionXYZ.y -= LIGHT_MOVE_SPEED;
+        }
+
+        // HACK:Exit early
+        return;
     }
 
     if (areAllModifiersUp(window))

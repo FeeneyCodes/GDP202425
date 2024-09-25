@@ -39,6 +39,8 @@
 
 #include "cPhysics.h"
 
+#include "cLightManager.h"
+
 //
 //const unsigned int MAX_NUMBER_OF_MESHES = 1000;
 //unsigned int g_NumberOfMeshesToDraw;
@@ -49,6 +51,8 @@ std::vector<sMesh*> g_vecMeshesToDraw;
 cPhysics* g_pPhysicEngine = NULL;
 // This loads the 3D models for drawing, etc.
 cVAOManager* g_pMeshManager = NULL;
+
+cLightManager* g_pLightManager = NULL;
 
 void AddModelsToScene(void);
 
@@ -433,7 +437,19 @@ int main(void)
     double lastFrameTime = glfwGetTime();
 
 
+    // Set up the lights
+    ::g_pLightManager = new cLightManager();
+    // Called only once
+    ::g_pLightManager->loadUniformLocations(program);
 
+    // Set up one of the lights in the scene
+    ::g_pLightManager->theLights[0].position = glm::vec4(0.0f, 15.0f, 0.0f, 1.0f);
+    ::g_pLightManager->theLights[0].diffuse = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+    ::g_pLightManager->theLights[0].atten.y = 0.1f;
+    ::g_pLightManager->theLights[0].atten.z = 0.01f;
+
+    ::g_pLightManager->theLights[0].param1.x = 0.0f;    // Point light (see shader)
+    ::g_pLightManager->theLights[0].param2.x = 1.0f;    // Turn on (see shader)
 
 
     while (!glfwWindowShouldClose(window))
@@ -474,6 +490,16 @@ int main(void)
         const GLint matProjection_UL = glGetUniformLocation(program, "matProjection");
         glUniformMatrix4fv(matProjection_UL, 1, GL_FALSE, (const GLfloat*)&matProjection);
 
+
+        // Place light #0 where the little yellow "light sphere" is
+        // Find the Light_Sphere
+        sMesh* pLightSphere = pFindMeshByFriendlyName("Light_Sphere");
+        // 
+        ::g_pLightManager->theLights[0].position = glm::vec4(pLightSphere->positionXYZ, 1.0f);
+
+        // Update the light info in the shader
+        // (Called every frame)
+        ::g_pLightManager->updateShaderWithLightInfo();
 
 
         // Draw all the objects
@@ -662,6 +688,18 @@ void AddModelsToScene(void)
 {
 
     // Load some models to draw
+
+    {
+        sMesh* pSphereMesh = new sMesh();
+        pSphereMesh->modelFileName = "assets/models/Sphere_radius_1_xyz.ply";
+        pSphereMesh->positionXYZ = glm::vec3(0.0f, 7.5f, 0.0f);
+        pSphereMesh->bIsWireframe = true;
+        pSphereMesh->objectColourRGBA = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
+        pSphereMesh->uniformScale = 0.1f;
+        pSphereMesh->uniqueFriendlyName = "Light_Sphere";
+
+        ::g_vecMeshesToDraw.push_back(pSphereMesh);
+    }
 
     // Add a bunch of bunny rabbits
     float boxLimit = 50.0f;

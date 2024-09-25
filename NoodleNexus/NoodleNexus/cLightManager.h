@@ -30,7 +30,7 @@ public:
     cLightManager();
 
     void loadUniformLocations(GLuint shaderProgram);
-    void updateShaderWithLightInfo(GLuint shaderProgram);
+    void updateShaderWithLightInfo(void);
 
     // Mirror of what's inside the shader
     struct sLight
@@ -46,6 +46,15 @@ public:
         // 2 = directional light
         glm::vec4 param2;	// x = 0 for off, 1 for on
         // yzw are TBD
+
+        // The uniform locations of >this< light
+        GLuint position_UL = -1;
+        GLuint diffuse_UL = -1;
+        GLuint specular_UL = -1;
+        GLuint atten_UL = -1;
+        GLuint direction_UL = -1;
+        GLuint param1_UL = -1;
+        GLuint param2_UL = -1;
     };
 
     static const int NUMBEROFLIGHTS = 10;

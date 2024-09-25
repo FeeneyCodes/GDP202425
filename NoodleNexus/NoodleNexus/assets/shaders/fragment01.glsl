@@ -13,6 +13,8 @@ const int POINT_LIGHT_TYPE = 0;
 const int SPOT_LIGHT_TYPE = 1;
 const int DIRECTIONAL_LIGHT_TYPE = 2;
 
+
+
 struct sLight
 {
 	vec4 position;			
@@ -30,7 +32,8 @@ struct sLight
 
 const int NUMBEROFLIGHTS = 10;
 uniform sLight theLights[NUMBEROFLIGHTS]; 
-
+// uniform vec4 thelights[0].position;
+// uniform vec4 thelights[1].position;
 
 // Inspired by Mike Bailey's Graphic Shader, chapter 6
 // (you should read it. Yes, you)

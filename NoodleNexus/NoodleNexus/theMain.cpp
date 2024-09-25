@@ -433,6 +433,9 @@ int main(void)
     double lastFrameTime = glfwGetTime();
 
 
+
+
+
     while (!glfwWindowShouldClose(window))
     {
         float ratio;
@@ -465,8 +468,16 @@ int main(void)
         //                               upVector);
 
 
-                // Draw all the objects
-                //for (unsigned int meshIndex = 0; meshIndex != ::g_NumberOfMeshesToDraw; meshIndex++)
+        const GLint matView_UL = glGetUniformLocation(program, "matView");
+        glUniformMatrix4fv(matView_UL, 1, GL_FALSE, (const GLfloat*)&matView);
+
+        const GLint matProjection_UL = glGetUniformLocation(program, "matProjection");
+        glUniformMatrix4fv(matProjection_UL, 1, GL_FALSE, (const GLfloat*)&matProjection);
+
+
+
+        // Draw all the objects
+        //for (unsigned int meshIndex = 0; meshIndex != ::g_NumberOfMeshesToDraw; meshIndex++)
         for (unsigned int meshIndex = 0; meshIndex != ::g_vecMeshesToDraw.size(); meshIndex++)
         {
             //            sMesh* pCurMesh = ::g_myMeshes[meshIndex];
@@ -524,13 +535,22 @@ int main(void)
 
             //mat4x4_mul(mvp, p, m);
             //mvp = p * v * m;
-            glm::mat4 matMVP = matProjection * matView * matModel;
+//            glm::mat4 matMVP = matProjection * matView * matModel;
 
-            const GLint mvp_location = glGetUniformLocation(program, "MVP");
-            glUniformMatrix4fv(mvp_location,
-                1,
-                GL_FALSE,
-                (const GLfloat*)&matMVP);
+            //const GLint mvp_location = glGetUniformLocation(program, "MVP");
+            //glUniformMatrix4fv(mvp_location, 
+            //    1,
+            //    GL_FALSE,
+            //    (const GLfloat*)&matMVP);
+
+            const GLint mvp_location = glGetUniformLocation(program, "matModel");
+            glUniformMatrix4fv(mvp_location, 1, GL_FALSE, (const GLfloat*)&matModel);
+
+            //const GLint mvp_location = glGetUniformLocation(program, "matView");
+            //glUniformMatrix4fv(mvp_location, 1, GL_FALSE, (const GLfloat*)&matMVP);
+
+            //const GLint mvp_location = glGetUniformLocation(program, "matProjection");
+            //glUniformMatrix4fv(mvp_location, 1, GL_FALSE, (const GLfloat*)&matMVP);
 
             // uniform bool bUseObjectColour;
             GLint bUseObjectColour = glGetUniformLocation(program, "bUseObjectColour");

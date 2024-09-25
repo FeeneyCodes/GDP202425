@@ -27,6 +27,9 @@
     <Filter Include="Phsyics_Stuff">
       <UniqueIdentifier>{b50e5ed1-0d30-423d-8675-9d288d42b19b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="LIghts">
+      <UniqueIdentifier>{0479b598-aa46-49da-ac91-afc112109a35}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="theMain.cpp">
@@ -59,6 +62,9 @@
     <ClCompile Include="cPhysics.cpp">
       <Filter>Phsyics_Stuff</Filter>
     </ClCompile>
+    <ClCompile Include="cLightManager.cpp">
+      <Filter>LIghts</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PlyFileLoaders.h">
@@ -84,6 +90,9 @@
     </ClInclude>
     <ClInclude Include="cPhysics.h">
       <Filter>Phsyics_Stuff</Filter>
+    </ClInclude>
+    <ClInclude Include="cLightManager.h">
+      <Filter>LIghts</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

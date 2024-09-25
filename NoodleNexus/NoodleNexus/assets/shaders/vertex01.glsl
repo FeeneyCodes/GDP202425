@@ -1,17 +1,26 @@
 #version 330
 // Vertex shader
-uniform mat4 MVP;
-
 in vec3 vCol;
 in vec3 vPos;
 
-out vec3 color;
+out vec3 fColour;
+out vec4 fvertexWorldLocation;
+
+//uniform mat4 MVP;
+uniform mat4 matView;
+uniform mat4 matProjection;
+uniform mat4 matModel;
 
 void main()
 {
 	vec3 finalVert = vPos;	
 	
-	gl_Position = MVP * vec4(finalVert, 1.0);
+	// Screen space location of vertex
+	mat4 matMVP = matProjection * matView * matModel;
+	gl_Position = matMVP * vec4(finalVert, 1.0);
 	
-	color = vCol;
+	// Calculate location of the vertex in the "world"
+	fvertexWorldLocation = matModel * vec4(finalVert, 1.0);
+	
+	fColour = vCol;
 }

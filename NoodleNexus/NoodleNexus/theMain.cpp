@@ -395,6 +395,11 @@ int main(void)
     //    terrainModel, program);
     //std::cout << terrainModel.numberOfVertices << " vertices loaded" << std::endl;
 
+    sModelDrawInfo bunnyModel;
+    ::g_pMeshManager->LoadModelIntoVAO("assets/models/bun_zipper_res2_10x_size_xyz_only.ply",
+        bunnyModel, program);
+    std::cout << bunnyModel.numberOfVertices << " vertices loaded" << std::endl;
+
     sModelDrawInfo platPlaneDrawInfo;
     ::g_pMeshManager->LoadModelIntoVAO("assets/models/Flat_Plane_xyz.ply", 
         platPlaneDrawInfo, program);
@@ -638,6 +643,27 @@ void AddModelsToScene(void)
 
     // Load some models to draw
 
+    // Add a bunch of bunny rabbits
+    float boxLimit = 50.0f;
+    float boxStep = 5.0f;
+    for (float x = -boxLimit; x <= boxLimit; x += boxStep)
+    {
+        for (float z = -boxLimit; z <= boxLimit; z += boxStep)
+        {
+            sMesh* pBunny = new sMesh();
+            pBunny->modelFileName = "assets/models/bun_zipper_res2_10x_size_xyz_only.ply";
+            pBunny->positionXYZ = glm::vec3(x, -3.0f, z);
+            pBunny->objectColourRGBA 
+                = glm::vec4(getRandomFloat(0.0f, 1.0f),
+                            getRandomFloat(0.0f, 1.0f),
+                            getRandomFloat(0.0f, 1.0f), 
+                            1.0f );
+            pBunny->uniqueFriendlyName = "Ground";
+            ::g_vecMeshesToDraw.push_back(pBunny);
+        }
+    }//for (float x = -boxLimit...
+
+
     {
         sMesh* pFlatPlane = new sMesh();
         pFlatPlane->modelFileName = "assets/models/Flat_Plane_xyz.ply";
@@ -671,7 +697,7 @@ void AddModelsToScene(void)
 
         //::g_myMeshes[::g_NumberOfMeshesToDraw] = pFlatPlane;
         //::g_NumberOfMeshesToDraw++;
-        ::g_vecMeshesToDraw.push_back(pFlatPlane);
+        //::g_vecMeshesToDraw.push_back(pFlatPlane);
     }
 
 
@@ -679,7 +705,7 @@ void AddModelsToScene(void)
         sMesh* pSphereMesh = new sMesh();
         pSphereMesh->modelFileName = "assets/models/Sphere_radius_1_xyz.ply";
         pSphereMesh->positionXYZ = glm::vec3(0.0f, 10.0f, 0.0f);
-        pSphereMesh->bIsWireframe = true;
+        //pSphereMesh->bIsWireframe = true;
         pSphereMesh->objectColourRGBA = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
         pSphereMesh->uniqueFriendlyName = "Ball";
 
@@ -694,7 +720,7 @@ void AddModelsToScene(void)
         // We could also have pulled that information from the mesh info
         pSphereInfo->radius = 1.0f;
 
-        pSphereInfo->physicInfo.velocity.y = -0.5f;
+//        pSphereInfo->physicInfo.velocity.y = -0.5f;
         
         // Associate this drawing mesh to this physics object
         pSphereInfo->physicInfo.pAssociatedDrawingMeshInstance = pSphereMesh;

@@ -1,11 +1,11 @@
 #version 330
-// Pixel fragment
+// (Pixel) Fragment fragment
 in vec3 color;
 
 uniform vec4 objectColour;
 uniform bool bUseObjectColour;
 
-out vec4 fragment;
+out vec4 finalPixelColour;
 
 void main()
 {
@@ -15,5 +15,5 @@ void main()
 		finalColour = objectColour.rgb;
 	}
 	
-	fragment = vec4(finalColour, 1.0);
+	finalPixelColour = vec4(finalColour, 1.0);
 }

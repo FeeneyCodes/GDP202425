@@ -13,6 +13,7 @@ public:
 
 	// Pass the 3 US census file names
 	bool LoadNames(std::string lastnameFile, std::string boys, std::string girls);
+	bool LoadNamesDefault(void);
 
 	// This will make a monster
 	// Health 100. It'll pick a ransom first and last name

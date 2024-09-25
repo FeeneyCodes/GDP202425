@@ -12,6 +12,19 @@ cMonsterCreator::~cMonsterCreator()
 {
 }
 
+bool cMonsterCreator::LoadNamesDefault(void)
+{
+	return this->LoadNames("USCen/US_LastNames.txt",
+		"USCen/dist.male.first.txt",
+		"USCen/dist.female.first.txt");
+}
+
+
+//if (!pMC->LoadNames("USCen/US_LastNames.txt",
+//	"USCen/dist.male.first.txt",
+//	"USCen/dist.female.first.txt"))
+
+
 
 bool cMonsterCreator::LoadNames(
 	std::string lastnameFileName,

@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <iterator>			// For the back inserter
 #include <sstream>		// string stream or string builder
+#include <map>
 
 
 
@@ -77,11 +78,98 @@ int main(int argc, char* argv[])
 	delete pTheArena;
 
 
+
+
+	// We'd like to store out monsters by full name
+	// pMonster->name = pMonster->firstName + " " + pMonster->lastName;
+
+	cMonsterCreator* MC = new cMonsterCreator();
+	MC->LoadNamesDefault();
+
+	//std::map< unsigned int, cMonster* > mapLikeAVector;
+	//for (unsigned int index = 0; index != 10; index++)
+	//{
+	//	mapLikeAVector[index] = MC->CreateMonster();
+	//}
+	//mapLikeAVector[3]->
+
+	std::map<std::string, cMonster*> map_pMonstersByName;
+
+	cMonster* pM1 = MC->CreateMonster();
+	map_pMonstersByName[pM1->name] = pM1;
+
+	for (unsigned int index = 0; index != 10; index++)
+	{
+		cMonster* pNewMonster = MC->CreateMonster();
+		map_pMonstersByName[pNewMonster->name] = pNewMonster;
+	}
+
+	// Get this monster 
+	cMonster* pLB = map_pMonstersByName["LORENA BANGS"];
+//	cMonster* pLB = map_pMonstersByName["MICHAEL FEENEY"];
+	std::cout << pLB->age << std::endl;
+
+
+//	cMonster* pLB = map_pMonstersByName["MICHAEL FEENEY"];
+	std::map<std::string, cMonster*>::iterator itMF
+		= map_pMonstersByName.find("MICHAEL FEENEY");
+	// found it? 
+	if (itMF != map_pMonstersByName.end())
+	{
+		// DID find it
+		cMonster* pMF = itMF->second;
+		std::cout << pMF->name << std::endl;
+	}
+	itMF++;
+//	itMF += 5;	// Not OK
+	std::advance(itMF, 4);
+
+	for (std::map<std::string, cMonster*>::iterator itMon = map_pMonstersByName.begin();
+		itMon != map_pMonstersByName.end();
+		itMon++)
+	{
+		cMonster* pMF = itMF->second;
+		std::cout << pMF->name << std::endl;
+	}
+
+
+	// Log() search speed    O(log) or O(ln)
+	// CPU bound (memory access was zero)
+	// memory bound (CPU is nothing)
+	// 
+	// Each doubling is one more search
+	// 2 -> 1 
+	// 4 -> 2
+	// 8 -> 3
+	// 16 -> 4
+	// 32 -> 5
+	// 64 -> 6
+	// 128 -> 7		as opposed to 128
+	// 256 -> 8     
+	// 4 billion --> 32 searches   (125 million times faster)
+
+
+	std::map<unsigned int /*SN*/, cMonster*> map_pMonstersBySN;
+
+//	map_pMonstersBySN[173883] = MC->CreateMonster();
+
+
+
+
+
+
+
+
+
+
+
 	std::vector<cMonster> vecMonsters_A;
 	// Add some monsters
 	vecMonsters_A.push_back(cMonster());
 	vecMonsters_A.push_back(cMonster());
 	// .. and so on
+
+
 
 	std::vector<cMonster> vecMonsters_copy;
 

@@ -23,6 +23,7 @@ public:
 	void KillAllHumans(void);
 	void PrintStats(void);
 	unsigned int uniqueID;
+	unsigned int FAN_SN;		// 7 digits
 
 	void AttackThisMonster(cMonster* pTarget);
 	void AttackThisMonster(unsigned int uniqueID);

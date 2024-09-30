@@ -128,10 +128,20 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="cMonster.h" />
+    <ClInclude Include="cSuperMonster.h" />
+    <ClInclude Include="cSuperMonster_COPY.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="cVector3.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cMonster.cpp" />
+    <ClCompile Include="cSuperMonster.cpp" />
+    <ClCompile Include="cSuperMonster._COPYcpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="theMain.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

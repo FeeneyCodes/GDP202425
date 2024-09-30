@@ -16,6 +16,9 @@
     <Filter Include="Monsters">
       <UniqueIdentifier>{ceb83f12-4533-4c8e-951b-646b35689250}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Monsters\A copy">
+      <UniqueIdentifier>{02a9d646-d6c5-4aab-81b1-bf4b80b60fe6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cVector3.h">
@@ -24,6 +27,12 @@
     <ClInclude Include="cMonster.h">
       <Filter>Monsters</Filter>
     </ClInclude>
+    <ClInclude Include="cSuperMonster.h">
+      <Filter>Monsters</Filter>
+    </ClInclude>
+    <ClInclude Include="cSuperMonster_COPY.h">
+      <Filter>Monsters\A copy</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cMonster.cpp">
@@ -31,6 +40,12 @@
     </ClCompile>
     <ClCompile Include="theMain.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cSuperMonster._COPYcpp">
+      <Filter>Monsters\A copy</Filter>
+    </ClCompile>
+    <ClCompile Include="cSuperMonster.cpp">
+      <Filter>Monsters</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

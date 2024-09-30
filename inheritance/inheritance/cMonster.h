@@ -21,5 +21,17 @@ public:
 
 	void KillAllHumans(void);
 
-private:
+	// Read only getter (accessor)
+	std::string getEyeColour(void);
+
+	void MakeNoise(void);
+
+protected:
+	// Just like private, but anything 
+	//	that inherits form this has this, too
+	// Acts like it's still private
+	std::string eyeColour;
+
+private:	
+	std::string secretCrush;
 };

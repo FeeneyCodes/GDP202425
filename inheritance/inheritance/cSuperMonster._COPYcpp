@@ -5,7 +5,8 @@
 cSuperMonster::cSuperMonster()		// Default constructor
 {
 	std::cout << "cSuperMonster::cSuperMonster()" << std::endl;
-	this->eyeColour = "grey";
+
+
 }
 
 cSuperMonster::cSuperMonster(std::string _name)
@@ -21,7 +22,16 @@ cSuperMonster::~cSuperMonster()
 
 }
 
-// GiveBirth@cSuperMonster@@QEAAXH@Z
+
+void cSuperMonster::KillAllHumans(void)
+{
+	std::cout << "cSuperMonster::KillAllHumans(void)" << std::endl;
+	// And other stuff too...
+
+
+	return;
+}
+
 void cSuperMonster::GiveBirth(int numberOfMonsters)
 {
 	std::cout << "Super Monster had " << numberOfMonsters << " children" << std::endl;
@@ -29,9 +39,3 @@ void cSuperMonster::GiveBirth(int numberOfMonsters)
 	return;
 }
 
-
-void cSuperMonster::MakeNoise(void)
-{
-	std::cout << "cSuperMonster says bark!" << std::endl;
-	return;
-}

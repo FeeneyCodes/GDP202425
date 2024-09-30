@@ -8,6 +8,7 @@
 #include <iterator>			// For the back inserter
 #include <sstream>		// string stream or string builder
 #include <map>
+#include <list>
 
 
 
@@ -30,6 +31,36 @@ T addTwoThings(T a, T b)
 	return result;
 }
 
+
+// HOW you overload an operator
+// NOTE: You almost NEVER really want to do this!!
+//bool operator<(cMonster& A, cMonster& B)
+//{
+//	if (A.age < B.age)
+//	{
+//		return true;
+//	}
+//	return false;
+//}
+
+bool compareByAgeLessThan(cMonster& A, cMonster& B)
+{
+	if (A.age < B.age)
+	{
+		return true;
+	}
+	return false;
+}
+
+//cMonster& operator<<(cMonster& A)
+////{
+////	if (A.age < B.age)
+////	{
+////		return true;
+////	}
+////	return false;
+////}
+//cout << myMonster
 
 // argc : How many parameters were passed. 
 //        (at leat 1 always)
@@ -76,6 +107,45 @@ int main(int argc, char* argv[])
 
 
 	delete pTheArena;
+
+
+	// LIST
+	std::list<int> myListInts;
+	myListInts.insert(myListInts.end(), 54);
+	myListInts.insert(myListInts.end(), 77);
+	myListInts.insert(myListInts.end(), 135);
+	myListInts.insert(myListInts.end(), 5);
+
+
+	// Will return an iterator either:
+	// - pointing to the thing it found
+	// - pointing to the .end() location
+	std::list<int>::iterator it135 = std::find(myListInts.begin(), myListInts.end(), 135);
+
+	it135++;
+	it135--;
+	std::advance(it135, 4);
+//	it135 += 4;
+
+	if (it135 != myListInts.end())
+	{
+		// found it!
+		myListInts.insert(it135, 99);
+	}
+	if (it135 == myListInts.end())
+	{
+		// DIDN'T find it
+		std::cout << "Didn't find the number" << std::endl;
+	}
+
+
+	for (std::list<int>::iterator it = myListInts.begin();
+		it != myListInts.end();
+		it++)
+	{
+		std::cout << *it << std::endl;
+	}
+
 
 
 
@@ -169,6 +239,13 @@ int main(int argc, char* argv[])
 	vecMonsters_A.push_back(cMonster());
 	// .. and so on
 
+//	std::sort(vecMonsters_A.begin(), vecMonsters_A.end());
+	std::sort(vecMonsters_A.begin(), vecMonsters_A.end(), compareByAgeLessThan);
+
+
+	//cMonster bob;
+	//cMonster sally;
+	//if ( bob < sally )
 
 
 	std::vector<cMonster> vecMonsters_copy;

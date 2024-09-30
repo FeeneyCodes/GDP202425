@@ -28,6 +28,10 @@ public:
 	void AttackThisMonster(cMonster* pTarget);
 	void AttackThisMonster(unsigned int uniqueID);
 
+//	bool operator<(const cMonster& A, const cMonster& B);
+//	operator+();
+
+
 };
 
 

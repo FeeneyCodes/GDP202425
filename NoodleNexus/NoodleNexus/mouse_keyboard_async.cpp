@@ -129,6 +129,28 @@ void handleKeyboardAsync(GLFWwindow* window)
         {
             pLightSphere->positionXYZ.y -= LIGHT_MOVE_SPEED;
         }
+        //// Linear atten 1 & 2
+        //if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
+        //{
+        //    // Increase linear (making it darker)
+        //    ::g_theLights[0]->atten.y *= 0.99f;     // Down 1%
+        //}
+        //if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
+        //{
+        //    // Increase linear (making it darker)
+        //    ::g_theLights[0]->atten.y *= 1.01f;     // Up 1%
+        //}
+        //// Quadratic atten 3 & 4
+        //if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
+        //{
+        //    // Quadratic linear (making it darker)
+        //    ::g_theLights[0]->atten.z *= 0.999f;     // Down 0.1%
+        //}
+        //if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
+        //{
+        //    // Quadratic linear (making it darker)
+        //    ::g_theLights[0]->atten.z *= 1.001f;     // Up 0.1%
+        //}
 
         // HACK:Exit early
         return;

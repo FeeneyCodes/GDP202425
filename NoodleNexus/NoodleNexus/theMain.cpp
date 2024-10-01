@@ -665,8 +665,35 @@ int main(void)
         pBallShadow->positionXYZ.z = pBall->positionXYZ.z;
         // Don't update the y - keep the shadow near the plane
 
+
+
+
         // Physic update and test 
         ::g_pPhysicEngine->StepTick(deltaTime);
+
+
+        // Handle any collisions
+        if (::g_pPhysicEngine->vec_SphereAABB_Collisions.size() > 0 )
+        {
+            // Yes, there were collisions
+
+            for (unsigned int index = 0; index != ::g_pPhysicEngine->vec_SphereAABB_Collisions.size(); index++)
+            {
+                cPhysics::sCollision_SphereAABB thisCollisionEvent = ::g_pPhysicEngine->vec_SphereAABB_Collisions[index];
+
+                if (thisCollisionEvent.pTheSphere->pPhysicInfo->velocity.y  < 0.0f)
+                {
+                    // Yes, it's heading down
+                    // So reverse the direction of velocity
+                    thisCollisionEvent.pTheSphere->pPhysicInfo->velocity.y = fabs(thisCollisionEvent.pTheSphere->pPhysicInfo->velocity.y);
+                }
+
+            }//for (unsigned int index
+ 
+        }//if (::g_pPhysicEngine->vec_SphereAABB_Collisions
+
+
+
 
         // Handle async IO stuff
         handleKeyboardAsync(window);

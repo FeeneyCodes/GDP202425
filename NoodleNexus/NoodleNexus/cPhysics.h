@@ -103,6 +103,16 @@ public:
 	// Called every time we want a collision detection step
 	void StepTick(double deltaTime);
 
+
+//	bool DoesRayCollide(glm::vec3 rayStart, glm::vec3 rayEnd);
+//	bool DoesRayCollide(glm::vec3 rayStart, glm::vec3 rayEnd, vec_pMeshesIHit);
+	// Store the "vec_pMeshesIHit" like the collision events
+	void DoesRayCollide(glm::vec3 rayStart, glm::vec3 rayEnd);
+	// If there's a intersection, it will be added to 
+	// std::vector<sMeshCollionEven> vec_pMeshesRayHit;
+
+
+
 	// Check to see if they collided. 
 	// We likely need other information, like where, when, etc.
 	bool bSphereAABBCollision(sSphere* pSphere, sAABB* pAABB);

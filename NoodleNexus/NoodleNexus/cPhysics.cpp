@@ -128,14 +128,14 @@ void cPhysics::m_CheckForCollisions(double deltaTime)
 				// They collided! 
 				// Oh no... what are we supposed to do now?? 
 
-				// HACK: change direction of sphere
-				// Check if the sphere is going "down" -ve in the y
-				if (pCurrentSphere->pPhysicInfo->velocity.y < 0.0f)
-				{
-					// Yes, it's heading down
-					// So reverse the direction of velocity
-					pCurrentSphere->pPhysicInfo->velocity.y = fabs(pCurrentSphere->pPhysicInfo->velocity.y);
-				}
+//				// HACK: change direction of sphere
+//				// Check if the sphere is going "down" -ve in the y
+//				if (pCurrentSphere->pPhysicInfo->velocity.y < 0.0f)
+//				{
+//					// Yes, it's heading down
+//					// So reverse the direction of velocity
+//					pCurrentSphere->pPhysicInfo->velocity.y = fabs(pCurrentSphere->pPhysicInfo->velocity.y);
+//				}
 
 				// HACK:
 //				std::cout << "A sphere and AABB collided! Huzzah!" << std::endl;

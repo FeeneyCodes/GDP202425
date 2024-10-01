@@ -394,10 +394,11 @@ int main(void)
     //    dragonModel, program);
     //std::cout << dragonModel.numberOfVertices << " vertices loaded" << std::endl;
 
-    //sModelDrawInfo terrainModel;
-    //pMeshManager->LoadModelIntoVAO("assets/models/Simple_MeshLab_terrain_xyz_only.ply", 
-    //    terrainModel, program);
-    //std::cout << terrainModel.numberOfVertices << " vertices loaded" << std::endl;
+    sModelDrawInfo terrainModel;
+//    pMeshManager->LoadModelIntoVAO("assets/models/Simple_MeshLab_terrain_xyz_only.ply", 
+    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Simple_MeshLab_terrain_xyz_N.ply",
+        terrainModel, program);
+    std::cout << terrainModel.numberOfVertices << " vertices loaded" << std::endl;
 
     sModelDrawInfo bunnyModel;
 //    ::g_pMeshManager->LoadModelIntoVAO("assets/models/bun_zipper_res2_10x_size_xyz_only.ply",
@@ -417,7 +418,12 @@ int main(void)
         sphereMesh, program);
     std::cout << sphereMesh.numberOfVertices << " vertices loaded" << std::endl;
 
-//    pMeshManager->LoadTheListOfModelsIWantFromASexyFile("MyModels.sexy");
+    sModelDrawInfo sphereShadowMesh;
+    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Sphere_radius_1_Flat_Shadow_xyz_N.ply",
+        sphereShadowMesh, program);
+    std::cout << sphereShadowMesh.numberOfVertices << " vertices loaded" << std::endl;
+
+    //    pMeshManager->LoadTheListOfModelsIWantFromASexyFile("MyModels.sexy");
 
 
     ::g_pPhysicEngine = new cPhysics();
@@ -426,7 +432,9 @@ int main(void)
 
    
     ::g_pFlyCamera = new cBasicFlyCamera();
-    ::g_pFlyCamera->setEyeLocation(glm::vec3(0.0f, 0.0f, -20.0f));
+    ::g_pFlyCamera->setEyeLocation(glm::vec3(0.0f, 10.0f, 50.0f));
+    // Rotate the camera 180 degrees
+    ::g_pFlyCamera->rotateLeftRight_Yaw_NoScaling(glm::radians(180.0f));
 
 
 
@@ -448,8 +456,8 @@ int main(void)
     // Set up one of the lights in the scene
     ::g_pLightManager->theLights[0].position = glm::vec4(0.0f, 15.0f, 0.0f, 1.0f);
     ::g_pLightManager->theLights[0].diffuse = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-    ::g_pLightManager->theLights[0].atten.y = 0.1f;
-    ::g_pLightManager->theLights[0].atten.z = 0.01f;
+    ::g_pLightManager->theLights[0].atten.y = 0.01f;
+    ::g_pLightManager->theLights[0].atten.z = 0.001f;
 
     ::g_pLightManager->theLights[0].param1.x = 0.0f;    // Point light (see shader)
     ::g_pLightManager->theLights[0].param2.x = 1.0f;    // Turn on (see shader)
@@ -650,6 +658,13 @@ int main(void)
         //    pBall->positionXYZ.y -= 1.0f * deltaTime;
         //}
 
+        // HACK: Update "shadow" of ball to be where the ball hits the large block ground
+        sMesh* pBallShadow = pFindMeshByFriendlyName("Ball_Shadow");
+        sMesh* pBall = pFindMeshByFriendlyName("Ball");
+        pBallShadow->positionXYZ.x = pBall->positionXYZ.x;
+        pBallShadow->positionXYZ.z = pBall->positionXYZ.z;
+        // Don't update the y - keep the shadow near the plane
+
         // Physic update and test 
         ::g_pPhysicEngine->StepTick(deltaTime);
 
@@ -695,11 +710,12 @@ void AddModelsToScene(void)
 
     // Load some models to draw
 
+
     {
         sMesh* pSphereMesh = new sMesh();
 //        pSphereMesh->modelFileName = "assets/models/Sphere_radius_1_xyz.ply";
         pSphereMesh->modelFileName = "assets/models/Sphere_radius_1_xyz_N.ply";
-        pSphereMesh->positionXYZ = glm::vec3(0.0f, 7.5f, 0.0f);
+        pSphereMesh->positionXYZ = glm::vec3(0.0f, 30.0f, 0.0f);
         pSphereMesh->bIsWireframe = true;
         pSphereMesh->objectColourRGBA = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
         pSphereMesh->uniformScale = 0.1f;
@@ -708,31 +724,30 @@ void AddModelsToScene(void)
         ::g_vecMeshesToDraw.push_back(pSphereMesh);
     }
 
-    // Add a bunch of bunny rabbits
-    float boxLimit = 50.0f;
-    float boxStep = 5.0f;
-    for (float x = -boxLimit; x <= boxLimit; x += boxStep)
-    {
-        for (float z = -boxLimit; z <= boxLimit; z += boxStep)
-        {
-            sMesh* pBunny = new sMesh();
-//            pBunny->modelFileName = "assets/models/bun_zipper_res2_10x_size_xyz_only.ply";
-            pBunny->modelFileName = "assets/models/bun_zipper_res2_10x_size_xyz_N_only.ply";
-            pBunny->positionXYZ = glm::vec3(x, -3.0f, z);
-            pBunny->objectColourRGBA 
-                = glm::vec4(getRandomFloat(0.0f, 1.0f),
-                            getRandomFloat(0.0f, 1.0f),
-                            getRandomFloat(0.0f, 1.0f), 
-                            1.0f );
-            pBunny->uniqueFriendlyName = "Ground";
-            ::g_vecMeshesToDraw.push_back(pBunny);
-        }
-    }//for (float x = -boxLimit...
+//    // Add a bunch of bunny rabbits
+//    float boxLimit = 50.0f;
+//    float boxStep = 5.0f;
+//    for (float x = -boxLimit; x <= boxLimit; x += boxStep)
+//    {
+//        for (float z = -boxLimit; z <= boxLimit; z += boxStep)
+//        {
+//            sMesh* pBunny = new sMesh();
+////            pBunny->modelFileName = "assets/models/bun_zipper_res2_10x_size_xyz_only.ply";
+//            pBunny->modelFileName = "assets/models/bun_zipper_res2_10x_size_xyz_N_only.ply";
+//            pBunny->positionXYZ = glm::vec3(x, -3.0f, z);
+//            pBunny->objectColourRGBA 
+//                = glm::vec4(getRandomFloat(0.0f, 1.0f),
+//                            getRandomFloat(0.0f, 1.0f),
+//                            getRandomFloat(0.0f, 1.0f), 
+//                            1.0f );
+//            pBunny->uniqueFriendlyName = "Ground";
+//            ::g_vecMeshesToDraw.push_back(pBunny);
+//        }
+//    }//for (float x = -boxLimit...
 
 
     {
         sMesh* pFlatPlane = new sMesh();
-//        pFlatPlane->modelFileName = "assets/models/Flat_Plane_xyz.ply";
         pFlatPlane->modelFileName = "assets/models/Flat_Plane_xyz_N.ply";
         pFlatPlane->positionXYZ = glm::vec3(0.0f, -5.0f, 0.0f);
         pFlatPlane->objectColourRGBA = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
@@ -748,9 +763,28 @@ void AddModelsToScene(void)
         pAABBGround->centreXYZ = pFlatPlane->positionXYZ;
         sModelDrawInfo planeMeshInfo;
         ::g_pMeshManager->FindDrawInfoByModelName(pFlatPlane->modelFileName, planeMeshInfo);
-        pAABBGround->extentsXYZ = planeMeshInfo.extenXYZ;
 
-        pAABBGround->physicInfo.pAssociatedDrawingMeshInstance = pFlatPlane;
+       // Manually enter the AABB info:
+        pAABBGround->centreXYZ = glm::vec3(0.0f, 0.0f, 0.0f);   // From the mesh model
+        // How far from the centre the XYZ min and max are
+        // This information is from the mesh we loaded
+        // WARNING: We need to be careful about the scale
+        pAABBGround->minXYZ.x = -100.0f;
+        pAABBGround->maxXYZ.x = 100.0f;
+
+        pAABBGround->minXYZ.z = -100.0f;
+        pAABBGround->maxXYZ.z = 100.0f;
+
+        pAABBGround->minXYZ.y = -1.0f;
+        pAABBGround->maxXYZ.y = 1.0f;
+
+        // Copy the physics object position from the initial mesh position
+        pAABBGround->pPhysicInfo->position = pFlatPlane->positionXYZ;
+
+        // Don't move this ground (skip integration step)
+        pAABBGround->pPhysicInfo->bDoesntMove = true;
+
+        pAABBGround->pPhysicInfo->pAssociatedDrawingMeshInstance = pFlatPlane;
 
         ::g_pPhysicEngine->vecAABBs.push_back(pAABBGround);
     }
@@ -763,17 +797,35 @@ void AddModelsToScene(void)
         pFlatPlane->uniformScale = 1.01f;
         pFlatPlane->objectColourRGBA = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
-        //::g_myMeshes[::g_NumberOfMeshesToDraw] = pFlatPlane;
-        //::g_NumberOfMeshesToDraw++;
-        //::g_vecMeshesToDraw.push_back(pFlatPlane);
+        ::g_vecMeshesToDraw.push_back(pFlatPlane);
     }
+
+    sMesh* pBunny = new sMesh();
+    //            pBunny->modelFileName = "assets/models/bun_zipper_res2_10x_size_xyz_only.ply";
+    pBunny->modelFileName = "assets/models/bun_zipper_res2_10x_size_xyz_N_only.ply";
+    pBunny->positionXYZ = glm::vec3(10.0f, 10.0f, 0.0f);
+    pBunny->objectColourRGBA
+        = glm::vec4(getRandomFloat(0.0f, 1.0f),
+            getRandomFloat(0.0f, 1.0f),
+            getRandomFloat(0.0f, 1.0f),
+            1.0f);
+    pBunny->uniqueFriendlyName = "Ground";
+    ::g_vecMeshesToDraw.push_back(pBunny);
+
 
 
     {
+
+        //    ____                _            __                   _     
+        //   |  _ \ ___ _ __   __| | ___ _ __ / / __ ___   ___  ___| |__  
+        //   | |_) / _ \ '_ \ / _` |/ _ \ '__/ / '_ ` _ \ / _ \/ __| '_ \ 
+        //   |  _ <  __/ | | | (_| |  __/ | / /| | | | | |  __/\__ \ | | |
+        //   |_| \_\___|_| |_|\__,_|\___|_|/_/ |_| |_| |_|\___||___/_| |_|
+        //                                                                
         sMesh* pSphereMesh = new sMesh();
 //        pSphereMesh->modelFileName = "assets/models/Sphere_radius_1_xyz.ply";
         pSphereMesh->modelFileName = "assets/models/Sphere_radius_1_xyz_N.ply";
-        pSphereMesh->positionXYZ = glm::vec3(0.0f, 10.0f, 0.0f);
+        pSphereMesh->positionXYZ = glm::vec3(-15.0f, -3.0f, -20.0f);
         //pSphereMesh->bIsWireframe = true;
         pSphereMesh->objectColourRGBA = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
         pSphereMesh->uniqueFriendlyName = "Ball";
@@ -782,20 +834,88 @@ void AddModelsToScene(void)
         //::g_NumberOfMeshesToDraw++;
         ::g_vecMeshesToDraw.push_back(pSphereMesh);
 
+        {
+            sMesh* pSphereShadowMesh = new sMesh();
+            pSphereShadowMesh->modelFileName = "assets/models/Sphere_radius_1_Flat_Shadow_xyz_N.ply";
+            pSphereShadowMesh->positionXYZ = pSphereMesh->positionXYZ;
+            pSphereShadowMesh->positionXYZ.y = -3.95f;  // JUST above the ground
+            pSphereShadowMesh->objectColourRGBA = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+            pSphereShadowMesh->uniqueFriendlyName = "Ball_Shadow";
+            ::g_vecMeshesToDraw.push_back(pSphereShadowMesh);
+        }
+
+
+        //    ____  _               _                  _     _           _   
+        //   |  _ \| |__  _   _ ___(_) ___ ___    ___ | |__ (_) ___  ___| |_ 
+        //   | |_) | '_ \| | | / __| |/ __/ __|  / _ \| '_ \| |/ _ \/ __| __|
+        //   |  __/| | | | |_| \__ \ | (__\__ \ | (_) | |_) | |  __/ (__| |_ 
+        //   |_|   |_| |_|\__, |___/_|\___|___/  \___/|_.__// |\___|\___|\__|
+        //                |___/                           |__/               
         // Add sphere
         cPhysics::sSphere* pSphereInfo = new cPhysics::sSphere();
-        pSphereInfo->centre = pSphereMesh->positionXYZ;
+
+        pSphereInfo->centre = glm::vec3(0.0f);  // Sphere's centre (i.e. an offset from the position)
+
+        pSphereInfo->pPhysicInfo->position = pSphereMesh->positionXYZ;
         // HACK: We know this is 1.0 because...?
         // We could also have pulled that information from the mesh info
         pSphereInfo->radius = 1.0f;
 
-//        pSphereInfo->physicInfo.velocity.y = -0.5f;
+        pSphereInfo->pPhysicInfo->velocity.y = 7.5f;
+        
+        // Set some x velocity
+        pSphereInfo->pPhysicInfo->velocity.x = 1.0f;
+
+
+        pSphereInfo->pPhysicInfo->acceleration.y = -3.0f;
         
         // Associate this drawing mesh to this physics object
-        pSphereInfo->physicInfo.pAssociatedDrawingMeshInstance = pSphereMesh;
+        pSphereInfo->pPhysicInfo->pAssociatedDrawingMeshInstance = pSphereMesh;
 
         ::g_pPhysicEngine->vecSpheres.push_back(pSphereInfo);
     }
+
+
+    for ( unsigned int ballCount = 0; ballCount != 99; ballCount++ )
+    {
+        //    ____                _            __                   _     
+        //   |  _ \ ___ _ __   __| | ___ _ __ / / __ ___   ___  ___| |__  
+        //   | |_) / _ \ '_ \ / _` |/ _ \ '__/ / '_ ` _ \ / _ \/ __| '_ \ 
+        //   |  _ <  __/ | | | (_| |  __/ | / /| | | | | |  __/\__ \ | | |
+        //   |_| \_\___|_| |_|\__,_|\___|_|/_/ |_| |_| |_|\___||___/_| |_|
+        //                                                                
+        sMesh* pSphereMesh = new sMesh();
+        //        pSphereMesh->modelFileName = "assets/models/Sphere_radius_1_xyz.ply";
+        pSphereMesh->modelFileName = "assets/models/Sphere_radius_1_xyz_N.ply";
+        pSphereMesh->positionXYZ.x = getRandomFloat(-30.0f, 30.0f);
+        pSphereMesh->positionXYZ.z = getRandomFloat(-30.0f, 30.0f);
+        pSphereMesh->positionXYZ.y = getRandomFloat(0.0f, 40.0f);
+        //pSphereMesh->bIsWireframe = true;
+        pSphereMesh->objectColourRGBA = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+        pSphereMesh->objectColourRGBA.r = getRandomFloat(0.0f, 1.0f);
+        pSphereMesh->objectColourRGBA.g = getRandomFloat(0.0f, 1.0f);
+        pSphereMesh->objectColourRGBA.b = getRandomFloat(0.0f, 1.0f);
+        ::g_vecMeshesToDraw.push_back(pSphereMesh);
+
+        //    ____  _               _                  _     _           _   
+        //   |  _ \| |__  _   _ ___(_) ___ ___    ___ | |__ (_) ___  ___| |_ 
+        //   | |_) | '_ \| | | / __| |/ __/ __|  / _ \| '_ \| |/ _ \/ __| __|
+        //   |  __/| | | | |_| \__ \ | (__\__ \ | (_) | |_) | |  __/ (__| |_ 
+        //   |_|   |_| |_|\__, |___/_|\___|___/  \___/|_.__// |\___|\___|\__|
+        //                |___/                           |__/               
+        // Add sphere
+        cPhysics::sSphere* pSphereInfo = new cPhysics::sSphere();
+        pSphereInfo->centre = glm::vec3(0.0f);  // Sphere's centre (i.e. an offset from the position)
+        pSphereInfo->pPhysicInfo->position = pSphereMesh->positionXYZ;
+        pSphereInfo->radius = 1.0f;
+        pSphereInfo->pPhysicInfo->velocity.y = getRandomFloat(2.0f, 10.0f);
+        pSphereInfo->pPhysicInfo->velocity.x = getRandomFloat(-5.0f, 5.0f);
+        pSphereInfo->pPhysicInfo->velocity.z = getRandomFloat(-5.0f, 5.0f);
+        pSphereInfo->pPhysicInfo->acceleration.y = -3.0f;
+        pSphereInfo->pPhysicInfo->pAssociatedDrawingMeshInstance = pSphereMesh;
+        ::g_pPhysicEngine->vecSpheres.push_back(pSphereInfo);
+    }//for ( unsigned int ballCount
+
     //    sMesh* pDragon = new sMesh();
     //    pDragon->modelFileName = "assets/models/Dragon 2.5Edited_xyz_only.ply";
     //    pDragon->positionXYZ = glm::vec3(20.0f, 0.0f, 0.0f);

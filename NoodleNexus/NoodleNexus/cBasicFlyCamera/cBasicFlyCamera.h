@@ -36,6 +36,8 @@ public:
 	// negative (-ve) is "turning to the left"
 	// positive (+ve) is "turning to the right"
 	void rotateLeftRight_Yaw(float yAngleAdjust);
+	// Sets the angle with no "movement speed" scaling
+	void rotateLeftRight_Yaw_NoScaling(float yAngleAdjust);
 
 	// positive (+ve) is "looking up"
 	// negative (-ve) is "looking down"

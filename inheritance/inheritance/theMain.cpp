@@ -25,6 +25,7 @@ int main(int argc, char* argv[])
 //	std::vector<cSuperMonster*> vecSuperMonsters;
 
 	std::vector< cMonster* > vecAllMonsters;
+//	std::vector< cSuperMonster* > vecAllMonsters;
 
 	cMonster* pMatt = new cMonster("Matt");
 	vecAllMonsters.push_back(pMatt);

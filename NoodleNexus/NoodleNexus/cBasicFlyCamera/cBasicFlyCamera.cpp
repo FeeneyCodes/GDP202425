@@ -95,6 +95,12 @@ void cBasicFlyCamera::rotateLeftRight_Yaw(float yAngleAdjust)
 	this->m_Yaw_Y_axis_rotation += (this->m_turnSpeedScaling * yAngleAdjust);
 }
 
+
+void cBasicFlyCamera::rotateLeftRight_Yaw_NoScaling(float yAngleAdjust)
+{
+	this->m_Yaw_Y_axis_rotation += yAngleAdjust;
+}
+
 // positive (+ve) is "looking up"
 // negative (-ve) is "looking down"
 void cBasicFlyCamera::pitchUpDown(float xAngleAdjust)

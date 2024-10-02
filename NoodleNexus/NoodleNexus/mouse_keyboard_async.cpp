@@ -105,7 +105,7 @@ void handleKeyboardAsync(GLFWwindow* window)
         // Find the Light_Sphere
 //        sMesh* pLightSphere = pFindMeshByFriendlyName("Light_Sphere");
 
-        const float LIGHT_MOVE_SPEED = 0.01f;
+        const float LIGHT_MOVE_SPEED = 0.02f;
 
         if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         {
@@ -148,12 +148,14 @@ void handleKeyboardAsync(GLFWwindow* window)
         if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS)
         {
             // Quadratic linear (making it darker)
-            ::g_pLightManager->theLights[g_selectedLightIndex].atten.z *= 0.999f;     // Down 0.1%
+            // This is WAY more sensitive than the linear
+            //  ...so you might want to change it by 0.1% (0.999)
+            ::g_pLightManager->theLights[g_selectedLightIndex].atten.z *= 0.99f;    // Down 1%
         }
         if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS)
         {
             // Quadratic linear (making it darker)
-            ::g_pLightManager->theLights[g_selectedLightIndex].atten.z *= 1.001f;     // Up 0.1%
+            ::g_pLightManager->theLights[g_selectedLightIndex].atten.z *= 1.01f;     // Up 1%
         }
         // HACK:Exit early
         return;

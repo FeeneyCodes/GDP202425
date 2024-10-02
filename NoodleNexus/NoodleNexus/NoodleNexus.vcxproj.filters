@@ -30,6 +30,9 @@
     <Filter Include="LIghts">
       <UniqueIdentifier>{0479b598-aa46-49da-ac91-afc112109a35}</UniqueIdentifier>
     </Filter>
+    <Filter Include="RenderStuff">
+      <UniqueIdentifier>{9cdea607-512f-4c0a-9b61-159d8362c1d3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="theMain.cpp">
@@ -64,6 +67,9 @@
     </ClCompile>
     <ClCompile Include="cLightManager.cpp">
       <Filter>LIghts</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderCall.cpp">
+      <Filter>RenderStuff</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

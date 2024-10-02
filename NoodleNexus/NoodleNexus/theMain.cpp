@@ -41,6 +41,8 @@
 
 #include "cLightManager.h"
 
+#include <windows.h>    // Includes ALL of windows... MessageBox
+
 //
 //const unsigned int MAX_NUMBER_OF_MESHES = 1000;
 //unsigned int g_NumberOfMeshesToDraw;
@@ -52,7 +54,7 @@ cPhysics* g_pPhysicEngine = NULL;
 // This loads the 3D models for drawing, etc.
 cVAOManager* g_pMeshManager = NULL;
 
-cLightManager* g_pLightManager = NULL;
+//cLightManager* g_pLightManager = NULL;
 
 void AddModelsToScene(void);
 
@@ -74,7 +76,45 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 
     if (mods == GLFW_MOD_SHIFT)
     {
+        if (key == GLFW_KEY_F9 && action == GLFW_PRESS)
+        {
+            // Save state to file
+//            MyAmazingStateThing->saveToFile("MySaveFile.sexy");
+        }
+        if (key == GLFW_KEY_F10 && action == GLFW_PRESS)
+        {
+            // Save state to file
+            // https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-messagebox
+//            MessageBox(NULL, L"Hello!", L"The title", MB_OK);
+            if (MessageBox(NULL, L"Kill all humans?", L"Bender asks", MB_YESNO) == IDYES)
+            {
+                std::cout << "You are heartless" << std::endl;
+            }
+            else
+            {
+                std::cout << "Humans still live..." << std::endl;
+            }
+        }
+    }
 
+    if (key == GLFW_KEY_5 && action == GLFW_PRESS)
+    {
+        // check if you are out of bounds
+        if (::g_selectedLightIndex > 0)
+        {
+
+            ::g_selectedLightIndex--;
+        }
+        //// 0 to 10
+        //if (::g_selectedLightIndex < 0)
+        //{
+        //    ::g_selectedLightIndex = 0;
+        //}
+
+    }
+    if (key == GLFW_KEY_6 && action == GLFW_PRESS)
+    {
+        ::g_selectedLightIndex++;
     }
 
 //    if (key == GLFW_KEY_A)
@@ -400,6 +440,11 @@ int main(void)
         terrainModel, program);
     std::cout << terrainModel.numberOfVertices << " vertices loaded" << std::endl;
 
+    sModelDrawInfo warehouseModel;
+    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Warehouse_xyz_n.ply",
+        warehouseModel, program);
+    std::cout << warehouseModel.numberOfVertices << " vertices loaded" << std::endl;
+
     sModelDrawInfo bunnyModel;
 //    ::g_pMeshManager->LoadModelIntoVAO("assets/models/bun_zipper_res2_10x_size_xyz_only.ply",
     ::g_pMeshManager->LoadModelIntoVAO("assets/models/bun_zipper_res2_10x_size_xyz_N_only.ply",
@@ -463,6 +508,16 @@ int main(void)
     ::g_pLightManager->theLights[0].param2.x = 1.0f;    // Turn on (see shader)
 
 
+    // Set up one of the lights in the scene
+    ::g_pLightManager->theLights[1].position = glm::vec4(0.0f, 15.0f, 0.0f, 1.0f);
+    ::g_pLightManager->theLights[1].diffuse = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+    ::g_pLightManager->theLights[1].atten.y = 0.01f;
+    ::g_pLightManager->theLights[1].atten.z = 0.001f;
+
+    ::g_pLightManager->theLights[1].param1.x = 0.0f;    // Point light (see shader)
+    ::g_pLightManager->theLights[1].param2.x = 1.0f;    // Turn on (see shader)
+
+
     while (!glfwWindowShouldClose(window))
     {
         float ratio;
@@ -501,16 +556,17 @@ int main(void)
         const GLint matProjection_UL = glGetUniformLocation(program, "matProjection");
         glUniformMatrix4fv(matProjection_UL, 1, GL_FALSE, (const GLfloat*)&matProjection);
 
-
+        // *******************************************************************
         // Place light #0 where the little yellow "light sphere" is
         // Find the Light_Sphere
         sMesh* pLightSphere = pFindMeshByFriendlyName("Light_Sphere");
         // 
-        ::g_pLightManager->theLights[0].position = glm::vec4(pLightSphere->positionXYZ, 1.0f);
+        pLightSphere->positionXYZ = ::g_pLightManager->theLights[::g_selectedLightIndex].position;
 
         // Update the light info in the shader
         // (Called every frame)
         ::g_pLightManager->updateShaderWithLightInfo();
+        // *******************************************************************
 
 
         // Draw all the objects
@@ -527,6 +583,21 @@ int main(void)
                 // (for, while, do)
                 continue;
             }
+
+            // Use lighting or not
+            // uniform bool bDoNotLight;	
+            GLint bDoNotLight_UL = glGetUniformLocation(program, "bDoNotLight");
+            if (pCurMesh->bDoNotLight)
+            {
+                //glUniform1f(bDoNotLight_UL, 1.0f);  // True
+                glUniform1f(bDoNotLight_UL, (GLfloat)GL_TRUE);  // True
+            }
+            else
+            {
+//                glUniform1f(bDoNotLight_UL, 0.0f);  // False
+                glUniform1f(bDoNotLight_UL, (GLfloat)GL_FALSE);  // False
+            }
+
 
             // Could be called the "model" or "world" matrix
             glm::mat4 matModel = glm::mat4(1.0f);
@@ -708,11 +779,17 @@ int main(void)
         ssTitle << "Camera: "
             << ::g_pFlyCamera->getEyeLocation().x << ", "
             << ::g_pFlyCamera->getEyeLocation().y << ", "
-            << ::g_pFlyCamera->getEyeLocation().z << std::endl;
-//        ssTitle << "Camera: "
-//            << cameraEye.x << ", "
-//            << cameraEye.y << ", "
-//            << cameraEye.z << std::endl;
+            << ::g_pFlyCamera->getEyeLocation().z 
+            << "   ";
+        ssTitle << "light[" << g_selectedLightIndex << "] "
+            << ::g_pLightManager->theLights[g_selectedLightIndex].position.x << ", "
+            << ::g_pLightManager->theLights[g_selectedLightIndex].position.y << ", "
+            << ::g_pLightManager->theLights[g_selectedLightIndex].position.z
+            << "   "
+            << "linear: " << ::g_pLightManager->theLights[0].atten.y
+            << "   "
+            << "quad: " << ::g_pLightManager->theLights[0].atten.z;
+
 
 //        glfwSetWindowTitle(window, "Hey!");
         glfwSetWindowTitle(window, ssTitle.str().c_str());
@@ -751,26 +828,47 @@ void AddModelsToScene(void)
         ::g_vecMeshesToDraw.push_back(pSphereMesh);
     }
 
-//    // Add a bunch of bunny rabbits
-//    float boxLimit = 50.0f;
-//    float boxStep = 5.0f;
-//    for (float x = -boxLimit; x <= boxLimit; x += boxStep)
-//    {
-//        for (float z = -boxLimit; z <= boxLimit; z += boxStep)
-//        {
-//            sMesh* pBunny = new sMesh();
-////            pBunny->modelFileName = "assets/models/bun_zipper_res2_10x_size_xyz_only.ply";
-//            pBunny->modelFileName = "assets/models/bun_zipper_res2_10x_size_xyz_N_only.ply";
-//            pBunny->positionXYZ = glm::vec3(x, -3.0f, z);
-//            pBunny->objectColourRGBA 
-//                = glm::vec4(getRandomFloat(0.0f, 1.0f),
-//                            getRandomFloat(0.0f, 1.0f),
-//                            getRandomFloat(0.0f, 1.0f), 
-//                            1.0f );
-//            pBunny->uniqueFriendlyName = "Ground";
-//            ::g_vecMeshesToDraw.push_back(pBunny);
-//        }
-//    }//for (float x = -boxLimit...
+    {
+        sMesh* pDebugSphere = new sMesh();
+        pDebugSphere->modelFileName = "assets/models/Sphere_radius_1_xyz_N.ply";
+        pDebugSphere->positionXYZ = glm::vec3(0.0f, 5.0f, 0.0f);
+        pDebugSphere->bIsWireframe = true;
+        pDebugSphere->objectColourRGBA = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+        pDebugSphere->uniqueFriendlyName = "Debug_Sphere";
+        pDebugSphere->uniformScale = 10.0f;
+        pDebugSphere->bDoNotLight = true;
+//        ::g_vecMeshesToDraw.push_back(pDebugSphere);
+    }
+
+    // Add a bunch of bunny rabbits
+    float boxLimit = 50.0f;
+    float boxStep = 10.0f;
+    for (float x = -boxLimit; x <= boxLimit; x += boxStep)
+    {
+        for (float z = -boxLimit; z <= boxLimit; z += boxStep)
+        {
+            sMesh* pBunny = new sMesh();
+//            pBunny->modelFileName = "assets/models/bun_zipper_res2_10x_size_xyz_only.ply";
+            pBunny->modelFileName = "assets/models/bun_zipper_res2_10x_size_xyz_N_only.ply";
+            pBunny->positionXYZ = glm::vec3(x, -3.0f, z);
+            pBunny->objectColourRGBA 
+                = glm::vec4(getRandomFloat(0.0f, 1.0f),
+                            getRandomFloat(0.0f, 1.0f),
+                            getRandomFloat(0.0f, 1.0f), 
+                            1.0f );
+            ::g_vecMeshesToDraw.push_back(pBunny);
+        }
+    }//for (float x = -boxLimit...
+
+    {
+        sMesh* pWarehouse = new sMesh();
+        pWarehouse->modelFileName = "assets/models/Warehouse_xyz_n.ply";
+//        pWarehouse->positionXYZ = glm::vec3(0.0f, -5.0f, 0.0f);
+        pWarehouse->rotationEulerXYZ.y = -90.0f;
+        pWarehouse->objectColourRGBA = glm::vec4(0.6f, 0.6f, 0.6f, 1.0f);
+        pWarehouse->uniqueFriendlyName = "Warehouse";
+         ::g_vecMeshesToDraw.push_back(pWarehouse);
+    }
 
 
     {
@@ -903,7 +1001,7 @@ void AddModelsToScene(void)
     }
 
 
-    for ( unsigned int ballCount = 0; ballCount != 99; ballCount++ )
+    for ( unsigned int ballCount = 0; ballCount != 4; ballCount++ )
     {
         //    ____                _            __                   _     
         //   |  _ \ ___ _ __   __| | ___ _ __ / / __ ___   ___  ___| |__  

@@ -5,6 +5,7 @@
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
 #include <vector>
+#include <string>  
 
 class cLightManager
 {
@@ -47,6 +48,23 @@ public:
         glm::vec4 param2;	// x = 0 for off, 1 for on
         // yzw are TBD
 
+        void setLinearAtten(float newLinear)
+        {
+            this->atten.y = newLinear;
+        }
+        void setQuadraticAtten(float newQuad)
+        {
+            this->atten.z = newQuad;
+        }
+        void TurnOn(void)
+        {
+            this->param2.x = 1.0f;
+        }
+        void TurnOff(void)
+        {
+            this->param2.x = 0.0f;
+        }
+
         // The uniform locations of >this< light
         GLuint position_UL = -1;
         GLuint diffuse_UL = -1;
@@ -55,10 +73,14 @@ public:
         GLuint direction_UL = -1;
         GLuint param1_UL = -1;
         GLuint param2_UL = -1;
+
+        std::string getState(void);
+        bool loadState(std::string stateString);
     };
 
     static const int NUMBEROFLIGHTS = 10;
     sLight theLights[NUMBEROFLIGHTS];
+
 
     //std::vector<sLight> vecLights;
 };

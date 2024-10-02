@@ -1,5 +1,6 @@
 #include "cLightManager.h"
 #include <float.h>
+#include <sstream>	// String stream
 
 
 
@@ -126,4 +127,36 @@ void cLightManager::updateShaderWithLightInfo(void)
 	}//for (unsigned int index...
 
 	return;
+}
+
+std::string cLightManager::sLight::getState(void)
+{
+	std::stringstream ssLightState;
+
+	// "position 922.3  8882.9   22.3"
+	ssLightState << "position "
+		<< this->position.x << " "
+		<< this->position.y << " "
+		<< this->position.z << std::endl;
+	// And so on...
+
+	// return as a string
+	return ssLightState.str();
+}
+
+bool cLightManager::sLight::loadState(std::string stateString)
+{
+	std::stringstream ssLightState;
+	ssLightState << stateString;
+
+	std::string discard;
+	ssLightState >> discard;		// "position"
+	ssLightState >> this->position.x;
+	ssLightState >> this->position.y;
+	ssLightState >> this->position.z;
+
+	// And so on...
+
+	// If it worked
+	return true;
 }

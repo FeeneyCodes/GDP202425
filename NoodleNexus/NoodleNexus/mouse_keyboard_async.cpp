@@ -8,6 +8,10 @@
 #include "sharedThings.h"   // The camera, etc.
 #include "sMesh.h"
 
+#include "cLightManager.h"
+
+//extern cLightManager* g_pLightManager;
+
 // Defined in theMain.cpp
 sMesh* pFindMeshByFriendlyName(std::string theNameToFind);
 
@@ -99,59 +103,58 @@ void handleKeyboardAsync(GLFWwindow* window)
     if (isControlDown(window) )
     {
         // Find the Light_Sphere
-        sMesh* pLightSphere = pFindMeshByFriendlyName("Light_Sphere");
+//        sMesh* pLightSphere = pFindMeshByFriendlyName("Light_Sphere");
 
         const float LIGHT_MOVE_SPEED = 0.01f;
 
         if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         {
-            pLightSphere->positionXYZ.z += LIGHT_MOVE_SPEED;
+            ::g_pLightManager->theLights[g_selectedLightIndex].position.z += LIGHT_MOVE_SPEED;
         }
 
         if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
         {
-            pLightSphere->positionXYZ.z -= LIGHT_MOVE_SPEED;
+            ::g_pLightManager->theLights[g_selectedLightIndex].position.z -= LIGHT_MOVE_SPEED;
         }
 
         if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
         {
-            pLightSphere->positionXYZ.x -= LIGHT_MOVE_SPEED;
+            ::g_pLightManager->theLights[g_selectedLightIndex].position.x -= LIGHT_MOVE_SPEED;
         }
         if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         {
-            pLightSphere->positionXYZ.x += LIGHT_MOVE_SPEED;
+            ::g_pLightManager->theLights[g_selectedLightIndex].position.x += LIGHT_MOVE_SPEED;
         }
         if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
         {
-            pLightSphere->positionXYZ.y += LIGHT_MOVE_SPEED;
+            ::g_pLightManager->theLights[g_selectedLightIndex].position.y += LIGHT_MOVE_SPEED;
         }
         if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
         {
-            pLightSphere->positionXYZ.y -= LIGHT_MOVE_SPEED;
+            ::g_pLightManager->theLights[g_selectedLightIndex].position.y -= LIGHT_MOVE_SPEED;
         }
-        //// Linear atten 1 & 2
-        //if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
-        //{
-        //    // Increase linear (making it darker)
-        //    ::g_theLights[0]->atten.y *= 0.99f;     // Down 1%
-        //}
-        //if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
-        //{
-        //    // Increase linear (making it darker)
-        //    ::g_theLights[0]->atten.y *= 1.01f;     // Up 1%
-        //}
-        //// Quadratic atten 3 & 4
-        //if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
-        //{
-        //    // Quadratic linear (making it darker)
-        //    ::g_theLights[0]->atten.z *= 0.999f;     // Down 0.1%
-        //}
-        //if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
-        //{
-        //    // Quadratic linear (making it darker)
-        //    ::g_theLights[0]->atten.z *= 1.001f;     // Up 0.1%
-        //}
-
+        // Linear atten 1 & 2
+        if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
+        {
+            // Increase linear (making it darker)
+            ::g_pLightManager->theLights[g_selectedLightIndex].atten.y *= 0.99f;     // Down 1%
+        }
+        if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
+        {
+            // Increase linear (making it darker)
+            ::g_pLightManager->theLights[g_selectedLightIndex].atten.y *= 1.01f;     // Up 1%
+        }
+        // Quadratic atten 3 & 4
+        if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS)
+        {
+            // Quadratic linear (making it darker)
+            ::g_pLightManager->theLights[g_selectedLightIndex].atten.z *= 0.999f;     // Down 0.1%
+        }
+        if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS)
+        {
+            // Quadratic linear (making it darker)
+            ::g_pLightManager->theLights[g_selectedLightIndex].atten.z *= 1.001f;     // Up 0.1%
+        }
         // HACK:Exit early
         return;
     }

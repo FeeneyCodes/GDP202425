@@ -3,8 +3,13 @@
 #include "GLCommon.h"
 
 #include "cBasicFlyCamera/cBasicFlyCamera.h"
+#include "cLightManager.h"
 
 extern cBasicFlyCamera* g_pFlyCamera;
+
+extern cLightManager* g_pLightManager;
+extern unsigned int g_selectedLightIndex;
+
 
 // GLFW callback function signatures
 void cursor_position_callback(GLFWwindow* window, double xpos, double ypos);
@@ -18,3 +23,6 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 // WE call these (not GLFW)
 void handleKeyboardAsync(GLFWwindow* window);
 void handleMouseAsync(GLFWwindow* window);
+
+// Can call this from anything that has this header file
+void DrawDebugSphere(glm::vec3 position, glm::vec4 RGBA, float scale);

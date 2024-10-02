@@ -23,8 +23,12 @@ struct sMesh
 
 	bool bIsWireframe = false;
 	bool bIsVisible = true;
+	bool bDoNotLight = false;
 
 	unsigned int uniqueID = 0;
+
+	std::string getState(void);
+	bool loadState(std::string newState);
 
 //	sMesh* pChildMeshes[100];
 };

@@ -7,13 +7,13 @@ in vec4 fvertexNormal;
 uniform vec4 objectColour;			// Override colour 
 uniform bool bUseObjectColour;
 uniform vec4 eyeLocation;			// Where the camera is
+uniform bool bDoNotLight;			// if true, skips lighting
 
 out vec4 finalPixelColour;
 
 const int POINT_LIGHT_TYPE = 0;
 const int SPOT_LIGHT_TYPE = 1;
 const int DIRECTIONAL_LIGHT_TYPE = 2;
-
 
 
 struct sLight
@@ -31,7 +31,7 @@ struct sLight
 	                // yzw are TBD
 };
 
-const int NUMBEROFLIGHTS = 10;
+const int NUMBEROFLIGHTS = 100;
 uniform sLight theLights[NUMBEROFLIGHTS]; 
 // uniform vec4 thelights[0].position;
 // uniform vec4 thelights[1].position;
@@ -49,6 +49,15 @@ void main()
 		vertexColour = objectColour.rgb;
 	}
 	
+	// Use lighting?
+	if ( bDoNotLight )
+	{
+		finalPixelColour.rgb = objectColour.rgb;
+		finalPixelColour.a = 1.0f;
+		return;
+	}
+	
+	
 //	finalPixelColour = vec4(finalColour, 1.0);
 
 //	vec3 fvertexNormal = vec3(0.0f, 1.0f, 0.0f);
@@ -62,6 +71,8 @@ void main()
 
 											
 	finalPixelColour = pixelColour;
+	finalPixelColour.a = 1.0f;		
+
 }
 
 

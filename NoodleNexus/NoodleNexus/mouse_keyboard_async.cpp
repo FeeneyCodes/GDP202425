@@ -157,6 +157,25 @@ void handleKeyboardAsync(GLFWwindow* window)
             // Quadratic linear (making it darker)
             ::g_pLightManager->theLights[g_selectedLightIndex].atten.z *= 1.01f;     // Up 1%
         }
+
+        // Angles of spot light
+        if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS)
+        {
+            ::g_pLightManager->theLights[g_selectedLightIndex].param1.y -= 0.1f;     
+        }       
+        if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS)
+        {
+            ::g_pLightManager->theLights[g_selectedLightIndex].param1.y += 0.1f;     
+        }              
+
+        if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS)
+        {
+            ::g_pLightManager->theLights[g_selectedLightIndex].param1.z -= 0.1f;     
+        }       
+        if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS)
+        {
+            ::g_pLightManager->theLights[g_selectedLightIndex].param1.z += 0.1f;     
+        }          
         // HACK:Exit early
         return;
     }

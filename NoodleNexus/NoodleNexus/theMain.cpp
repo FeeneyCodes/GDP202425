@@ -33,6 +33,7 @@
 #include "cPhysics.h"
 #include "cLightManager.h"
 #include <windows.h>    // Includes ALL of windows... MessageBox
+#include "cLightHelper/cLightHelper.h"
 
 //
 //const unsigned int MAX_NUMBER_OF_MESHES = 1000;
@@ -58,6 +59,16 @@ static void error_callback(int error, const char* description)
 {
     fprintf(stderr, "Error: %s\n", description);
 }
+
+bool isControlDown(GLFWwindow* window);
+//{
+//    if ((glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) ||
+//        (glfwGetKey(window, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS))
+//    {
+//        return true;
+//    }
+//    return false;
+//}
 
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
@@ -87,31 +98,44 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
                 std::cout << "Humans still live..." << std::endl;
             }
         }
-    }
+    }//if (mods == GLFW_MOD_SHIFT)
 
-    if (key == GLFW_KEY_5 && action == GLFW_PRESS)
+ //   if (mods == GLFW_KEY_LEFT_CONTROL)
+    if (isControlDown(window))
     {
-        // check if you are out of bounds
-        if (::g_selectedLightIndex > 0)
+        if (key == GLFW_KEY_5 && action == GLFW_PRESS)
         {
+            // check if you are out of bounds
+            if (::g_selectedLightIndex > 0)
+            {
 
-            ::g_selectedLightIndex--;
+                ::g_selectedLightIndex--;
+            }
+            //// 0 to 10
+            //if (::g_selectedLightIndex < 0)
+            //{
+            //    ::g_selectedLightIndex = 0;
+            //}
+
         }
-        //// 0 to 10
-        //if (::g_selectedLightIndex < 0)
-        //{
-        //    ::g_selectedLightIndex = 0;
-        //}
-
-    }
-    if (key == GLFW_KEY_6 && action == GLFW_PRESS)
-    {
-        ::g_selectedLightIndex++;
-        if (::g_selectedLightIndex >= 10)
+        if (key == GLFW_KEY_6 && action == GLFW_PRESS)
         {
-            ::g_selectedLightIndex = 9;
+            ::g_selectedLightIndex++;
+            if (::g_selectedLightIndex >= 10)
+            {
+                ::g_selectedLightIndex = 9;
+            }
         }
-    }
+
+        if (key == GLFW_KEY_9 && action == GLFW_PRESS)
+        {
+            ::g_bShowDebugSpheres = true;
+        }
+        if (key == GLFW_KEY_0 && action == GLFW_PRESS)
+        {
+            ::g_bShowDebugSpheres = false;
+        }
+    }//if (mods == GLFW_KEY_LEFT_CONTROL)
 
 //    if (key == GLFW_KEY_A)
 //    {
@@ -495,7 +519,7 @@ int main(void)
     ::g_pLightManager->loadUniformLocations(program);
 
     // Set up one of the lights in the scene
-    ::g_pLightManager->theLights[0].position = glm::vec4(0.0f, 15.0f, 0.0f, 1.0f);
+    ::g_pLightManager->theLights[0].position = glm::vec4(-15.0f, 30.0f, 0.0f, 1.0f);
     ::g_pLightManager->theLights[0].diffuse = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
     ::g_pLightManager->theLights[0].atten.y = 0.01f;
     ::g_pLightManager->theLights[0].atten.z = 0.001f;
@@ -505,14 +529,20 @@ int main(void)
 
 
     // Set up one of the lights in the scene
-    ::g_pLightManager->theLights[1].position = glm::vec4(0.0f, 15.0f, 0.0f, 1.0f);
+    ::g_pLightManager->theLights[1].position = glm::vec4(0.0f, 20.0f, 0.0f, 1.0f);
     ::g_pLightManager->theLights[1].diffuse = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
     ::g_pLightManager->theLights[1].atten.y = 0.01f;
     ::g_pLightManager->theLights[1].atten.z = 0.001f;
 
-    ::g_pLightManager->theLights[1].param1.x = 0.0f;    // Point light (see shader)
+    ::g_pLightManager->theLights[1].param1.x = 1.0f;    // Spot light (see shader)
+    ::g_pLightManager->theLights[1].direction = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
+    ::g_pLightManager->theLights[1].param1.y = 5.0f;   //  y = inner angle
+    ::g_pLightManager->theLights[1].param1.z = 10.0f;  //  z = outer angle
+
     ::g_pLightManager->theLights[1].param2.x = 1.0f;    // Turn on (see shader)
 
+
+    cLightHelper TheLightHelper;
 
     while (!glfwWindowShouldClose(window))
     {
@@ -552,12 +582,12 @@ int main(void)
         const GLint matProjection_UL = glGetUniformLocation(program, "matProjection");
         glUniformMatrix4fv(matProjection_UL, 1, GL_FALSE, (const GLfloat*)&matProjection);
 
-        // *******************************************************************
-        // Place light #0 where the little yellow "light sphere" is
-        // Find the Light_Sphere
-        sMesh* pLightSphere = pFindMeshByFriendlyName("Light_Sphere");
-        // 
-        pLightSphere->positionXYZ = ::g_pLightManager->theLights[::g_selectedLightIndex].position;
+//        // *******************************************************************
+//        // Place light #0 where the little yellow "light sphere" is
+//        // Find the Light_Sphere
+//        sMesh* pLightSphere = pFindMeshByFriendlyName("Light_Sphere");
+//        // 
+//        pLightSphere->positionXYZ = ::g_pLightManager->theLights[::g_selectedLightIndex].position;
 
         // Update the light info in the shader
         // (Called every frame)
@@ -575,6 +605,80 @@ int main(void)
             DrawMesh(pCurMesh, program);
 
         }//for (unsigned int meshIndex..
+
+
+        // **********************************************************************************
+        if (::g_bShowDebugSpheres)
+        {
+
+            DrawDebugSphere(::g_pLightManager->theLights[::g_selectedLightIndex].position,
+                glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), 0.1f, program);
+
+            const float DEBUG_LIGHT_BRIGHTNESS = 0.3f;
+
+            const float ACCURACY = 0.1f;       // How many units distance
+            float distance_75_percent =
+                TheLightHelper.calcApproxDistFromAtten(0.75f, ACCURACY, FLT_MAX,
+                    ::g_pLightManager->theLights[::g_selectedLightIndex].atten.x,   // Const attent
+                    ::g_pLightManager->theLights[::g_selectedLightIndex].atten.y,   // Linear attenuation
+                    ::g_pLightManager->theLights[::g_selectedLightIndex].atten.z);  // Quadratic attenuation
+
+            DrawDebugSphere(::g_pLightManager->theLights[::g_selectedLightIndex].position,
+                glm::vec4(DEBUG_LIGHT_BRIGHTNESS, 0.0f, 0.0f, 1.0f),
+                distance_75_percent,
+                program);
+
+
+            float distance_50_percent =
+                TheLightHelper.calcApproxDistFromAtten(0.5f, ACCURACY, FLT_MAX,
+                    ::g_pLightManager->theLights[::g_selectedLightIndex].atten.x,   // Const attent
+                    ::g_pLightManager->theLights[::g_selectedLightIndex].atten.y,   // Linear attenuation
+                    ::g_pLightManager->theLights[::g_selectedLightIndex].atten.z);  // Quadratic attenuation
+
+            DrawDebugSphere(::g_pLightManager->theLights[::g_selectedLightIndex].position,
+                glm::vec4(0.0f, DEBUG_LIGHT_BRIGHTNESS, 0.0f, 1.0f),
+                distance_50_percent,
+                program);
+
+            float distance_25_percent =
+                TheLightHelper.calcApproxDistFromAtten(0.25f, ACCURACY, FLT_MAX,
+                    ::g_pLightManager->theLights[::g_selectedLightIndex].atten.x,   // Const attent
+                    ::g_pLightManager->theLights[::g_selectedLightIndex].atten.y,   // Linear attenuation
+                    ::g_pLightManager->theLights[::g_selectedLightIndex].atten.z);  // Quadratic attenuation
+
+            DrawDebugSphere(::g_pLightManager->theLights[::g_selectedLightIndex].position,
+                glm::vec4(0.0f, 0.0f, DEBUG_LIGHT_BRIGHTNESS, 1.0f),
+                distance_25_percent,
+                program);
+
+            float distance_05_percent =
+                TheLightHelper.calcApproxDistFromAtten(0.05f, ACCURACY, FLT_MAX,
+                    ::g_pLightManager->theLights[::g_selectedLightIndex].atten.x,   // Const attent
+                    ::g_pLightManager->theLights[::g_selectedLightIndex].atten.y,   // Linear attenuation
+                    ::g_pLightManager->theLights[::g_selectedLightIndex].atten.z);  // Quadratic attenuation
+
+            DrawDebugSphere(::g_pLightManager->theLights[::g_selectedLightIndex].position,
+                glm::vec4(DEBUG_LIGHT_BRIGHTNESS, DEBUG_LIGHT_BRIGHTNESS, 0.0f, 1.0f),
+                distance_05_percent,
+                program);
+
+        }
+        // **********************************************************************************
+
+        //for (float x = -50.0f; x < 50.0f; x += 5.0f)
+        //{
+        //    for (float y = 0.0f; y < 50.0f; y += 5.0f)
+        //    {
+        //        for (float z = -50.0f; z < 50.0f; z += 5.0f)
+        //        {
+        //            DrawDebugSphere(glm::vec3(x, y, z),
+        //                glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
+        //                1.0f, program);
+
+        //        }
+        //    }
+        //}
+
 
 
         // Calculate elapsed time
@@ -595,8 +699,6 @@ int main(void)
         pBallShadow->positionXYZ.x = pBall->positionXYZ.x;
         pBallShadow->positionXYZ.z = pBall->positionXYZ.z;
         // Don't update the y - keep the shadow near the plane
-
-
 
 
         // Physic update and test 
@@ -623,6 +725,20 @@ int main(void)
  
         }//if (::g_pPhysicEngine->vec_SphereAABB_Collisions
 
+
+        // Point the spot light to the ball
+        sMesh* pBouncy_5_Ball = pFindMeshByFriendlyName("Bouncy_5");
+        if (pBouncy_5_Ball)
+        {
+            glm::vec3 directionToBal
+                = pBouncy_5_Ball->positionXYZ - glm::vec3(::g_pLightManager->theLights[1].position);
+    
+            // Normalize to get the direction only
+            directionToBal = glm::normalize(directionToBal);
+
+            // Point the spot light at the bouncy ball
+            ::g_pLightManager->theLights[1].direction = glm::vec4(directionToBal, 1.0f);
+        }
 
 
 
@@ -675,30 +791,30 @@ void AddModelsToScene(void)
     // Load some models to draw
 
 
-    {
-        sMesh* pSphereMesh = new sMesh();
-//        pSphereMesh->modelFileName = "assets/models/Sphere_radius_1_xyz.ply";
-        pSphereMesh->modelFileName = "assets/models/Sphere_radius_1_xyz_N.ply";
-        pSphereMesh->positionXYZ = glm::vec3(0.0f, 30.0f, 0.0f);
-        pSphereMesh->bIsWireframe = true;
-        pSphereMesh->objectColourRGBA = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
-        pSphereMesh->uniformScale = 0.1f;
-        pSphereMesh->uniqueFriendlyName = "Light_Sphere";
+//    {
+//        sMesh* pSphereMesh = new sMesh();
+////        pSphereMesh->modelFileName = "assets/models/Sphere_radius_1_xyz.ply";
+//        pSphereMesh->modelFileName = "assets/models/Sphere_radius_1_xyz_N.ply";
+//        pSphereMesh->positionXYZ = glm::vec3(0.0f, 30.0f, 0.0f);
+//        pSphereMesh->bIsWireframe = true;
+//        pSphereMesh->objectColourRGBA = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
+//        pSphereMesh->uniformScale = 0.1f;
+//        pSphereMesh->uniqueFriendlyName = "Light_Sphere";
+//
+//        ::g_vecMeshesToDraw.push_back(pSphereMesh);
+//    }
 
-        ::g_vecMeshesToDraw.push_back(pSphereMesh);
-    }
-
-    {
-        sMesh* pDebugSphere = new sMesh();
-        pDebugSphere->modelFileName = "assets/models/Sphere_radius_1_xyz_N.ply";
-        pDebugSphere->positionXYZ = glm::vec3(0.0f, 5.0f, 0.0f);
-        pDebugSphere->bIsWireframe = true;
-        pDebugSphere->objectColourRGBA = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
-        pDebugSphere->uniqueFriendlyName = "Debug_Sphere";
-        pDebugSphere->uniformScale = 10.0f;
-        pDebugSphere->bDoNotLight = true;
-//        ::g_vecMeshesToDraw.push_back(pDebugSphere);
-    }
+    //{
+    //    sMesh* pDebugSphere = new sMesh();
+    //    pDebugSphere->modelFileName = "assets/models/Sphere_radius_1_xyz_N.ply";
+    //    pDebugSphere->positionXYZ = glm::vec3(0.0f, 5.0f, 0.0f);
+    //    pDebugSphere->bIsWireframe = true;
+    //    pDebugSphere->objectColourRGBA = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+    //    pDebugSphere->uniqueFriendlyName = "Debug_Sphere";
+    //    pDebugSphere->uniformScale = 10.0f;
+    //    pDebugSphere->bDoNotLight = true;
+    //    ::g_vecMeshesToDraw.push_back(pDebugSphere);
+    //}
 
     // Add a bunch of bunny rabbits
     float boxLimit = 50.0f;
@@ -861,7 +977,7 @@ void AddModelsToScene(void)
     }
 
 
-    for ( unsigned int ballCount = 0; ballCount != 4; ballCount++ )
+    for ( unsigned int ballCount = 0; ballCount != 10; ballCount++ )
     {
         //    ____                _            __                   _     
         //   |  _ \ ___ _ __   __| | ___ _ __ / / __ ___   ___  ___| |__  
@@ -880,6 +996,10 @@ void AddModelsToScene(void)
         pSphereMesh->objectColourRGBA.r = getRandomFloat(0.0f, 1.0f);
         pSphereMesh->objectColourRGBA.g = getRandomFloat(0.0f, 1.0f);
         pSphereMesh->objectColourRGBA.b = getRandomFloat(0.0f, 1.0f);
+        std::stringstream ssBallName;
+        ssBallName << "Bouncy_" << ballCount;
+        pSphereMesh->uniqueFriendlyName = ssBallName.str();
+
         ::g_vecMeshesToDraw.push_back(pSphereMesh);
 
         //    ____  _               _                  _     _           _   

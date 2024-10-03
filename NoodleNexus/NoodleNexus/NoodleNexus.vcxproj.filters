@@ -71,6 +71,9 @@
     <ClCompile Include="RenderCall.cpp">
       <Filter>RenderStuff</Filter>
     </ClCompile>
+    <ClCompile Include="cLightHelper\cLightHelper.cpp">
+      <Filter>LIghts</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PlyFileLoaders.h">
@@ -98,6 +101,9 @@
       <Filter>Phsyics_Stuff</Filter>
     </ClInclude>
     <ClInclude Include="cLightManager.h">
+      <Filter>LIghts</Filter>
+    </ClInclude>
+    <ClInclude Include="cLightHelper\cLightHelper.h">
       <Filter>LIghts</Filter>
     </ClInclude>
   </ItemGroup>

@@ -12,13 +12,10 @@ extern cVAOManager* g_pMeshManager;
 
 //RenderCall
 
-
-void DrawDebugSphere(glm::vec3 position, glm::vec4 RGBA, float scale)
-{
+sMesh* pDebugSphere = NULL;
 
 
-	return;
-}
+
 
 void DrawMesh(sMesh* pCurMesh, GLuint program)
 {
@@ -162,4 +159,34 @@ void DrawMesh(sMesh* pCurMesh, GLuint program)
 
 
 	return;
+}
+
+
+void DrawDebugSphere(glm::vec3 position, glm::vec4 RGBA, float scale, GLuint program)
+{
+    // Created the debug sphere, yet?
+    if (!pDebugSphere)           // Same as if ( pDebugSphere == NULL )
+    {
+        pDebugSphere = new sMesh();
+        pDebugSphere->modelFileName = "assets/models/Sphere_radius_1_xyz_N.ply";
+        pDebugSphere->positionXYZ = glm::vec3(0.0f, 5.0f, 0.0f);
+        pDebugSphere->bIsWireframe = true;
+        pDebugSphere->objectColourRGBA = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+        pDebugSphere->uniqueFriendlyName = "Debug_Sphere";
+        pDebugSphere->uniformScale = 10.0f;
+        pDebugSphere->bDoNotLight = true;
+    }
+    // At this point the debug sphere is created
+
+    pDebugSphere->bIsVisible = true;
+    pDebugSphere->positionXYZ = position;
+    pDebugSphere->bOverrideObjectColour = true;
+    pDebugSphere->objectColourRGBA = RGBA;
+    pDebugSphere->uniformScale = scale;
+
+    DrawMesh(pDebugSphere, program);
+
+    pDebugSphere->bIsVisible = false;
+
+    return;
 }

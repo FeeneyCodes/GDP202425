@@ -135,6 +135,13 @@ vec4 calculateLightContrib( vec3 vertexMaterialColour, vec3 vertexNormal,
 		vec3 lightVector = normalize(vLightToVertex);
 		float dotProduct = dot(lightVector, vertexNormal.xyz);	 
 		
+		// Cut off the light after the distance cut off 
+		if ( distanceToLight > theLights[index].atten.w )
+		{
+			finalObjectColour = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+			return;
+		}
+		
 		dotProduct = max( 0.0f, dotProduct );	
 		
 		vec3 lightDiffuseContrib = dotProduct * theLights[index].diffuse.rgb;

@@ -28,3 +28,8 @@ void handleMouseAsync(GLFWwindow* window);
 void DrawDebugSphere(glm::vec3 position, glm::vec4 RGBA, float scale, GLuint program);
 
 extern bool g_bShowDebugSpheres;
+
+glm::vec3 g_rgb_from_HTML(unsigned int red, unsigned int green, unsigned int blue);
+
+// HACK: Show "targeting LASER"
+extern bool g_bShowLASERBeam;

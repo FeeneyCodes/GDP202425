@@ -8,6 +8,7 @@
 #include <map>
 #include <glm/glm.hpp>
 #include <glm/vec3.hpp>
+#include <vector>
 
 // The vertex structure 
 //	that's ON THE GPU (eventually) 
@@ -66,6 +67,19 @@ public:
 								 sModelDrawInfo &drawInfo);
 
 	std::string getLastError(bool bAndClear = true);
+
+	// More general triangle information
+	// (i.e. not coupled to the shader info
+	//  that's in the sModelDrawInfo)
+	struct sTriangle
+	{
+		glm::vec3 vertices[3];
+		glm::vec3 normal;
+		// Maybe other things?
+	};
+	// Returns false if didn't find mesh
+	bool getTriangleMeshInfo(std::string meshName,
+	                         std::vector<cVAOManager::sTriangle> &vecTriangles);
 
 private:
 

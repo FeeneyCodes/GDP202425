@@ -6,6 +6,7 @@
 #include <vector>
 // 
 #include "sMesh.h"
+#include "cVAOManager/cVAOManager.h"
 
 class cPhysics
 {
@@ -88,6 +89,30 @@ public:
 		//		unsigned int uniqueID;
 	};
 
+	struct sLine
+	{
+		glm::vec3 startXYZ;
+		glm::vec3 endXYZ;
+		float getLength(void)
+		{
+			return glm::distance(this->endXYZ, this->startXYZ);
+		}
+	};
+
+	struct sTriangle
+	{
+		glm::vec3 vertices[3];
+		glm::vec3 normal;
+		// Maybe other things?
+	};
+	
+	struct sTriangleMesh
+	{
+		std::string meshModelName;
+		std::string meshInstanceName;	// Friendly name?
+		std::vector<sTriangle> vecTriangles;
+	};
+
 	// Other types soon, likely
 	// struct sPlane
 	// struct sCapsule
@@ -96,6 +121,27 @@ public:
 
 	std::vector<sSphere*> vecSpheres;
 	std::vector<sAABB*> vecAABBs;
+	std::vector< sTriangleMesh*> vecMeshes;
+
+
+	// Looks up the mesh information from the VAO manager
+	void setVAOManager(cVAOManager* pTheVAOManager);
+private:
+	cVAOManager* m_pVAOManager = NULL;
+public:
+	// Look up the mesh from the VAO manager
+	// (if it's loaded)
+	bool addTriangleMesh(std::string meshModelName);
+	// What if the mesh has been placed somewhere else in the world? 
+	// TODO: 
+	bool addTriangleMesh(std::string meshModelName, 
+		glm::vec3 meshWorldPosition,
+		glm::vec3 meshWorldOrientation, 
+		float uniformScale);
+	bool addTriangleMesh(std::string meshModelName, glm::mat4 modelMatrix);
+	
+	// Takes triangle information directly 
+	bool addTriangleMesh(std::string meshModelName, sTriangleMesh& vecMeshes);
 
 //	std::vector<sPhysicObject*> vecAllTheObjects;
 //	std::vector< sPhysInfo* > vec_pPhysInfos;
@@ -104,20 +150,12 @@ public:
 	void StepTick(double deltaTime);
 
 
-//	bool DoesRayCollide(glm::vec3 rayStart, glm::vec3 rayEnd);
-//	bool DoesRayCollide(glm::vec3 rayStart, glm::vec3 rayEnd, vec_pMeshesIHit);
-	// Store the "vec_pMeshesIHit" like the collision events
-	void DoesRayCollide(glm::vec3 rayStart, glm::vec3 rayEnd);
-	// If there's a intersection, it will be added to 
-	// std::vector<sMeshCollionEven> vec_pMeshesRayHit;
-
-
-
-	// Check to see if they collided. 
-	// We likely need other information, like where, when, etc.
-	bool bSphereAABBCollision(sSphere* pSphere, sAABB* pAABB);
-	bool bSphereSphereCollision(sSphere* pA, sSphere* pB);
-	bool bAABB_ABBBCollision(sAABB* pA, sAABB* pB);
+////	bool DoesRayCollide(glm::vec3 rayStart, glm::vec3 rayEnd);
+////	bool DoesRayCollide(glm::vec3 rayStart, glm::vec3 rayEnd, vec_pMeshesIHit);
+//	// Store the "vec_pMeshesIHit" like the collision events
+//	void DoesRayCollide(glm::vec3 rayStart, glm::vec3 rayEnd);
+//	// If there's a intersection, it will be added to 
+//	// std::vector<sMeshCollionEven> vec_pMeshesRayHit;
 
 
 	// Could do this... like a callback or event 
@@ -157,6 +195,33 @@ public:
 		// glm::vec3 sphereDirection;
 	};
 	std::vector<sCollision_SphereAABB> vec_SphereSphere_Collisions;
+
+	struct sCollision_RayTriangleInMesh
+	{
+		double timeOfCollision;
+
+		sLine theRay;
+		std::vector<sTriangle> vecTriangles;
+		// Any other things you might want
+	};
+	std::vector<sCollision_RayTriangleInMesh> vec_RayTriangle_Collisions;
+
+
+	// Returns immediately with the triangles we hit
+	bool rayCast(glm::vec3 start, glm::vec3 end,
+		std::vector<sCollision_RayTriangleInMesh>& vec_RayTriangle_Collisions);
+	// This one adds the collision to the vec_RayTriangle_Collisions
+	void rayCast(glm::vec3 start, glm::vec3 end);
+
+
+
+	// Check to see if they collided. 
+	// We likely need other information, like where, when, etc.
+	bool bSphereAABBCollision(sSphere* pSphere, sAABB* pAABB);
+	bool bSphereSphereCollision(sSphere* pA, sSphere* pB);
+	bool bAABB_ABBBCollision(sAABB* pA, sAABB* pB);
+	bool bRay_TriangleCollision(sLine theLine, sTriangle theTri);
+
 
 private:
 	void m_CheckForCollisions(double deltaTime);

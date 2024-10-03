@@ -139,7 +139,7 @@ vec4 calculateLightContrib( vec3 vertexMaterialColour, vec3 vertexNormal,
 		if ( distanceToLight > theLights[index].atten.w )
 		{
 			finalObjectColour = vec4(0.0f, 0.0f, 0.0f, 1.0f);
-			return;
+			return finalObjectColour;
 		}
 		
 		dotProduct = max( 0.0f, dotProduct );	

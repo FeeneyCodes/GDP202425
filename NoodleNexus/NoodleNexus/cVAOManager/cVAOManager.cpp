@@ -511,3 +511,69 @@ void sModelDrawInfo::calculateExtents(void)
 	return;
 }
 
+
+bool cVAOManager::getTriangleMeshInfo(
+	std::string meshName,
+	std::vector<sTriangle>& vecTriangles)
+{
+	sModelDrawInfo meshInfo;
+	if (!this->FindDrawInfoByModelName(meshName, meshInfo))
+	{
+		// Can't find that mesh... 
+		return false;
+	}
+
+	vecTriangles.clear();
+
+	// Copy that meshInfo to the vecTriangle vector
+	// 
+	// Recal that the index information is a 1D array, 
+	//	and that every 3 indices is one triangle
+	// Then we look up the vertex infom from the index
+	//  info. AND we'll have to calculate the normal, too
+	// (which is the cross product of the vertex locations)
+	// 
+	// 	sVertex_SHADER_FORMAT_xyz_rgb_N* pVertices;	
+	//	unsigned int* pIndices;
+	//
+	// Remember that the element (triangle) indexes are in sets of 3s
+	// pIndices[0] & pIndices[1] & pIndices[2] are triangle 0
+	// pIndices[3] & pIndices[4] & pIndices[5] are triangle 1
+	// ... and so on
+	for (unsigned int index = 0; index != meshInfo.numberOfIndices; index += 3)
+	{
+		unsigned int vertIndex0 = meshInfo.pIndices[index + 0];
+		unsigned int vertIndex1 = meshInfo.pIndices[index + 1];
+		unsigned int vertIndex2 = meshInfo.pIndices[index + 2];
+
+		sTriangle curTriangle;
+		curTriangle.vertices[0].x = meshInfo.pVertices[vertIndex0].x;
+		curTriangle.vertices[0].y = meshInfo.pVertices[vertIndex0].y;
+		curTriangle.vertices[0].z = meshInfo.pVertices[vertIndex0].z;
+
+		curTriangle.vertices[1].x = meshInfo.pVertices[vertIndex1].x;
+		curTriangle.vertices[1].y = meshInfo.pVertices[vertIndex1].y;
+		curTriangle.vertices[1].z = meshInfo.pVertices[vertIndex1].z;
+
+		curTriangle.vertices[2].x = meshInfo.pVertices[vertIndex2].x;
+		curTriangle.vertices[2].y = meshInfo.pVertices[vertIndex2].y;
+		curTriangle.vertices[2].z = meshInfo.pVertices[vertIndex2].z;
+
+		// Calculate the normal
+		// https://en.wikipedia.org/wiki/Cross_product
+
+		curTriangle.normal =
+			glm::cross(curTriangle.vertices[1] - curTriangle.vertices[0],
+				       curTriangle.vertices[2] - curTriangle.vertices[0]);
+		// Normalize it
+		curTriangle.normal = glm::normalize(curTriangle.normal);
+
+		vecTriangles.push_back(curTriangle);
+
+	}//for (unsigned int index
+
+
+
+
+	return true;
+}

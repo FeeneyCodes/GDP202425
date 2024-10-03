@@ -488,10 +488,19 @@ int main(void)
         sphereShadowMesh, program);
     std::cout << sphereShadowMesh.numberOfVertices << " vertices loaded" << std::endl;
 
+    //sModelDrawInfo backroomLevelMesh;
+    //::g_pMeshManager->LoadModelIntoVAO("assets/models/Backrooms_Level_0/tinker_adjusted_xyz_N.ply",
+    //    backroomLevelMesh, program);
+    //std::cout << backroomLevelMesh.numberOfVertices << " vertices loaded" << std::endl;
+
     //    pMeshManager->LoadTheListOfModelsIWantFromASexyFile("MyModels.sexy");
 
 
     ::g_pPhysicEngine = new cPhysics();
+
+    // For triangle meshes, let the physics object "know" about the VAO manager
+    ::g_pPhysicEngine->setVAOManager(::g_pMeshManager);
+
 
     AddModelsToScene();
 
@@ -595,6 +604,12 @@ int main(void)
         // *******************************************************************
 
 
+        //    ____                       _                      
+        //   |  _ \ _ __ __ ___      __ | |    ___   ___  _ __  
+        //   | | | | '__/ _` \ \ /\ / / | |   / _ \ / _ \| '_ \ 
+        //   | |_| | | | (_| |\ V  V /  | |__| (_) | (_) | |_) |
+        //   |____/|_|  \__,_| \_/\_/   |_____\___/ \___/| .__/ 
+        //                                               |_|    
         // Draw all the objects
         //for (unsigned int meshIndex = 0; meshIndex != ::g_NumberOfMeshesToDraw; meshIndex++)
         for (unsigned int meshIndex = 0; meshIndex != ::g_vecMeshesToDraw.size(); meshIndex++)
@@ -605,6 +620,31 @@ int main(void)
             DrawMesh(pCurMesh, program);
 
         }//for (unsigned int meshIndex..
+
+
+        // Draw the LASER beam
+        if (::g_bShowLASERBeam)
+        {
+            // Draw a bunch of little balls along a line from the camera
+            //  to some place in the distance
+
+            // The fly camera is always "looking at" something 1.0 unit away
+            glm::vec3 cameraDirection = ::g_pFlyCamera->getTargetRelativeToCamera();     //0,0,1
+
+            glm::vec3 LASER_ball_location = ::g_pFlyCamera->getEyeLocation();
+            // Move the LASER below the camera
+            LASER_ball_location += glm::vec3(0.0f, -2.0f, 0.0f);
+
+            // Is the LASER less than 500 units long?
+            // (is the last LAZER ball we drew beyond 500 units form the camera?)
+            while ( glm::distance(::g_pFlyCamera->getEyeLocation(), LASER_ball_location) < 500.0f )
+            {
+                // Move the next ball 0.1 times the normalized camera direction
+                LASER_ball_location += (cameraDirection * 0.1f);
+                DrawDebugSphere(LASER_ball_location, glm::vec4(0.0f, 0.0f, 1.0f, 1.0f), 0.05f, program);
+            }
+
+        }//if (::g_bShowLASERBeam)
 
 
         // **********************************************************************************
@@ -836,7 +876,25 @@ void AddModelsToScene(void)
         }
     }//for (float x = -boxLimit...
 
+
+    //{
+    //    sMesh* pBackrooms = new sMesh();
+    //    pBackrooms->modelFileName = "assets/models/Backrooms_Level_0/tinker_adjusted_xyz_N.ply";
+    //    pBackrooms->objectColourRGBA = glm::vec4(::g_rgb_from_HTML(240, 230, 140), 1.0f);
+    //    pBackrooms->bIsWireframe = true;
+    //    pBackrooms->bDoNotLight = true;
+    //    pBackrooms->bOverrideObjectColour = true;
+    //    pBackrooms->uniqueFriendlyName = "Backrooms";
+    //     ::g_vecMeshesToDraw.push_back(pBackrooms);
+    //}
+
     {
+//    ____                _            __                   _     
+//   |  _ \ ___ _ __   __| | ___ _ __ / / __ ___   ___  ___| |__  
+//   | |_) / _ \ '_ \ / _` |/ _ \ '__/ / '_ ` _ \ / _ \/ __| '_ \ 
+//   |  _ <  __/ | | | (_| |  __/ | / /| | | | | |  __/\__ \ | | |
+//   |_| \_\___|_| |_|\__,_|\___|_|/_/ |_| |_| |_|\___||___/_| |_|
+//                                                                
         sMesh* pWarehouse = new sMesh();
         pWarehouse->modelFileName = "assets/models/Warehouse_xyz_n.ply";
 //        pWarehouse->positionXYZ = glm::vec3(0.0f, -5.0f, 0.0f);
@@ -844,6 +902,19 @@ void AddModelsToScene(void)
         pWarehouse->objectColourRGBA = glm::vec4(0.6f, 0.6f, 0.6f, 1.0f);
         pWarehouse->uniqueFriendlyName = "Warehouse";
          ::g_vecMeshesToDraw.push_back(pWarehouse);
+
+//    ____  _               _                  _     _           _   
+//   |  _ \| |__  _   _ ___(_) ___ ___    ___ | |__ (_) ___  ___| |_ 
+//   | |_) | '_ \| | | / __| |/ __/ __|  / _ \| '_ \| |/ _ \/ __| __|
+//   |  __/| | | | |_| \__ \ | (__\__ \ | (_) | |_) | |  __/ (__| |_ 
+//   |_|   |_| |_|\__, |___/_|\___|___/  \___/|_.__// |\___|\___|\__|
+//                |___/                           |__/               
+         ::g_pPhysicEngine->addTriangleMesh(
+             "assets/models/Warehouse_xyz_n.ply",
+             pWarehouse->positionXYZ,
+             pWarehouse->rotationEulerXYZ,
+             pWarehouse->uniformScale);
+
     }
 
 

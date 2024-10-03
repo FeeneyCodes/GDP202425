@@ -47,6 +47,11 @@ glm::vec3 cBasicFlyCamera::getEyeLocation(void)
 	return this->m_eye;
 }
 
+glm::vec3 cBasicFlyCamera::getTargetRelativeToCamera(void)
+{
+	return glm::normalize(this->m_target);
+}
+
 glm::vec3 cBasicFlyCamera::getTargetLocation(void)
 {
 	// For now, this is simple, but will get more complicated

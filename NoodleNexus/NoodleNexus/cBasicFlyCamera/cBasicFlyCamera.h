@@ -14,6 +14,8 @@ public:
 
 	glm::vec3 getEyeLocation(void);
 	glm::vec3 getTargetLocation(void);
+	// Normalized version of getTargetLocation()
+	glm::vec3 getTargetRelativeToCamera(void);
 
 	// Do we want an "up" vector as well?
 

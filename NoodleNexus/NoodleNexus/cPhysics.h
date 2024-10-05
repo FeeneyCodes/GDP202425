@@ -109,7 +109,6 @@ public:
 		glm::vec3 vertices[3];
 		glm::vec3 normal;
 		// Maybe other things?
-		//glm::vec3 intersectionPoint;
 	};
 	
 	struct sTriangleMesh

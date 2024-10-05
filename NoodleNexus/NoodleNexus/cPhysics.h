@@ -91,6 +91,11 @@ public:
 
 	struct sLine
 	{
+		sLine()
+		{
+			this->startXYZ = glm::vec3(0.0f);
+			this->endXYZ = glm::vec3(0.0f);
+		}
 		glm::vec3 startXYZ;
 		glm::vec3 endXYZ;
 		float getLength(void)
@@ -104,6 +109,7 @@ public:
 		glm::vec3 vertices[3];
 		glm::vec3 normal;
 		// Maybe other things?
+		//glm::vec3 intersectionPoint;
 	};
 	
 	struct sTriangleMesh
@@ -201,6 +207,7 @@ public:
 		double timeOfCollision;
 
 		sLine theRay;
+		std::string meshInstanceName;
 		std::vector<sTriangle> vecTriangles;
 		// Any other things you might want
 	};
@@ -220,7 +227,14 @@ public:
 	bool bSphereAABBCollision(sSphere* pSphere, sAABB* pAABB);
 	bool bSphereSphereCollision(sSphere* pA, sSphere* pB);
 	bool bAABB_ABBBCollision(sAABB* pA, sAABB* pB);
+	// This is an infinite ray intersection test
+	// The start and end define the line, but it extends forever
 	bool bRay_TriangleCollision(sLine theLine, sTriangle theTri);
+	// This is a line SEGMENT traingle test
+	bool bLineSegment_TriangleCollision(sLine theLine, sTriangle theTri);
+	// returns the barycentric coordinates(u, v, w)
+	bool bLineSegment_TriangleCollision(sLine theLine, sTriangle theTri,
+	                                    float& u, float& v, float& w, float& t);
 
 
 private:

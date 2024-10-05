@@ -198,123 +198,143 @@ sMesh* pFindMeshByFriendlyName(std::string theNameToFind)
 
 
 int main(void)
-{   
+{
 
-//    ConsoleStuff();
+    //    ConsoleStuff();
+    //
+        // On the stack, at compile time.
+        // Limited by the size of the stack.
+        // Also: Can't change the size.
+    //    sVertex vertices[3] =
+    //    {
+    //        { { -0.6f, -0.4f }, { 1.0f, 0.0f, 0.0f } },
+    //        { {  0.6f, -0.4f }, { 0.0f, 1.0f, 0.0f } },
+    //       { {  0.0f,  0.6f }, { 0.0f, 0.0f, 1.0f } }
+    //  };
+    //
+    //    sizeof(sVertex) * 3;
+    ////    std::cout << "vertices: " << vertices << '\n';
+    //    std::cout << (*(vertices + 1)).
+    //
+        // On the HEAP, so dynamically allocated at run time
+    //    sVertex* pVertices = new sVertex[3];
+    //
+    //    pVertices[0] = { { -0.6f, -0.4f }, { 1.0f, 0.0f, 0.0f } };
+    //    pVertices[1] = { {  0.6f, -0.4f }, { 0.0f, 1.0f, 0.0f } };
+    //    pVertices[2] = { {  0.0f,  0.6f }, { 0.0f, 0.0f, 1.0f } };
+    //
+        //s3DFileData plyFileInfoBunny;
+        //plyFileInfoBunny.fileName = "assets/models/bun_zipper_res3.ply";
+        //ReadPlyModelFromFile_xyz_ci(plyFileInfoBunny);
+    //
+        //s3DFileData plyFileInfo;
+        //plyFileInfo.fileName = "assets/models/VintageRacingCar_xyz_only.ply";
+        //ReadPlyModelFromFile_xyz(plyFileInfo);
+    //
+        //s3DFileData plyFileInfo;
+        //plyFileInfo.fileName = "assets/models/Dragon 2.5Edited_xyz_only.ply";
+        //ReadPlyModelFromFile_xyz(plyFileInfo);
+    //
+    // ******************************************************
+    //
+    //    // This is the array we are giving the GPU 
+    ////    unsigned int numberOfVertices_TO_DRAW = numberOfTriangles * 3;
+    //    unsigned int numberOfVertices_TO_DRAW = plyFileInfo.numberOfTriangles * 3;
+    //    // Each triangle has 3 vertices
+    //
+    //    sVertex* pVertices = new sVertex[numberOfVertices_TO_DRAW];
+    //
+    //    // Copy the data form the "ply" (i.e. file) arrays
+    //    // to the format that the GPU expects
+    ////     struct sPlyVertex
+    ////    {
+    ////        float x, y, z, confidence, intensity;
+    ////    };
+    ////
+    ////    struct sTriangle
+    ////    {
+    ////        unsigned int vertIndex_0;
+    ////        unsigned int vertIndex_1;
+    ////        unsigned int vertIndex_2;
+    ////    };
+    ////
+    ////  to... 
+    //// 
+    ////    struct sVertex
+    ////    {
+    ////        glm::vec2 pos;      // position   or "float x, y"
+    ////        glm::vec3 col;      //
+    //
+    //    unsigned int vertexIndex = 0;
+    //
+    ////    for (unsigned int triIndex = 0; triIndex != numberOfTriangles; triIndex++)
+    //    for (unsigned int triIndex = 0; triIndex != plyFileInfo.numberOfTriangles; triIndex++)
+    //    {
+    ////        { { -0.6f, -0.4f }, { 1.0f, 0.0f, 0.0f } },
+    ////        { {  0.6f, -0.4f }, { 0.0f, 1.0f, 0.0f } },
+    ////        { {  0.0f,  0.6f }, { 0.0f, 0.0f, 1.0f } }
+    //
+    ////        pVertices[vertexIndex + 0].pos.x = pPlyVertices[ pPlyTriangles[triIndex].vertIndex_0 ].x;
+    //        pVertices[vertexIndex + 0].pos.x = plyFileInfo.pPlyVertices[plyFileInfo.pPlyTriangles[triIndex].vertIndex_0 ].x;
+    //        pVertices[vertexIndex + 0].pos.y = plyFileInfo.pPlyVertices[plyFileInfo.pPlyTriangles[triIndex].vertIndex_0 ].y;
+    //        pVertices[vertexIndex + 0].pos.z = plyFileInfo.pPlyVertices[plyFileInfo.pPlyTriangles[triIndex].vertIndex_0 ].z;
+    //        pVertices[vertexIndex + 0].col.r = 1.0f;
+    //        pVertices[vertexIndex + 0].col.g = 1.0f;
+    //        pVertices[vertexIndex + 0].col.b = 1.0f;
+    //
+    //        pVertices[vertexIndex + 1].pos.x = plyFileInfo.pPlyVertices[plyFileInfo.pPlyTriangles[triIndex].vertIndex_1 ].x;
+    //        pVertices[vertexIndex + 1].pos.y = plyFileInfo.pPlyVertices[plyFileInfo.pPlyTriangles[triIndex].vertIndex_1 ].y;
+    //        pVertices[vertexIndex + 1].pos.z = plyFileInfo.pPlyVertices[plyFileInfo.pPlyTriangles[triIndex].vertIndex_1 ].z;
+    //        pVertices[vertexIndex + 1].col.r = 1.0f;
+    //        pVertices[vertexIndex + 1].col.g = 1.0f;
+    //        pVertices[vertexIndex + 1].col.b = 1.0f;
+    //
+    //        pVertices[vertexIndex + 2].pos.x = plyFileInfo.pPlyVertices[plyFileInfo.pPlyTriangles[triIndex].vertIndex_2 ].x;
+    //        pVertices[vertexIndex + 2].pos.y = plyFileInfo.pPlyVertices[plyFileInfo.pPlyTriangles[triIndex].vertIndex_2 ].y;
+    //        pVertices[vertexIndex + 2].pos.z = plyFileInfo.pPlyVertices[plyFileInfo.pPlyTriangles[triIndex].vertIndex_2 ].z;
+    //        pVertices[vertexIndex + 2].col.r = 1.0f;
+    //        pVertices[vertexIndex + 2].col.g = 1.0f;
+    //        pVertices[vertexIndex + 2].col.b = 1.0f;
+    //
+    //        vertexIndex += 3;
+    //    }
+    //
+    //
+    //    // Scale the dragon
+    ////    for (unsigned int index = 0; index != numberOfVertices_TO_DRAW; index++)
+    ////    {
+    ////        pVertices[index].pos.x *= 0.01f;
+    ////        pVertices[index].pos.y *= 0.01f;
+    ////        pVertices[index].pos.z *= 0.01f;
+    ////    }
+    //
+    ////    for (unsigned int index = 0; index != numberOfVertices_TO_DRAW; index++)
+    ////    {
+    ////        pVertices[index].pos.x += 1.0f;
+    ////    }
+    //
 //
-    // On the stack, at compile time.
-    // Limited by the size of the stack.
-    // Also: Can't change the size.
-//    sVertex vertices[3] =
+//    cPhysics testPhys;
+//
+//    cPhysics::sLine theLine;
+//    // Line goes left to right on x axis
+//    theLine.startXYZ = glm::vec3(+5.0f, 0.0f, -20.0f);
+//    theLine.endXYZ = glm::vec3(+5.0f, 0.0f, -20.0f);
+//
+//    cPhysics::sTriangle theTriangle;
+//    // Triangle intersects x axis
+//    theTriangle.vertices[0] = glm::vec3(0.0f, 10.0f, 0.0f);
+//    theTriangle.vertices[1] = glm::vec3(0.0f, -10.0f, -10.0f);
+//    theTriangle.vertices[2] = glm::vec3(0.0f, -10.0f, 10.0f);
+//
+//    if (testPhys.bLineSegment_TriangleCollision(theLine, theTriangle))
 //    {
-//        { { -0.6f, -0.4f }, { 1.0f, 0.0f, 0.0f } },
-//        { {  0.6f, -0.4f }, { 0.0f, 1.0f, 0.0f } },
-//       { {  0.0f,  0.6f }, { 0.0f, 0.0f, 1.0f } }
-//  };
-//
-//    sizeof(sVertex) * 3;
-////    std::cout << "vertices: " << vertices << '\n';
-//    std::cout << (*(vertices + 1)).
-//
-    // On the HEAP, so dynamically allocated at run time
-//    sVertex* pVertices = new sVertex[3];
-//
-//    pVertices[0] = { { -0.6f, -0.4f }, { 1.0f, 0.0f, 0.0f } };
-//    pVertices[1] = { {  0.6f, -0.4f }, { 0.0f, 1.0f, 0.0f } };
-//    pVertices[2] = { {  0.0f,  0.6f }, { 0.0f, 0.0f, 1.0f } };
-//
-    //s3DFileData plyFileInfoBunny;
-    //plyFileInfoBunny.fileName = "assets/models/bun_zipper_res3.ply";
-    //ReadPlyModelFromFile_xyz_ci(plyFileInfoBunny);
-//
-    //s3DFileData plyFileInfo;
-    //plyFileInfo.fileName = "assets/models/VintageRacingCar_xyz_only.ply";
-    //ReadPlyModelFromFile_xyz(plyFileInfo);
-//
-    //s3DFileData plyFileInfo;
-    //plyFileInfo.fileName = "assets/models/Dragon 2.5Edited_xyz_only.ply";
-    //ReadPlyModelFromFile_xyz(plyFileInfo);
-//
-// ******************************************************
-//
-//    // This is the array we are giving the GPU 
-////    unsigned int numberOfVertices_TO_DRAW = numberOfTriangles * 3;
-//    unsigned int numberOfVertices_TO_DRAW = plyFileInfo.numberOfTriangles * 3;
-//    // Each triangle has 3 vertices
-//
-//    sVertex* pVertices = new sVertex[numberOfVertices_TO_DRAW];
-//
-//    // Copy the data form the "ply" (i.e. file) arrays
-//    // to the format that the GPU expects
-////     struct sPlyVertex
-////    {
-////        float x, y, z, confidence, intensity;
-////    };
-////
-////    struct sTriangle
-////    {
-////        unsigned int vertIndex_0;
-////        unsigned int vertIndex_1;
-////        unsigned int vertIndex_2;
-////    };
-////
-////  to... 
-//// 
-////    struct sVertex
-////    {
-////        glm::vec2 pos;      // position   or "float x, y"
-////        glm::vec3 col;      //
-//
-//    unsigned int vertexIndex = 0;
-//
-////    for (unsigned int triIndex = 0; triIndex != numberOfTriangles; triIndex++)
-//    for (unsigned int triIndex = 0; triIndex != plyFileInfo.numberOfTriangles; triIndex++)
-//    {
-////        { { -0.6f, -0.4f }, { 1.0f, 0.0f, 0.0f } },
-////        { {  0.6f, -0.4f }, { 0.0f, 1.0f, 0.0f } },
-////        { {  0.0f,  0.6f }, { 0.0f, 0.0f, 1.0f } }
-//
-////        pVertices[vertexIndex + 0].pos.x = pPlyVertices[ pPlyTriangles[triIndex].vertIndex_0 ].x;
-//        pVertices[vertexIndex + 0].pos.x = plyFileInfo.pPlyVertices[plyFileInfo.pPlyTriangles[triIndex].vertIndex_0 ].x;
-//        pVertices[vertexIndex + 0].pos.y = plyFileInfo.pPlyVertices[plyFileInfo.pPlyTriangles[triIndex].vertIndex_0 ].y;
-//        pVertices[vertexIndex + 0].pos.z = plyFileInfo.pPlyVertices[plyFileInfo.pPlyTriangles[triIndex].vertIndex_0 ].z;
-//        pVertices[vertexIndex + 0].col.r = 1.0f;
-//        pVertices[vertexIndex + 0].col.g = 1.0f;
-//        pVertices[vertexIndex + 0].col.b = 1.0f;
-//
-//        pVertices[vertexIndex + 1].pos.x = plyFileInfo.pPlyVertices[plyFileInfo.pPlyTriangles[triIndex].vertIndex_1 ].x;
-//        pVertices[vertexIndex + 1].pos.y = plyFileInfo.pPlyVertices[plyFileInfo.pPlyTriangles[triIndex].vertIndex_1 ].y;
-//        pVertices[vertexIndex + 1].pos.z = plyFileInfo.pPlyVertices[plyFileInfo.pPlyTriangles[triIndex].vertIndex_1 ].z;
-//        pVertices[vertexIndex + 1].col.r = 1.0f;
-//        pVertices[vertexIndex + 1].col.g = 1.0f;
-//        pVertices[vertexIndex + 1].col.b = 1.0f;
-//
-//        pVertices[vertexIndex + 2].pos.x = plyFileInfo.pPlyVertices[plyFileInfo.pPlyTriangles[triIndex].vertIndex_2 ].x;
-//        pVertices[vertexIndex + 2].pos.y = plyFileInfo.pPlyVertices[plyFileInfo.pPlyTriangles[triIndex].vertIndex_2 ].y;
-//        pVertices[vertexIndex + 2].pos.z = plyFileInfo.pPlyVertices[plyFileInfo.pPlyTriangles[triIndex].vertIndex_2 ].z;
-//        pVertices[vertexIndex + 2].col.r = 1.0f;
-//        pVertices[vertexIndex + 2].col.g = 1.0f;
-//        pVertices[vertexIndex + 2].col.b = 1.0f;
-//
-//        vertexIndex += 3;
+//        std::cout << "itersected" << std::endl;
 //    }
-//
-//
-//    // Scale the dragon
-////    for (unsigned int index = 0; index != numberOfVertices_TO_DRAW; index++)
-////    {
-////        pVertices[index].pos.x *= 0.01f;
-////        pVertices[index].pos.y *= 0.01f;
-////        pVertices[index].pos.z *= 0.01f;
-////    }
-//
-////    for (unsigned int index = 0; index != numberOfVertices_TO_DRAW; index++)
-////    {
-////        pVertices[index].pos.x += 1.0f;
-////    }
-//
-
-
+//    else
+//    {
+//        std::cout << "missed" << std::endl;
+//    }
 
     glfwSetErrorCallback(error_callback);
 
@@ -623,6 +643,9 @@ int main(void)
 
 
         // Draw the LASER beam
+        cPhysics::sLine LASERbeam;
+        glm::vec3 LASERbeam_Offset = glm::vec3(0.0f, -2.0f, 0.0f);
+
         if (::g_bShowLASERBeam)
         {
             // Draw a bunch of little balls along a line from the camera
@@ -631,9 +654,12 @@ int main(void)
             // The fly camera is always "looking at" something 1.0 unit away
             glm::vec3 cameraDirection = ::g_pFlyCamera->getTargetRelativeToCamera();     //0,0,1
 
-            glm::vec3 LASER_ball_location = ::g_pFlyCamera->getEyeLocation();
+
+            LASERbeam.startXYZ = ::g_pFlyCamera->getEyeLocation();
+
             // Move the LASER below the camera
-            LASER_ball_location += glm::vec3(0.0f, -2.0f, 0.0f);
+            LASERbeam.startXYZ += LASERbeam_Offset;
+            glm::vec3 LASER_ball_location = LASERbeam.startXYZ;
 
             // Is the LASER less than 500 units long?
             // (is the last LAZER ball we drew beyond 500 units form the camera?)
@@ -644,7 +670,30 @@ int main(void)
                 DrawDebugSphere(LASER_ball_location, glm::vec4(0.0f, 0.0f, 1.0f, 1.0f), 0.05f, program);
             }
 
+            // Set the end of the LASER to the last location of the beam
+            LASERbeam.endXYZ = LASER_ball_location;
+
         }//if (::g_bShowLASERBeam)
+
+        // Now draw a different coloured ball wherever we get a collision with a triangle
+        std::vector<cPhysics::sCollision_RayTriangleInMesh> vec_RayTriangle_Collisions;
+        ::g_pPhysicEngine->rayCast(LASERbeam.startXYZ, LASERbeam.endXYZ, vec_RayTriangle_Collisions);
+        for (std::vector<cPhysics::sCollision_RayTriangleInMesh>::iterator itTriList = vec_RayTriangle_Collisions.begin();
+            itTriList != vec_RayTriangle_Collisions.end(); itTriList++)
+        {
+            for (std::vector<cPhysics::sTriangle>::iterator itTri = itTriList->vecTriangles.begin();
+                itTri != itTriList->vecTriangles.end(); itTri++)
+            {
+                // Draw a sphere at the centre of the triangle
+                glm::vec3 triCentre = (itTri->vertices[0] + itTri->vertices[1] + itTri->vertices[2]) / 3.0f;
+                DrawDebugSphere(triCentre, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), 0.5f, program);
+
+                //DrawDebugSphere(itTri->intersectionPoint, glm::vec4(1.0f, 1.0f, 0.0f, 1.0f), 0.25f, program);
+
+
+            }//for (std::vector<cPhysics::sTriangle>::iterator itTri = itTriList->vecTriangles
+
+        }//for (std::vector<cPhysics::sCollision_RayTriangleInMesh>::iterator itTriList = vec_RayTriangle_Collisions
 
 
         // **********************************************************************************

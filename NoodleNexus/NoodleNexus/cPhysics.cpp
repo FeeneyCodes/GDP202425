@@ -373,8 +373,8 @@ bool cPhysics::addTriangleMesh(
 		sTriangle curTriangle = *itTri;
 		// Transform the vertex to where they are in the world...
 		glm::vec4 vert0World = matModel * glm::vec4(curTriangle.vertices[0], 1.0f);
-		glm::vec4 vert1World = matModel * glm::vec4(curTriangle.vertices[0], 1.0f);
-		glm::vec4 vert2World = matModel * glm::vec4(curTriangle.vertices[0], 1.0f);
+		glm::vec4 vert1World = matModel * glm::vec4(curTriangle.vertices[1], 1.0f);
+		glm::vec4 vert2World = matModel * glm::vec4(curTriangle.vertices[2], 1.0f);
 
 		// Copy the transformed vertices bacl
 		itTri->vertices[0] = vert0World;
@@ -416,6 +416,10 @@ bool cPhysics::rayCast(glm::vec3 start, glm::vec3 end,
 		// Dereference the iterator to get the mesh
 		sTriangleMesh* pCurTriMesh = *itMesh;
 
+		sCollision_RayTriangleInMesh intersectionInfo;
+		intersectionInfo.theRay = theRay;
+		intersectionInfo.meshInstanceName = pCurTriMesh->meshInstanceName;
+
 		// Go through each triangle
 		for (std::vector<sTriangle>::iterator itTri = pCurTriMesh->vecTriangles.begin();
 			itTri != pCurTriMesh->vecTriangles.end(); itTri++)
@@ -425,17 +429,34 @@ bool cPhysics::rayCast(glm::vec3 start, glm::vec3 end,
 			// Sorry, but the method takes pointers to the 
 			//	line(ray) and triangle.
 			// I did this because the other methods did this
-			if (this->bRay_TriangleCollision(theRay, CurTriangle))
+			float u, v, w, t;
+			if (this->bLineSegment_TriangleCollision(theRay, CurTriangle, u, v, w, t))
 			{
-				// They intersect
-				sCollision_RayTriangleInMesh intersectionInfo;
-				// TODO: add the information about the intersection
-				
-				// Add this intersection event to the vector
-				vec_RayTriangle_Collisions.push_back(intersectionInfo);
+				// They intersect, so add this triangle to the "intersected triangles" of this mesh		
+				//float sumU = u + v + w;
+				//CurTriangle.intersectionPoint.x =
+				//	  CurTriangle.vertices[0].x * u 
+				//	+ CurTriangle.vertices[1].x * v 
+				//	+ CurTriangle.vertices[2].x * w;
+				//CurTriangle.intersectionPoint.y =
+				//	  CurTriangle.vertices[0].y * u 
+				//	+ CurTriangle.vertices[1].y * v 
+				//	+ CurTriangle.vertices[2].y * w;
+				//CurTriangle.intersectionPoint.z =
+				//	  CurTriangle.vertices[0].z * u 
+				//	+ CurTriangle.vertices[1].z * v 
+				//	+ CurTriangle.vertices[2].z * w;
+				intersectionInfo.vecTriangles.push_back(CurTriangle);
 			}
 
 		}//for (std::vector<sTriangle>::iterator itTri
+
+		// Add this mesh-triangle(s) to the vector of collisions
+		// (one entry per mesh)
+		if ( ! intersectionInfo.vecTriangles.empty() )
+		{
+			vec_RayTriangle_Collisions.push_back(intersectionInfo);
+		}
 
 	}//for (std::vector< sTriangleMesh*>::iterator itMesh
 
@@ -458,42 +479,197 @@ void cPhysics::rayCast(glm::vec3 start, glm::vec3 end)
 	return;
 }
 
+// Not sure what the AI was on about, but here's a much 
+//	simpler version of the drek it spit out:
+float ScalarTriple(glm::vec3 a, glm::vec3 b, glm::vec3 c) 
+{
+	return glm::dot (a, glm::cross(b, c));
+}
+
+// Reworked from the Christer Ericsson collision book
+// == = Section 5.3.4: ============================================================
+// 
+// IntersectLineTriangle() function
+// 
+// Given line pq and ccw triangle abc, return whether line pierces triangle. If
+// so, also return the barycentric coordinates (u,v,w) of the intersection point
+//int IntersectLineTriangle(Point p, Point q, Point a, Point b, Point c,
+//	float& u, float& v, float& w)
+// Assume p = line start, q = line end
 bool cPhysics::bRay_TriangleCollision(sLine theLine, sTriangle theTri)
 {
-	// From Christer Ericsson collision detection book
-	// == = Section 5.3.4: ============================================================ =
+	glm::vec3 pq = theLine.endXYZ - theLine.startXYZ;		//	Vector pq = q - p;
+	glm::vec3 pa = theTri.vertices[0] - theLine.startXYZ;	//	Vector pa = a - p;
+	glm::vec3 pb = theTri.vertices[1] - theLine.startXYZ;	//	Vector pb = b - p;
+	glm::vec3 pc = theTri.vertices[2] - theLine.startXYZ;	//	Vector pc = c - p;
+	//	Test if pq is inside the edges bc, ca and ab. Done by testing
+	//	that the signed tetrahedral volumes, computed using scalar triple
+	//	products, are all positive
+	float u = ScalarTriple(pq, pc, pb);		//	u = ScalarTriple(pq, pc, pb);
+	if (u < 0.0f)	{
+		return false;
+	}
+	float v = ScalarTriple(pq, pa, pc);		//	v = ScalarTriple(pq, pa, pc);
+	if (v < 0.0f)	{
+		return false;
+	}
+	float w = ScalarTriple(pq, pb, pa);		//	w = ScalarTriple(pq, pb, pa);
+	if (w < 0.0f) {
+		return false;
+	}
 
-	// Given line pq and ccw triangle abc, return whether line pierces triangle. If
-	// so, also return the barycentric coordinates (u,v,w) of the intersection point
-	//int IntersectLineTriangle(Point p, Point q, Point a, Point b, Point c,
-	//	float& u, float& v, float& w)
-	//{
-	//	Vector pq = q - p;
-	//	Vector pa = a - p;
-	//	Vector pb = b - p;
-	//	Vector pc = c - p;
-	//	// Test if pq is inside the edges bc, ca and ab. Done by testing
-	//	// that the signed tetrahedral volumes, computed using scalar triple
-	//	// products, are all positive
-	//	u = ScalarTriple(pq, pc, pb);
-	//	if (u < 0.0f) return 0;
-	//	v = ScalarTriple(pq, pa, pc);
-	//	if (v < 0.0f) return 0;
-	//	w = ScalarTriple(pq, pb, pa);
-	//	if (w < 0.0f) return 0;
-
-	//	// Compute the barycentric coordinates (u, v, w) determining the
-	//	// intersection point r, r = u*a + v*b + w*c
-	//	float denom = 1.0f / (u + v + w);
-	//	u *= denom;
-	//	v *= denom;
-	//	w *= denom; // w = 1.0f - u - v;
-	//	return 1;
-	//}
-
-
-	return false;
+	//	Compute the barycentric coordinates (u, v, w) determining the
+	//	intersection point r, r = u*a + v*b + w*c
+	float denom = 1.0f / (u + v + w);
+	u *= denom;
+	v *= denom;
+	w *= denom; // w = 1.0f - u - v;
+	
+	return true;
 }
+
+
+// Reworked from the Christer Ericsson collision book
+// == = Section 5.3.6: ============================================================ =
+// Given segment pq and triangle abc, returns whether segment intersects
+// triangle and if so, also returns the barycentric coordinates (u,v,w)
+// of the intersection point
+//	int IntersectSegmentTriangle(Point p, Point q, Point a, Point b, Point c,
+//		float& u, float& v, float& w, float& t)
+bool cPhysics::bLineSegment_TriangleCollision(sLine theLine, sTriangle theTri)
+{
+	glm::vec3 ab = theTri.vertices[1] - theTri.vertices[0];		//	Vector ab = b - a;
+	glm::vec3 ac = theTri.vertices[2] - theTri.vertices[0];		//	Vector ac = c - a;
+	glm::vec3 qp = theLine.startXYZ - theLine.endXYZ;			//	Vector qp = p - q;
+	//
+	//	Compute triangle normal. Can be precalculated or cached if
+	//	intersecting multiple segments against the same triangle
+	glm::vec3 n = glm::cross(ab, ac);	//	Vector n = Cross(ab, ac);
+	//
+	//	Compute denominator d. If d <= 0, segment is parallel to or points
+	//	away from triangle, so exit early
+	float d = glm::dot(qp, n);		//	float d = Dot(qp, n);
+
+	if (d <= 0.0f) {
+		return false;
+	}
+	//
+	//	Compute intersection t value of pq with plane of triangle. A ray
+	//	intersects iff 0 <= t. Segment intersects iff 0 <= t <= 1. Delay
+	//	dividing by d until intersection has been found to pierce triangle
+	glm::vec3 ap = theLine.startXYZ - theTri.vertices[0];		//	Vector ap = p - a;
+	float t = glm::dot(ap, n);									//	t = Dot(ap, n);
+
+	if (t < 0.0f) {
+		return false;
+	}
+
+	// For segment; exclude this code line for a ray test
+	if (t > d) {
+		return 0;
+	}
+
+	//	Compute barycentric coordinate components and test if within bounds
+	glm::vec3 e = glm::cross(qp, ap);	//	Vector e = Cross(qp, ap);
+	float v = glm::dot(ac, e);		//	v = Dot(ac, e);
+
+	if (v < 0.0f || v > d) {
+		return false;
+	}
+
+	float w = -glm::dot(ab, e);		//	w = -Dot(ab, e);
+
+	if ((w < 0.0f) || (v + w > d)) {
+		return 0;
+	}
+
+	//	Segment/ray intersects triangle. Perform delayed division and
+	//	compute the last barycentric coordinate component
+	// Discard this:
+	float u = 0.0f;
+	return this->bLineSegment_TriangleCollision(theLine, theTri, u, v, w, t);
+}
+
+// Reworked from the Christer Ericsson collision book
+// == = Section 5.3.6: ============================================================ =
+// Given segment pq and triangle abc, returns whether segment intersects
+// triangle and if so, also returns the barycentric coordinates (u,v,w)
+// of the intersection point
+//	int IntersectSegmentTriangle(Point p, Point q, Point a, Point b, Point c,
+//		float& u, float& v, float& w, float& t)
+bool cPhysics::bLineSegment_TriangleCollision(
+	sLine theLine, sTriangle theTri,
+    float& u, float& v, float& w, float& t)
+{
+	glm::vec3 ab = theTri.vertices[1] - theTri.vertices[0];		//	Vector ab = b - a;
+	glm::vec3 ac = theTri.vertices[2] - theTri.vertices[0];		//	Vector ac = c - a;
+	glm::vec3 qp = theLine.startXYZ - theLine.endXYZ;			//	Vector qp = p - q;
+	//
+	//	Compute triangle normal. Can be precalculated or cached if
+	//	intersecting multiple segments against the same triangle
+	glm::vec3 n = glm::cross(ab, ac);	//	Vector n = Cross(ab, ac);
+	//
+	//	Compute denominator d. If d <= 0, segment is parallel to or points
+	//	away from triangle, so exit early
+	float d = glm::dot(qp, n);		//	float d = Dot(qp, n);
+	
+	if (d <= 0.0f) {
+		return false;
+	}
+	//
+	//	Compute intersection t value of pq with plane of triangle. A ray
+	//	intersects iff 0 <= t. Segment intersects iff 0 <= t <= 1. Delay
+	//	dividing by d until intersection has been found to pierce triangle
+	glm::vec3 ap = theLine.startXYZ - theTri.vertices[0];		//	Vector ap = p - a;
+	t = glm::dot(ap, n);									//	t = Dot(ap, n);
+	
+	if (t < 0.0f) {
+		return false;
+	}
+
+	// For segment; exclude this code line for a ray test
+	if (t > d) {
+		return 0;
+	}
+
+	//	Compute barycentric coordinate components and test if within bounds
+	glm::vec3 e = glm::cross(qp, ap);	//	Vector e = Cross(qp, ap);
+	v = glm::dot(ac, e);		//	v = Dot(ac, e);
+
+	if (v < 0.0f || v > d) {
+		return false;
+	}
+
+	w = -glm::dot(ab, e);		//	w = -Dot(ab, e);
+
+	if ( (w < 0.0f) || (v + w > d) ) {
+		return 0;
+	}
+	
+	//	Segment/ray intersects triangle. Perform delayed division and
+	//	compute the last barycentric coordinate component
+	float ood = 1.0f / d;
+	t *= ood;
+	v *= ood;
+	w *= ood;
+	u = 1.0f - v - w;
+	
+	return true;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 	// Feeney asked chatGPT this:

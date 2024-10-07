@@ -13,9 +13,14 @@ public:
 	cSuperMonster(std::string _name);			// constructor (c'tor)
 	~cSuperMonster();		// destructor (d'tor)
 
+	// Overriding
 	void MakeNoise(void);
 
 
 	void GiveBirth(int numberOfMonsters);
+
+
+	// Called every frame to update the state
+	void Update(double deltaTime);
 
 };

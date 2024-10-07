@@ -33,6 +33,9 @@
     <ClInclude Include="cSuperMonster_COPY.h">
       <Filter>Monsters\A copy</Filter>
     </ClInclude>
+    <ClInclude Include="cFlyingMonster.h">
+      <Filter>Monsters</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cMonster.cpp">
@@ -45,6 +48,9 @@
       <Filter>Monsters\A copy</Filter>
     </ClCompile>
     <ClCompile Include="cSuperMonster.cpp">
+      <Filter>Monsters</Filter>
+    </ClCompile>
+    <ClCompile Include="cFlyingMonstercpp.cpp">
       <Filter>Monsters</Filter>
     </ClCompile>
   </ItemGroup>

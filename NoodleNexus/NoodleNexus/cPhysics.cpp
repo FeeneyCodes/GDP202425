@@ -433,7 +433,18 @@ bool cPhysics::rayCast(glm::vec3 start, glm::vec3 end,
 			if (this->bLineSegment_TriangleCollision(theRay, CurTriangle, u, v, w, t))
 			{
 				// They intersect, so add this triangle to the "intersected triangles" of this mesh		
-
+				CurTriangle.intersectionPoint.x =
+					  CurTriangle.vertices[0].x * u 
+					+ CurTriangle.vertices[1].x * v 
+					+ CurTriangle.vertices[2].x * w;
+				CurTriangle.intersectionPoint.y =
+					  CurTriangle.vertices[0].y * u 
+					+ CurTriangle.vertices[1].y * v 
+					+ CurTriangle.vertices[2].y * w;
+				CurTriangle.intersectionPoint.z =
+					  CurTriangle.vertices[0].z * u 
+					+ CurTriangle.vertices[1].z * v 
+					+ CurTriangle.vertices[2].z * w;
 				intersectionInfo.vecTriangles.push_back(CurTriangle);
 			}
 

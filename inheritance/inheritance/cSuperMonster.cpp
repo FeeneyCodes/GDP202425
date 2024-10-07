@@ -6,6 +6,9 @@ cSuperMonster::cSuperMonster()		// Default constructor
 {
 	std::cout << "cSuperMonster::cSuperMonster()" << std::endl;
 	this->eyeColour = "grey";
+	// 
+	this->monsterType = 2;
+
 }
 
 cSuperMonster::cSuperMonster(std::string _name)
@@ -33,5 +36,12 @@ void cSuperMonster::GiveBirth(int numberOfMonsters)
 void cSuperMonster::MakeNoise(void)
 {
 	std::cout << "cSuperMonster says bark!" << std::endl;
+	return;
+}
+
+// Called every frame to update the state
+void cSuperMonster::Update(double deltaTime)
+{
+	std::cout << "cSuperMonster::Update() called" << std::endl;
 	return;
 }

@@ -127,6 +127,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="cFlyingMonster.h" />
     <ClInclude Include="cMonster.h" />
     <ClInclude Include="cSuperMonster.h" />
     <ClInclude Include="cSuperMonster_COPY.h">
@@ -136,6 +137,7 @@
     <ClInclude Include="cVector3.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="cFlyingMonstercpp.cpp" />
     <ClCompile Include="cMonster.cpp" />
     <ClCompile Include="cSuperMonster.cpp" />
     <ClCompile Include="cSuperMonster._COPYcpp">

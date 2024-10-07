@@ -26,6 +26,14 @@ public:
 
 	void MakeNoise(void);
 
+	// A monster would call this to another monster
+	void ReceiveGift(std::string theGift);
+
+	// Called every frame to update the state
+	void Update(double deltaTime);
+
+	unsigned int monsterType;
+
 protected:
 	// Just like private, but anything 
 	//	that inherits form this has this, too

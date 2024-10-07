@@ -64,3 +64,9 @@ void cMonster::ReceiveGift(std::string theGift)
 	std::cout << "cMonster: I got a gift!!" << std::endl;
 	return;
 }
+
+
+void cMonster::Attack(void)
+{
+	std::cout << "Regular monster attacks!" << std::endl;
+}

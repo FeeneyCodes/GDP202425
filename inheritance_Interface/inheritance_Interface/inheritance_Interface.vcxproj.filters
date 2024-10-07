@@ -1,0 +1,72 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Monsters">
+      <UniqueIdentifier>{ceb83f12-4533-4c8e-951b-646b35689250}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Monsters\Weapons">
+      <UniqueIdentifier>{467134f3-e087-4ad8-9155-d623766c14bb}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="cVector3.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cMonster.h">
+      <Filter>Monsters</Filter>
+    </ClInclude>
+    <ClInclude Include="cSuperMonster.h">
+      <Filter>Monsters</Filter>
+    </ClInclude>
+    <ClInclude Include="cFlyingMonster.h">
+      <Filter>Monsters</Filter>
+    </ClInclude>
+    <ClInclude Include="cSword.h">
+      <Filter>Monsters\Weapons</Filter>
+    </ClInclude>
+    <ClInclude Include="cAxe.h">
+      <Filter>Monsters\Weapons</Filter>
+    </ClInclude>
+    <ClInclude Include="iMonster.h">
+      <Filter>Monsters</Filter>
+    </ClInclude>
+    <ClInclude Include="cMonsterFactory.h">
+      <Filter>Monsters</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="cMonster.cpp">
+      <Filter>Monsters</Filter>
+    </ClCompile>
+    <ClCompile Include="theMain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cSuperMonster.cpp">
+      <Filter>Monsters</Filter>
+    </ClCompile>
+    <ClCompile Include="cFlyingMonstercpp.cpp">
+      <Filter>Monsters</Filter>
+    </ClCompile>
+    <ClCompile Include="cAxe.cpp">
+      <Filter>Monsters\Weapons</Filter>
+    </ClCompile>
+    <ClCompile Include="cSword.cpp">
+      <Filter>Monsters\Weapons</Filter>
+    </ClCompile>
+    <ClCompile Include="cMonsterFactory.cpp">
+      <Filter>Monsters</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

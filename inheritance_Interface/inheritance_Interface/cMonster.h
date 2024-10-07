@@ -1,12 +1,14 @@
 #pragma once
 
+#include "iMonster.h"
+
 #define defaultHealth 100.0f
 
 #include <string>
 #include "cVector3.h"
 
 
-class cMonster
+class cMonster : public iMonster
 {
 public:
 	cMonster();			// constructor (c'tor)
@@ -24,16 +26,12 @@ public:
 	// Read only getter (accessor)
 	std::string getEyeColour(void);
 
+	// From the iMonster interface
 	virtual void MakeNoise(void);
-
-	// A monster would call this to another monster
-	void ReceiveGift(std::string theGift);
-
-	// Called every frame to update the state
-	// Tells the compiler to use polymorphic inheritance.
-	// This creates something called vTable that is a RUN-TIME
-	//	lookup for the method we want based on the type we craeated.
+	virtual void Attack(void);
 	virtual void Update(double deltaTime);
+	virtual void ReceiveGift(std::string theGift);
+
 
 	unsigned int monsterType;
 

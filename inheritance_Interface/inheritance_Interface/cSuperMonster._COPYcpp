@@ -1,0 +1,41 @@
+#include "cSuperMonster.h"
+
+#include <iostream>
+
+cSuperMonster::cSuperMonster()		// Default constructor
+{
+	std::cout << "cSuperMonster::cSuperMonster()" << std::endl;
+
+
+}
+
+cSuperMonster::cSuperMonster(std::string _name)
+{
+	this->firstName = _name;
+	std::cout << "cSuperMonster::cSuperMonster() : " << this->firstName << std::endl;
+}
+
+
+cSuperMonster::~cSuperMonster()
+{
+	std::cout << "cSuperMonster::~cSuperMonster() : " << this->firstName << std::endl;
+
+}
+
+
+void cSuperMonster::KillAllHumans(void)
+{
+	std::cout << "cSuperMonster::KillAllHumans(void)" << std::endl;
+	// And other stuff too...
+
+
+	return;
+}
+
+void cSuperMonster::GiveBirth(int numberOfMonsters)
+{
+	std::cout << "Super Monster had " << numberOfMonsters << " children" << std::endl;
+
+	return;
+}
+

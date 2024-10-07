@@ -13,6 +13,8 @@ int main(int argc, char* argv[])
 	std::cout << "----------------------" << std::endl;
 	cSuperFlyingMonster* pRobin = new cSuperFlyingMonster("Robin");
 
+//	((cMonster*)pRobin)->MakeNoise();
+
 	// ... a whole lot of various monsters are created...
 	// 100s of each monster
 

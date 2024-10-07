@@ -6,6 +6,10 @@
 // we want to have all the "public" things that monster has
 // In C++ the way this happen is WE CREATE A cMonster
 // if "public" then we expose the cMonster inside Super Monster publically.
+
+// Has an axe
+#include "cAxe.h"
+
 class cSuperMonster : public cMonster
 {
 public:
@@ -13,17 +17,21 @@ public:
 	cSuperMonster(std::string _name);			// constructor (c'tor)
 	~cSuperMonster();		// destructor (d'tor)
 
-	// Overriding
-	void MakeNoise(void);
+
+	// From the iMonster interface
+	virtual void MakeNoise(void);
+	virtual void Attack(void);
+	virtual void Update(double deltaTime);
+	virtual void ReceiveGift(std::string theGift);
 
 
-	void GiveBirth(int numberOfMonsters);
+	virtual void GiveBirth(int numberOfMonsters);
 
 
-
-	// Called every frame to update the state
-	void Update(double deltaTime);
+	std::string FavoriteIceCream;
 
 	unsigned int defaultNumberOfChildren;
+
+	cAxe* pTheAxe = NULL;
 
 };

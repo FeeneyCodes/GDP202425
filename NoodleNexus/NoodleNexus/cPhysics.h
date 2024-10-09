@@ -216,9 +216,10 @@ public:
 
 	// Returns immediately with the triangles we hit
 	bool rayCast(glm::vec3 start, glm::vec3 end,
-		std::vector<sCollision_RayTriangleInMesh>& vec_RayTriangle_Collisions);
+		std::vector<sCollision_RayTriangleInMesh>& vec_RayTriangle_Collisions, 
+		bool bIgnoreBackFacingTriangles = true);
 	// This one adds the collision to the vec_RayTriangle_Collisions
-	void rayCast(glm::vec3 start, glm::vec3 end);
+	void rayCast(glm::vec3 start, glm::vec3 end, bool bIgnoreBackFacingTriangles = true);
 
 
 

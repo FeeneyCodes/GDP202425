@@ -7,6 +7,7 @@
 #include <glm/gtc/matrix_transform.hpp> 
 
 #include <iostream>
+#include <algorithm>	// for the sort::
 
 glm::vec3 cPhysics::sAABB::getExtentsXYZ(void)
 {
@@ -381,6 +382,10 @@ bool cPhysics::addTriangleMesh(
 		itTri->vertices[1] = vert1World;
 		itTri->vertices[2] = vert2World;
 
+		//itTri->vertices[0] = curTriangle.vertices[0];
+		//itTri->vertices[1] = curTriangle.vertices[1];
+		//itTri->vertices[2] = curTriangle.vertices[2];
+
 		// Also rotate the normal
 		glm::mat4 matModelInverseTranspose = glm::inverse(glm::transpose(matModel));
 
@@ -397,9 +402,74 @@ bool cPhysics::addTriangleMesh(
 	return true;
 }
 
+//struct sTriangle
+//{
+//	glm::vec3 vertices[3];
+//	glm::vec3 normal;
+//	// Maybe other things?
+//	glm::vec3 intersectionPoint;
+//};
+// Calculate triangle to point distance
+float distancePointToIntersectionTriangle(
+	glm::vec3 thePoint, cPhysics::sTriangle theTriangle)
+{
+	return glm::distance(thePoint, theTriangle.intersectionPoint);
+}
+
+// Predicate function (binary)
+// Sort takes two WHATEVERS and compares 
+//	to see which is "less"
+// (for us, "less" is "closer to"
+glm::vec3 thePoint;
+bool isTriACloserThanB(cPhysics::sTriangle triA, cPhysics::sTriangle triB)
+{
+	float distToA = distancePointToIntersectionTriangle(thePoint, triA);
+	float distToB = distancePointToIntersectionTriangle(thePoint, triB);
+	if (distToA < distToB)
+	{
+		return true;
+	}
+	// 
+	return false;
+}
+
+class cSortCloseToPoint
+{
+public:
+	cSortCloseToPoint(glm::vec3 thePoint)
+	{
+		this->m_thePoint = thePoint;
+	}
+private:
+	glm::vec3 m_thePoint;
+public:
+	// Predicate comparison method (the "less than") method
+	// on predicate function
+	bool operator()(cPhysics::sTriangle triA, cPhysics::sTriangle triB)
+	{
+		float distToA = distancePointToIntersectionTriangle(thePoint, triA);
+		float distToB = distancePointToIntersectionTriangle(thePoint, triB);
+		if (distToA < distToB)
+		{
+			return true;
+		}
+		// 
+		return false;
+	}
+};
+
+
+
+//void Hey(void)
+//{
+//	cPhysics::sTriangle triA;
+//	cPhysics::sTriangle triB;
+//	if ( triA < triB )
+//}
 
 bool cPhysics::rayCast(glm::vec3 start, glm::vec3 end,
-	std::vector<sCollision_RayTriangleInMesh>& vec_RayTriangle_Collisions)
+	std::vector<sCollision_RayTriangleInMesh>& vec_RayTriangle_Collisions, 
+	bool bIgnoreBackFacingTriangles /*= true*/)
 {
 	sLine theRay;
 	theRay.startXYZ = start;
@@ -445,10 +515,40 @@ bool cPhysics::rayCast(glm::vec3 start, glm::vec3 end,
 					  CurTriangle.vertices[0].z * u 
 					+ CurTriangle.vertices[1].z * v 
 					+ CurTriangle.vertices[2].z * w;
-				intersectionInfo.vecTriangles.push_back(CurTriangle);
-			}
+
+//				// Ignoring backfacing triangle? 
+//				if (bIgnoreBackFacingTriangles)
+//				{
+//					// See if this traingle is facing "away" from the ray
+//					glm::vec3 rayDirection = (start - end);
+//					rayDirection = glm::normalize(rayDirection);
+//					float dotProd = glm::dot(rayDirection, CurTriangle.normal);
+//					//
+//					if (dotProd > 0.0f)
+//					{
+//						// Facing towards, so add
+//						intersectionInfo.vecTriangles.push_back(CurTriangle);
+//					}
+//				}
+//				else
+//				{
+					// Add all triangles, even back facing
+					intersectionInfo.vecTriangles.push_back(CurTriangle);
+//				}
+			}//if (this->bLineSegment_TriangleCollision...
 
 		}//for (std::vector<sTriangle>::iterator itTri
+
+		// Sort the traingles from nearest to farthest
+		// Compare the intersection point with the "glm::vec3 start" ray point
+		thePoint = theRay.startXYZ;
+		std::sort(intersectionInfo.vecTriangles.begin(),
+				  intersectionInfo.vecTriangles.end(), 
+			      cSortCloseToPoint(theRay.startXYZ) );
+		//std::sort(intersectionInfo.vecTriangles.begin(),
+		//		  intersectionInfo.vecTriangles.end(), 
+		//	      isTriACloserThanB);
+
 
 		// Add this mesh-triangle(s) to the vector of collisions
 		// (one entry per mesh)
@@ -458,6 +558,8 @@ bool cPhysics::rayCast(glm::vec3 start, glm::vec3 end,
 		}
 
 	}//for (std::vector< sTriangleMesh*>::iterator itMesh
+
+
 
 	// Any collisions? 
 	if (vec_RayTriangle_Collisions.empty())
@@ -471,7 +573,7 @@ bool cPhysics::rayCast(glm::vec3 start, glm::vec3 end,
 }
 
 // This one adds the collision to the vec_RayTriangle_Collisions
-void cPhysics::rayCast(glm::vec3 start, glm::vec3 end)
+void cPhysics::rayCast(glm::vec3 start, glm::vec3 end, bool bIgnoreBackFacingTriangles /*= true*/)
 {
 	// TODO: 
 

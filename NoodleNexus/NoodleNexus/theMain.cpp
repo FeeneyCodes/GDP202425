@@ -508,6 +508,11 @@ int main(void)
         sphereShadowMesh, program);
     std::cout << sphereShadowMesh.numberOfVertices << " vertices loaded" << std::endl;
 
+    sModelDrawInfo hangarMesh;
+    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Demonstration_Interior - DO NOT USE THIS xyz_N.ply",
+        hangarMesh, program);
+    std::cout << hangarMesh.numberOfVertices << " vertices loaded" << std::endl;
+
     //sModelDrawInfo backroomLevelMesh;
     //::g_pMeshManager->LoadModelIntoVAO("assets/models/Backrooms_Level_0/tinker_adjusted_xyz_N.ply",
     //    backroomLevelMesh, program);
@@ -652,7 +657,7 @@ int main(void)
             //  to some place in the distance
 
             // The fly camera is always "looking at" something 1.0 unit away
-            glm::vec3 cameraDirection = ::g_pFlyCamera->getTargetRelativeToCamera();     //0,0,1
+            glm::vec3 cameraDirection = ::g_pFlyCamera->getTargetRelativeToCamera();     //0,0.1,0.9
 
 
             LASERbeam.startXYZ = ::g_pFlyCamera->getEyeLocation();
@@ -663,10 +668,10 @@ int main(void)
 
             // Is the LASER less than 500 units long?
             // (is the last LAZER ball we drew beyond 500 units form the camera?)
-            while ( glm::distance(::g_pFlyCamera->getEyeLocation(), LASER_ball_location) < 500.0f )
+            while ( glm::distance(::g_pFlyCamera->getEyeLocation(), LASER_ball_location) < 150.0f )
             {
                 // Move the next ball 0.1 times the normalized camera direction
-                LASER_ball_location += (cameraDirection * 0.1f);
+                LASER_ball_location += (cameraDirection * 0.10f);  
                 DrawDebugSphere(LASER_ball_location, glm::vec4(0.0f, 0.0f, 1.0f, 1.0f), 0.05f, program);
             }
 
@@ -675,9 +680,16 @@ int main(void)
 
         }//if (::g_bShowLASERBeam)
 
+        // Draw the end of this LASER beam
+        DrawDebugSphere(LASERbeam.endXYZ, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), 0.1f, program);
+
         // Now draw a different coloured ball wherever we get a collision with a triangle
         std::vector<cPhysics::sCollision_RayTriangleInMesh> vec_RayTriangle_Collisions;
-        ::g_pPhysicEngine->rayCast(LASERbeam.startXYZ, LASERbeam.endXYZ, vec_RayTriangle_Collisions);
+        ::g_pPhysicEngine->rayCast(LASERbeam.startXYZ, LASERbeam.endXYZ, vec_RayTriangle_Collisions, false);
+
+        glm::vec4 triColour = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
+        float triangleSize = 0.25f;
+
         for (std::vector<cPhysics::sCollision_RayTriangleInMesh>::iterator itTriList = vec_RayTriangle_Collisions.begin();
             itTriList != vec_RayTriangle_Collisions.end(); itTriList++)
         {
@@ -685,10 +697,15 @@ int main(void)
                 itTri != itTriList->vecTriangles.end(); itTri++)
             {
                 // Draw a sphere at the centre of the triangle
-                glm::vec3 triCentre = (itTri->vertices[0] + itTri->vertices[1] + itTri->vertices[2]) / 3.0f;
-                DrawDebugSphere(triCentre, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), 0.5f, program);
+//                glm::vec3 triCentre = (itTri->vertices[0] + itTri->vertices[1] + itTri->vertices[2]) / 3.0f;
+//                DrawDebugSphere(triCentre, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), 0.5f, program);
 
-                DrawDebugSphere(itTri->intersectionPoint, glm::vec4(1.0f, 1.0f, 0.0f, 1.0f), 0.25f, program);
+//                DrawDebugSphere(itTri->intersectionPoint, glm::vec4(1.0f, 1.0f, 0.0f, 1.0f), 0.25f, program);
+                DrawDebugSphere(itTri->intersectionPoint, triColour, triangleSize, program);
+                triColour.r -= 0.1f;
+                triColour.g -= 0.1f;
+                triColour.b += 0.2f;
+                triangleSize *= 1.25f;
 
 
             }//for (std::vector<cPhysics::sTriangle>::iterator itTri = itTriList->vecTriangles
@@ -879,7 +896,16 @@ void AddModelsToScene(void)
 
     // Load some models to draw
 
-
+    {
+        sMesh* pHangar = new sMesh();
+        pHangar->modelFileName = "assets/models/Demonstration_Interior - DO NOT USE THIS xyz_N.ply";
+        pHangar->positionXYZ = glm::vec3(0.0f, 30.0f, 0.0f);
+        pHangar->bOverrideObjectColour = true;
+        pHangar->objectColourRGBA = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
+        pHangar->rotationEulerXYZ.x = -90.0f;
+        pHangar->rotationEulerXYZ.z = 180.0f;
+        ::g_vecMeshesToDraw.push_back(pHangar);
+    }
 //    {
 //        sMesh* pSphereMesh = new sMesh();
 ////        pSphereMesh->modelFileName = "assets/models/Sphere_radius_1_xyz.ply";
@@ -946,9 +972,11 @@ void AddModelsToScene(void)
 //                                                                
         sMesh* pWarehouse = new sMesh();
         pWarehouse->modelFileName = "assets/models/Warehouse_xyz_n.ply";
-//        pWarehouse->positionXYZ = glm::vec3(0.0f, -5.0f, 0.0f);
+        pWarehouse->positionXYZ = glm::vec3(-10.0f, 5.0f, 0.0f);
         pWarehouse->rotationEulerXYZ.y = -90.0f;
         pWarehouse->objectColourRGBA = glm::vec4(0.6f, 0.6f, 0.6f, 1.0f);
+        //pWarehouse->bIsWireframe = true;
+        pWarehouse->bOverrideObjectColour = true;
         pWarehouse->uniqueFriendlyName = "Warehouse";
          ::g_vecMeshesToDraw.push_back(pWarehouse);
 
@@ -965,6 +993,34 @@ void AddModelsToScene(void)
              pWarehouse->uniformScale);
 
     }
+    //{
+    //    //    ____                _            __                   _     
+    //    //   |  _ \ ___ _ __   __| | ___ _ __ / / __ ___   ___  ___| |__  
+    //    //   | |_) / _ \ '_ \ / _` |/ _ \ '__/ / '_ ` _ \ / _ \/ __| '_ \ 
+    //    //   |  _ <  __/ | | | (_| |  __/ | / /| | | | | |  __/\__ \ | | |
+    //    //   |_| \_\___|_| |_|\__,_|\___|_|/_/ |_| |_| |_|\___||___/_| |_|
+    //    //                                                                
+    //    sMesh* pWarehouse = new sMesh();
+    //    pWarehouse->modelFileName = "assets/models/Warehouse_xyz_n.ply";
+    //    pWarehouse->positionXYZ = glm::vec3(100.0f, -5.0f, 0.0f);
+    //    pWarehouse->rotationEulerXYZ.y = -90.0f;
+    //    pWarehouse->objectColourRGBA = glm::vec4(0.6f, 0.6f, 0.6f, 1.0f);
+    //    pWarehouse->uniqueFriendlyName = "Warehouse";
+    //    ::g_vecMeshesToDraw.push_back(pWarehouse);
+
+    //    //    ____  _               _                  _     _           _   
+    //    //   |  _ \| |__  _   _ ___(_) ___ ___    ___ | |__ (_) ___  ___| |_ 
+    //    //   | |_) | '_ \| | | / __| |/ __/ __|  / _ \| '_ \| |/ _ \/ __| __|
+    //    //   |  __/| | | | |_| \__ \ | (__\__ \ | (_) | |_) | |  __/ (__| |_ 
+    //    //   |_|   |_| |_|\__, |___/_|\___|___/  \___/|_.__// |\___|\___|\__|
+    //    //                |___/                           |__/               
+    //    ::g_pPhysicEngine->addTriangleMesh(
+    //        "assets/models/Warehouse_xyz_n.ply",
+    //        pWarehouse->positionXYZ,
+    //        pWarehouse->rotationEulerXYZ,
+    //        pWarehouse->uniformScale);
+
+    //}
 
 
     {

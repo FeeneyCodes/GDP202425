@@ -37,7 +37,7 @@ int main(int argc, char* argv[])
 	iMonster* pSally = theMF.createMonster("Super Duper Monster");
 	iMonster* pFrank = theMF.createMonster("Boring regular monster");
 	iMonster* pAli = theMF.createMonster("Monster that flies");
-
+//	iMonster* pNew = theMF.createMonster("The New Hotness");
 
 	vec_pMonsters.push_back(pFrank);
 	vec_pMonsters.push_back(pAli);

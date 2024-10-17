@@ -269,23 +269,33 @@ void printUsage(std::string exeName)
 		<< "Usage and switches" << std::endl
 		<< " - 1st param is sprite file name" << std::endl
 		<< "   (You can also drop the sprite PNG file onto the exe)" << std::endl
+		<< std::endl
 		<< " - pixelSize:X" << std::endl
 		<< "       number of pixels that make up 1 pixel in image" << std::endl
 		<< "       (note: no space after the colon)" << std::endl
-		<< "  *********** ISN'T VERY GOOD AT THE MOMENT ***************" << std::endl
+		<< "Default pixel size is 1 pixel." << std::endl
+		<< std::endl
 		<< " - guessPixelSize" << std::endl
 		<< "       Will try to determine the pixel side from the image." << std::endl
 		<< "       (It does this by seeing how many pixels are the same colour in a row.)" << std::endl
+		<< "  ************************************************************" << std::endl
 		<< "  *********** DOESN'T WORK CORRECTLY AT THE MOMENT ***********" << std::endl
-		<< std::endl
-		<< "Default pixel size is 1 pixel." << std::endl
+		<< "  ************************************************************" << std::endl
 		<< std::endl
 		<< " - noBackgroundColourBlocks" << std::endl
 		<< "       Will NOT output blocks of the 'background' colour." << std::endl
+		<< "       (Ignores the alpha channel)" << std::endl
 		<< std::endl
-		<< "To determine the 'background' colour, it'll take the most common pixel" << std::endl
-		<< " colour that it finds in the image. Like if most are black, it'll assume" << std::endl
-		<< " that's the background colour." << std::endl
+		<< " - setBackgroundColour:R:G:B" << std::endl
+		<< "       Where R, G, B are HTML colours (so 0 to 255, 0 being 'black')" << std::endl
+		<< "       (Ignores the alpha channel)" << std::endl
+		<< std::endl
+		<< " - cropToBackgroundColour" << std::endl
+		<< "       Will attempt to remove any extra 'boarder' background pixels" << std::endl
+		<< "       It will do this with the original image (i.e. before it's scaled)" << std::endl
+		<< "       (default background colour is black: 0,0,0)" << std::endl
+		<< "       (Ignores the alpha channel)" << std::endl
+		<< "       By default, it will NOT crop: i.e. assumes the image is correctly cropped" << std::endl
 		<< std::endl
 		<< "Example: " << std::endl
 		<< std::endl
@@ -296,12 +306,30 @@ void printUsage(std::string exeName)
 	return;
 }
 
+// The command line params
+struct sFlagSettings
+{
+	unsigned int pixelSize = 1;
+	bool bGuessPixelSize = false;
+	bool bNoBackgroundColourBlocks = true;
+	// setBackgroundColour:R:G:B
+	// Default is 'black' (0,0,0,1)
+	sPixelRGBA backgroundColour = sPixelRGBA(0, 0, 0);
+	bool bCropToBackgroundColour = false;
+};
+
 int main(int argc, char* argv[])
 {
 	std::string exeName = getExeNameFromFullPath(argv[0]);
 
+	std::cout << "Params: " << std::endl;
+	std::cout << "argv[0] : " << exeName << std::endl;
+	for (int index = 1; index != argc; index++)
+	{
+		std::cout << "argv[" << index << "] : " << argv[index] << std::endl;
+	}
 
-	if (argc == 1 || argc > 4 )
+	if (argc == 1)
 	{
 		printUsage(exeName);
 		return -1;
@@ -316,9 +344,7 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 
-	unsigned int pixelSize = 1;
-	bool bGuessPixelSize = false;
-	bool bNoBackgroundColourBlocks = true;
+	sFlagSettings appSettings;
 
 
 	// Scan for other params
@@ -327,15 +353,22 @@ int main(int argc, char* argv[])
 		std::string curParam = argv[argIndex];
 		if (curParam.find("guessPixelSize") != std::string::npos)
 		{
-			bGuessPixelSize = true;
+			std::cout << "Param: guessing pixel size." << std::endl;
+			appSettings.bGuessPixelSize = true;
 		}
 
-		std::string param3 = argv[2];
 		if (curParam.find("noBackgroundColourBlocks") != std::string::npos)
 		{
-			bNoBackgroundColourBlocks = false;
+			std::cout << "Won't generate block with background colour." << std::endl;
+			appSettings.bNoBackgroundColourBlocks = true;
 		}
 
+		if (curParam.find("cropToBackgroundColour") != std::string::npos)
+		{
+			std::cout << "Cropping background colour image boarder" << std::endl;
+			appSettings.bCropToBackgroundColour = true;
+		}		
+		
 		// pixelSize:X
 		if (curParam.find("pixelSize") != std::string::npos)
 		{
@@ -350,14 +383,39 @@ int main(int argc, char* argv[])
 			// Get number after colon
 			std::string strPixelSize = curParam.substr(colonOffset + 1);
 			// Is it a number?
-			pixelSize = atoi(strPixelSize.c_str());
-			if (pixelSize == 0)
+			appSettings.pixelSize = atoi(strPixelSize.c_str());
+			if (appSettings.pixelSize == 0)
 			{
 				// Didn't find a number
 				printUsage(exeName);
 				return -1;
 			}
-		}//if (std::find(..."pixelSize") 
+			std::cout << "Pixel size set to: " << appSettings.pixelSize << std::endl;
+		}//if (curParam.find("pixelSize")
+
+		// setBackgroundColour:R:G:B
+		if (curParam.find("setBackgroundColour") != std::string::npos)
+		{
+			std::size_t colon_1 = curParam.find(':');
+			std::size_t colon_2 = curParam.find(':', colon_1 + 1);
+			std::size_t colon_3 = curParam.find(':', colon_2 + 1);
+
+//			std::string ass = curParam.substr(colon_1 + 1, colon_2 - colon_1 - 1);
+//			std::string ass1 = curParam.substr(colon_2 + 1, colon_3 - colon_2 - 1);
+//			std::string ass2 = curParam.substr(colon_3 + 1);
+
+			appSettings.backgroundColour.R = atoi(curParam.substr(colon_1 + 1, colon_2 - colon_1 - 1).c_str());
+			appSettings.backgroundColour.B = atoi(curParam.substr(colon_2 + 1, colon_3 - colon_2 - 1).c_str());
+			appSettings.backgroundColour.G = atoi(curParam.substr(colon_3 + 1).c_str());
+			appSettings.backgroundColour.A = 255;
+
+			std::cout << "Background colour set to: "
+				<< appSettings.backgroundColour.R << ", "
+				<< appSettings.backgroundColour.G << ", "
+				<< appSettings.backgroundColour.B << ", "
+				<< appSettings.backgroundColour.A << std::endl;
+
+		}//if (curParam.find("setBackgroundColour")
 
 	}//for (unsigned int argIndex
 
@@ -411,13 +469,37 @@ int main(int argc, char* argv[])
 		std::cout << "Error: " << theSpriteImage.getLastError();
 		return -1;
 	}
+	std::cout << spriteFileName << " loaded OK" << std::endl;
 
-	if (bGuessPixelSize)
+	// Crop it? 
+	if (appSettings.bCropToBackgroundColour)
 	{
-		pixelSize = theSpriteImage.guessPixelSize();
+		std::cout << "Original width, height: "
+			<< theSpriteImage.getWidth() << " : "
+			<< theSpriteImage.getHeight() << std::endl;
+		std::cout << "Cropping background colour " 
+			<< "(" 
+			<< (unsigned int)appSettings.backgroundColour.R << ", "
+			<< (unsigned int)appSettings.backgroundColour.G << ", "
+			<< (unsigned int)appSettings.backgroundColour.B 
+			<< ") out...";
+
+		theSpriteImage.cropOutBackground(appSettings.backgroundColour);
+
+		std::cout << "done." << std::endl;
+		std::cout << "Cropped width, height: "
+			<< theSpriteImage.getWidth() << " : "
+			<< theSpriteImage.getHeight() << std::endl;
+	}
+
+
+
+	if (appSettings.bGuessPixelSize)
+	{
+		appSettings.pixelSize = theSpriteImage.guessPixelSize();
 
 		// Did it guess one?
-		if ( pixelSize == 0 )
+		if ( appSettings.pixelSize == 0 )
 		{
 			// Nope
 			std::cout << "Can't guess pixel size." << std::endl;
@@ -437,40 +519,40 @@ int main(int argc, char* argv[])
 	// Either the pixel size is guessed correctly or it's been set...
 	// ...or it's just one pixel
 
-	theSpriteImage.setPixelSizeAndProcess(pixelSize);
+	theSpriteImage.setPixelSizeAndProcess(appSettings.pixelSize);
 
 
 
-	for (unsigned int row = 0; row != theSpriteImage.getHeight(); row++)
-	{
-		for (unsigned int col = 0; col != theSpriteImage.getWidth(); col++)
-		{
-			sPixelRGBA curPixel = theSpriteImage.getPixel(row, col);
-			std::cout
-				<< (unsigned int)(curPixel.R) / 26
-				<< (unsigned int)(curPixel.G) / 26
-				<< (unsigned int)(curPixel.B) / 26;
-			std::cout << " ";
-		}
-		std::cout << std::endl;
-	}
-
-	std::cout << std::endl;
-
-	for (unsigned int row = 0; row != theSpriteImage.getScaledHeight(); row++)
-	{
-		for (unsigned int col = 0; col != theSpriteImage.getScaledWidth(); col++)
-		{
-			sPixelRGBA curPixel = theSpriteImage.getPixelScaled(row, col);
-
-			std::cout
-				<< (unsigned int)(curPixel.R) / 26
-				<< (unsigned int)(curPixel.G) / 26
-				<< (unsigned int)(curPixel.B) / 26;
-			std::cout << " ";
-		}
-		std::cout << std::endl;
-	}
+//	for (unsigned int row = 0; row != theSpriteImage.getHeight(); row++)
+//	{
+//		for (unsigned int col = 0; col != theSpriteImage.getWidth(); col++)
+//		{
+//			sPixelRGBA curPixel = theSpriteImage.getPixel(row, col);
+//			std::cout
+//				<< (unsigned int)(curPixel.R) / 26
+//				<< (unsigned int)(curPixel.G) / 26
+//				<< (unsigned int)(curPixel.B) / 26;
+//			std::cout << " ";
+//		}
+//		std::cout << std::endl;
+//	}
+//
+//	std::cout << std::endl;
+//
+//	for (unsigned int row = 0; row != theSpriteImage.getScaledHeight(); row++)
+//	{
+//		for (unsigned int col = 0; col != theSpriteImage.getScaledWidth(); col++)
+//		{
+//			sPixelRGBA curPixel = theSpriteImage.getPixelScaled(row, col);
+//
+//			std::cout
+//				<< (unsigned int)(curPixel.R) / 26
+//				<< (unsigned int)(curPixel.G) / 26
+//				<< (unsigned int)(curPixel.B) / 26;
+//			std::cout << " ";
+//		}
+//		std::cout << std::endl;
+//	}
 
 
 	std::vector<cVertex> vecVertices;
@@ -479,6 +561,7 @@ int main(int argc, char* argv[])
 	float boundingBoxminXYZ[3] = { FLT_MAX, FLT_MAX, FLT_MAX };
 	float boundingBoxmaxXYZ[3] = { 0.0f, 0.0f, 0.0f };
 
+	std::cout << "Adding cubes...";
 
 //	for (unsigned int row = 0; row != theSpriteImage.getHeight(); row++)
 	for (unsigned int row = 0; row != theSpriteImage.getScaledHeight(); row++)
@@ -496,14 +579,25 @@ int main(int argc, char* argv[])
 
 
 
-			// If it's black, DON'T add a cube
-			if ( ! curPixel.isBlack() )
+			// If it's the backgound colour, DON'T add a cube
+			if (appSettings.bNoBackgroundColourBlocks)
 			{
+				if (curPixel != appSettings.backgroundColour)
+				{
+					addCubeToVector(vecVertices, vecTriangles, theCube, col_offset, row_offset, 0.0f);
+				}
+			}
+			else
+			{
+				// Add every block, even background blocks
 				addCubeToVector(vecVertices, vecTriangles, theCube, col_offset, row_offset, 0.0f);
 			}
+
 		}
-		std::cout << std::endl;
+//		std::cout << std::endl;
 	}
+	std::cout << "done." << std::endl;
+
 
 	calcBoundingBoxMinMax(vecVertices, boundingBoxminXYZ, boundingBoxmaxXYZ);
 

@@ -1,5 +1,7 @@
 #include "cImageThingy.h"
 #include "lodepng.h"
+#include <iterator>
+#include <iostream>
 
 // See: https://lodev.org/lodepng/
 // for more information about how to use the png loader
@@ -48,7 +50,7 @@ bool cImageThingy::loadImage(std::string filename)
 			vecNewRow.push_back(this->getPixel(pixelIndex));
 		}
 
-		this->m_2D_image.push_back(vecNewRow);
+		this->m_2D_pixels.push_back(vecNewRow);
 	}
 
 	return true;
@@ -101,7 +103,7 @@ void cImageThingy::setPixelSizeAndProcess(unsigned int pixelSize)
 			vecNewRow.push_back(scaledPixel);
 		}
 
-		this->m_2D_ScaledImage.push_back(vecNewRow);
+		this->m_2D_ScaledPixels.push_back(vecNewRow);
 	}
 
 	return;
@@ -194,7 +196,7 @@ sPixelRGBA cImageThingy::getPixel(unsigned int row, unsigned int column)
 		return sPixelRGBA();
 	}
 
-	return this->m_2D_image[row][column];
+	return this->m_2D_pixels[row][column];
 }
 
 // Same but uses the pixel size to offset
@@ -204,8 +206,187 @@ sPixelRGBA cImageThingy::getPixelScaled(unsigned int row, unsigned int column)
 	{
 		return sPixelRGBA();
 	}
-	return this->m_2D_ScaledImage[row][column];
+	return this->m_2D_ScaledPixels[row][column];
+}
+
+bool operator==(const sPixelRGBA& lhs, const sPixelRGBA& rhs)
+{
+	if (lhs.R != rhs.R) { return false; }
+	if (lhs.G != rhs.G) { return false; }
+	if (lhs.B != rhs.B) { return false; }
+	if (lhs.A != rhs.A) { return false; }
+	return true;
+}
+
+bool operator!=(const sPixelRGBA& lhs, const sPixelRGBA& rhs)
+{
+	return !(lhs == rhs);
+}
+
+void PrintImage(std::vector< std::vector< sPixelRGBA > >& the2DArray)
+{
+	unsigned int height = (unsigned int)the2DArray.size();
+	unsigned int width = (unsigned int)the2DArray[0].size();
+
+	for (unsigned int row = 0; row != height; row++)
+	{
+		for (unsigned int col = 0; col != width; col++)
+		{
+			sPixelRGBA curPixel = the2DArray[row][col];
+			std::cout
+				<< (unsigned int)(curPixel.R) / 26
+				<< (unsigned int)(curPixel.G) / 26
+				<< (unsigned int)(curPixel.B) / 26;
+			std::cout << " ";
+		}
+		std::cout << std::endl;
+	}
+	std::cout << std::endl;
+	return;
 }
 
 
+void cImageThingy::cropOutBackground(sPixelRGBA backgroundColour)
+{
+	// Scan from the top to see if this row is "all background"
 
+//	PrintImage(this->m_2D_pixels);
+
+
+	// Remove top row if all background colour
+	while (this->m_bIsRowThisColour(0, backgroundColour))
+	{
+		this->m_removeRow(0);
+	}
+	// Remove bottom row if all background colour
+	while (this->m_bIsRowThisColour(this->m_height - 1, backgroundColour))
+	{
+		this->m_removeRow(this->m_height - 1);
+	}
+
+	// Remove left column if all background colour
+	while (this->m_bIsColumnThisColour(0, backgroundColour))
+	{
+		this->m_removeColumn(0);
+	}
+	// Remove right column if all background colour
+	while (this->m_bIsColumnThisColour(this->m_width - 1, backgroundColour))
+	{
+		this->m_removeColumn(this->m_width - 1);
+	}
+
+//	PrintImage(this->m_2D_pixels);
+
+	return;
+}
+
+void cImageThingy::m_removeRow(unsigned int rowIndex)
+{
+	std::vector< std::vector< sPixelRGBA > >::iterator itRow = this->m_2D_pixels.begin();
+	// Oh FFS... so no return on this one. Good gravy
+	// So you can't just do: this->m_2D_pixels.erase(std::advance(this->m_2D_pixels.begin(), 2));
+	// ...of course you can't.
+	std::advance(itRow, rowIndex);
+	this->m_2D_pixels.erase(itRow);
+	// 
+	this->m_resetLoadedDataToMatch2DPixelArray();
+	return;
+}
+
+bool cImageThingy::m_bIsRowThisColour(unsigned int rowIndex, sPixelRGBA thisColour)
+{
+	std::vector< std::vector< sPixelRGBA > >::iterator itRow = this->m_2D_pixels.begin();
+	// Oh FFS... so no return on this one. Good gravy
+	// So you can't just do: this->m_2D_pixels.erase(std::advance(this->m_2D_pixels.begin(), 2));
+	// ...of course you can't.
+	std::advance(itRow, 2);
+
+	for (std::vector< sPixelRGBA >::iterator itPixel = itRow->begin(); itPixel != itRow->end(); itPixel++)
+	{
+		if (*itPixel != thisColour)
+		{
+			// This pixel isn't the colour
+			return false;
+		}
+	}
+	// No different colours
+	return true;
+}
+
+// Left column is index 0
+void cImageThingy::m_removeColumn(unsigned int colIndex)
+{
+	for (std::vector< sPixelRGBA >& curRow : this->m_2D_pixels)
+	{
+		std::vector< sPixelRGBA >::iterator itPixel = curRow.begin();
+		std::advance(itPixel, colIndex);
+		curRow.erase(itPixel);
+	}
+	//
+	this->m_resetLoadedDataToMatch2DPixelArray();
+
+	return;
+}
+
+bool cImageThingy::m_bIsColumnThisColour(unsigned int colIndex, sPixelRGBA thisColour)
+{
+	for (std::vector< sPixelRGBA >& curRow : this->m_2D_pixels)
+	{
+		if (curRow[colIndex] != thisColour)
+		{
+			// This pixel isn't the colour
+			return false;
+		}
+	}
+	// No different colours
+	return true;
+}
+
+
+void cImageThingy::m_resetLoadedDataToMatch2DPixelArray(void)
+{
+	this->m_height = (unsigned int)this->m_2D_pixels.size();
+	this->m_width = (unsigned int)this->m_2D_pixels[0].size();
+
+	// std::vector<unsigned char> m_image;
+	// std::vector<sPixelRGBA> m_1D_pixels;
+
+	this->m_1D_pixels.clear();
+	for (unsigned int rowIndex = 0; rowIndex != this->m_height; rowIndex++)
+	{
+		for (unsigned int colIndex = 0; colIndex != this->m_width; colIndex++)
+		{
+			this->m_1D_pixels.push_back(this->m_2D_pixels[rowIndex][colIndex]);
+		}
+	}
+
+//	std::vector<unsigned char> OG(this->m_image);
+
+	this->m_image.clear();
+	for (unsigned int rowIndex = 0; rowIndex != this->m_height; rowIndex++)
+	{
+		for (unsigned int colIndex = 0; colIndex != this->m_width; colIndex++)
+		{
+			sPixelRGBA& curPixel = this->m_2D_pixels[rowIndex][colIndex];
+
+			this->m_image.push_back(curPixel.R);
+			this->m_image.push_back(curPixel.G);
+			this->m_image.push_back(curPixel.B);
+			this->m_image.push_back(curPixel.A);
+		}
+	}
+
+
+//	// compare the two
+//	bool bAreTheSame = true;
+//	for (unsigned int index = 0; index != this->m_image.size(); index++)
+//	{
+//		if (this->m_image[index] != OG[index])
+//		{
+//			bAreTheSame = false;
+//		}
+//	}
+//	OG.clear();
+
+	return;
+}

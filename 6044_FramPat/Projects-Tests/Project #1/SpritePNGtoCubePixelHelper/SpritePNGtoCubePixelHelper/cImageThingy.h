@@ -1,10 +1,11 @@
 #pragma once
+
 #include <string>
 #include <vector>
 
-
 //  This is to help load the sprite sheets and 
 //	get the pixel information out.
+
 
 struct sPixelRGBA
 {
@@ -12,6 +13,30 @@ struct sPixelRGBA
 	unsigned char G = 0;
 	unsigned char B = 0;
 	unsigned char A = 0;
+
+	sPixelRGBA()
+	{
+		this->R = this->G = this->B = 0;
+		this->A = 255;
+	}
+
+	sPixelRGBA(unsigned char R_, unsigned char G_, unsigned char B_)
+	{
+		this->R = R_;
+		this->G = G_;
+		this->B = B_;
+		this->A = 255;
+	}
+	sPixelRGBA(unsigned char R_, unsigned char G_, unsigned char B_, unsigned char A_)
+	{
+		this->R = R_;
+		this->G = G_;
+		this->B = B_;
+		this->A = A_;
+	}
+
+
+
 	void setBlackThreshold(unsigned char minRed, unsigned char minGreen, unsigned minBlue)
 	{
 		this->isBlackColourThreshold[0] = minRed;
@@ -33,6 +58,11 @@ private:
 	unsigned char isBlackColourThreshold[3] = { 0 };
 };
 
+
+
+bool operator==(const sPixelRGBA& lhs, const sPixelRGBA& rhs);
+bool operator!=(const sPixelRGBA& lhs, const sPixelRGBA& rhs);
+
 class cImageThingy
 {
 public:
@@ -40,6 +70,14 @@ public:
 
 
 	bool loadImage(std::string filename);
+
+	// NOTE: This uses the m_2D_image (from loadImage() to crop)
+	// It will then update:
+	//	- the m_2D_image
+	//	- the width and height or the original
+	//  - the m_image vector
+	// In other words, it should change it to be AS IF it loaded the cropped image
+	void cropOutBackground(sPixelRGBA backgroundColour);
 
 	// Height and width of loaded image
 	unsigned int getHeight(void);
@@ -91,10 +129,21 @@ private:
 	// Like above, but organized by pixels (not raw chars)
 	std::vector<sPixelRGBA> m_1D_pixels;
 	// This in a more helpsul 2D array
-	std::vector< std::vector< sPixelRGBA > > m_2D_image;
+	std::vector< std::vector< sPixelRGBA > > m_2D_pixels;
 
 	// Like above, but the pixels are scaled based on the pixel size
-	std::vector< std::vector< sPixelRGBA > > m_2D_ScaledImage;
+	std::vector< std::vector< sPixelRGBA > > m_2D_ScaledPixels;
 
 	std::string m_lastError;
+
+	// Top row is index 0
+	void m_removeRow(unsigned int rowIndex);
+	bool m_bIsRowThisColour(unsigned int rowIndex, sPixelRGBA thisColour);
+	// Left column is index 0
+	void m_removeColumn(unsigned int colIndex);
+	bool m_bIsColumnThisColour(unsigned int colIndex, sPixelRGBA thisColour);
+
+	// This is done after any of the "remove" methods above
+	void m_resetLoadedDataToMatch2DPixelArray(void);
+
 };

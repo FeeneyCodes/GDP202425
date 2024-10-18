@@ -78,6 +78,7 @@ public:
 	//  - the m_image vector
 	// In other words, it should change it to be AS IF it loaded the cropped image
 	void cropOutBackground(sPixelRGBA backgroundColour);
+	void cropOutBackgroundWithTransparency(void);
 
 	// Height and width of loaded image
 	unsigned int getHeight(void);
@@ -139,9 +140,11 @@ private:
 	// Top row is index 0
 	void m_removeRow(unsigned int rowIndex);
 	bool m_bIsRowThisColour(unsigned int rowIndex, sPixelRGBA thisColour);
+	bool m_bIsRowTransparent(unsigned int rowIndex);
 	// Left column is index 0
 	void m_removeColumn(unsigned int colIndex);
 	bool m_bIsColumnThisColour(unsigned int colIndex, sPixelRGBA thisColour);
+	bool m_bIsColumnTransparent(unsigned int colIndex);
 
 	// This is done after any of the "remove" methods above
 	void m_resetLoadedDataToMatch2DPixelArray(void);

@@ -286,9 +286,15 @@ void printUsage(std::string exeName)
 		<< "       Will NOT output blocks of the 'background' colour." << std::endl
 		<< "       (Ignores the alpha channel)" << std::endl
 		<< std::endl
+		<< " - useTransparencyAsBackground" << std::endl
+		<< "       Will use the PNG transparency channel as the 'background'" << std::endl
+		<< "       NOTE: If set, then the background 'colour' is ignored!" << std::endl
+		<< std::endl
 		<< " - setBackgroundColour:R:G:B" << std::endl
 		<< "       Where R, G, B are HTML colours (so 0 to 255, 0 being 'black')" << std::endl
-		<< "       (Ignores the alpha channel)" << std::endl
+		<< "       NOTE: If useTransparencyAsBackground is set, this is ignored." << std::endl
+		<< "             Default background colour is 'black' (0,0,0)." << std::endl
+		<< "             Ignores the PNG alpha channel." << std::endl
 		<< std::endl
 		<< " - cropToBackgroundColour" << std::endl
 		<< "       Will attempt to remove any extra 'boarder' background pixels" << std::endl
@@ -316,6 +322,7 @@ struct sFlagSettings
 	// Default is 'black' (0,0,0,1)
 	sPixelRGBA backgroundColour = sPixelRGBA(0, 0, 0);
 	bool bCropToBackgroundColour = false;
+	bool bTransparencyAsBackground = false;
 };
 
 int main(int argc, char* argv[])
@@ -363,6 +370,12 @@ int main(int argc, char* argv[])
 			appSettings.bNoBackgroundColourBlocks = true;
 		}
 
+		if (curParam.find("useTransparencyAsBackground") != std::string::npos)
+		{
+			std::cout << "Using PNG aplha channel as background" << std::endl;
+			appSettings.bTransparencyAsBackground = true;
+		}
+
 		if (curParam.find("cropToBackgroundColour") != std::string::npos)
 		{
 			std::cout << "Cropping background colour image boarder" << std::endl;
@@ -396,6 +409,18 @@ int main(int argc, char* argv[])
 		// setBackgroundColour:R:G:B
 		if (curParam.find("setBackgroundColour") != std::string::npos)
 		{
+			// Is useTransparencyAsBackground already set?
+			if (appSettings.bTransparencyAsBackground)
+			{
+				std::cout
+					<< "Error: Setting useTransparencyAsBackground option will " << std::endl
+					<< "       override the background colour comparison." << std::endl
+					<< "       If you want to compare by COLOUR, remove " << std::endl
+					<< "       the useTransparencyAsBackground option." << std::endl;
+				return -1;
+			}
+
+
 			std::size_t colon_1 = curParam.find(':');
 			std::size_t colon_2 = curParam.find(':', colon_1 + 1);
 			std::size_t colon_3 = curParam.find(':', colon_2 + 1);
@@ -477,14 +502,23 @@ int main(int argc, char* argv[])
 		std::cout << "Original width, height: "
 			<< theSpriteImage.getWidth() << " : "
 			<< theSpriteImage.getHeight() << std::endl;
-		std::cout << "Cropping background colour " 
-			<< "(" 
-			<< (unsigned int)appSettings.backgroundColour.R << ", "
-			<< (unsigned int)appSettings.backgroundColour.G << ", "
-			<< (unsigned int)appSettings.backgroundColour.B 
-			<< ") out...";
 
-		theSpriteImage.cropOutBackground(appSettings.backgroundColour);
+		if (appSettings.bTransparencyAsBackground)
+		{
+			std::cout << "Cropping out any extra transparent background pixels ";
+			theSpriteImage.cropOutBackgroundWithTransparency();
+		}
+		else
+		{
+			std::cout << "Cropping background colour " 
+				<< "(" 
+				<< (unsigned int)appSettings.backgroundColour.R << ", "
+				<< (unsigned int)appSettings.backgroundColour.G << ", "
+				<< (unsigned int)appSettings.backgroundColour.B 
+				<< ") out...";
+
+			theSpriteImage.cropOutBackground(appSettings.backgroundColour);
+		}
 
 		std::cout << "done." << std::endl;
 		std::cout << "Cropped width, height: "
@@ -582,16 +616,28 @@ int main(int argc, char* argv[])
 			// If it's the backgound colour, DON'T add a cube
 			if (appSettings.bNoBackgroundColourBlocks)
 			{
-				if (curPixel != appSettings.backgroundColour)
+				// Cropping if transparent?
+				if (appSettings.bTransparencyAsBackground)
 				{
-					addCubeToVector(vecVertices, vecTriangles, theCube, col_offset, row_offset, 0.0f);
+					if (curPixel.A != 0)
+					{
+						addCubeToVector(vecVertices, vecTriangles, theCube, col_offset, row_offset, 0.0f);
+					}
 				}
+				else
+				{
+					// Cropping out background COLOUR
+					if (curPixel != appSettings.backgroundColour)
+					{
+						addCubeToVector(vecVertices, vecTriangles, theCube, col_offset, row_offset, 0.0f);
+					}
+				}//if (appSettings.bTransparencyAsBackground)
 			}
 			else
 			{
 				// Add every block, even background blocks
 				addCubeToVector(vecVertices, vecTriangles, theCube, col_offset, row_offset, 0.0f);
-			}
+			}//if (appSettings.bNoBackgroundColourBlocks)
 
 		}
 //		std::cout << std::endl;
@@ -622,6 +668,8 @@ void printPlyFile(std::string inputFileName, std::vector<cVertex>& vecVertices, 
 	plyFileName[decimalPointIndex + 2] = 'l';
 	plyFileName[decimalPointIndex + 3] = 'y';
 
+	std::cout << "Writing to PLY file: " << plyFileName;
+
 	std::ofstream outFile(plyFileName.c_str());
 
 	outFile << "ply" << std::endl;
@@ -644,6 +692,8 @@ void printPlyFile(std::string inputFileName, std::vector<cVertex>& vecVertices, 
 	outFile << "property list uchar int vertex_indices" << std::endl;
 	outFile << "end_header" << std::endl;
 
+	unsigned int progressStep = (unsigned int)vecVertices.size() / 10;
+
 	for (unsigned int index = 0; index != vecVertices.size(); index++)
 	{
 		outFile
@@ -659,7 +709,15 @@ void printPlyFile(std::string inputFileName, std::vector<cVertex>& vecVertices, 
 			<< (unsigned int)(vecVertices[index].a * 255.0f) << " "
 			<< vecVertices[index].u << " "
 			<< vecVertices[index].v << std::endl;
+
+		if (index % progressStep == 0)
+		{
+			std::cout << ".";
+		}
+
 	}//for ( unsigned int index = 0;
+
+	progressStep = (unsigned int)vecTris.size() / 10;
 
 	for (unsigned int index = 0; index != vecTris.size(); index++)
 	{
@@ -668,12 +726,17 @@ void printPlyFile(std::string inputFileName, std::vector<cVertex>& vecVertices, 
 			<< vecTris[index].index[0] << " "
 			<< vecTris[index].index[1] << " "
 			<< vecTris[index].index[2] << std::endl;
+
+		if (index % progressStep == 0)
+		{
+			std::cout << ".";
+		}
 	}//for ( unsigned int index = 0
 
 
 	outFile.close();
 
-	std::cout << "Wrote to " << plyFileName << " OK." << std::endl;
+	std::cout << "done." << std::endl;
 
 	return;
 }

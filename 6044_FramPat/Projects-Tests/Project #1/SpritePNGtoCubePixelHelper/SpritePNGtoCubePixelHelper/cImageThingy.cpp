@@ -280,6 +280,39 @@ void cImageThingy::cropOutBackground(sPixelRGBA backgroundColour)
 	return;
 }
 
+void cImageThingy::cropOutBackgroundWithTransparency(void)
+{
+	// Scan from the top to see if this row is "all background"
+
+//	PrintImage(this->m_2D_pixels);
+
+
+	// Remove top row if all background colour
+	while (this->m_bIsRowTransparent(0))
+	{
+		this->m_removeRow(0);
+	}
+	// Remove bottom row if all background colour
+	while (this->m_bIsRowTransparent(this->m_height - 1))
+	{
+		this->m_removeRow(this->m_height - 1);
+	}
+
+	// Remove left column if all background colour
+	while (this->m_bIsColumnTransparent(0))
+	{
+		this->m_removeColumn(0);
+	}
+	// Remove right column if all background colour
+	while (this->m_bIsColumnTransparent(this->m_width - 1))
+	{
+		this->m_removeColumn(this->m_width - 1);
+	}
+
+//	PrintImage(this->m_2D_pixels);
+
+	return;
+}
 void cImageThingy::m_removeRow(unsigned int rowIndex)
 {
 	std::vector< std::vector< sPixelRGBA > >::iterator itRow = this->m_2D_pixels.begin();
@@ -299,7 +332,7 @@ bool cImageThingy::m_bIsRowThisColour(unsigned int rowIndex, sPixelRGBA thisColo
 	// Oh FFS... so no return on this one. Good gravy
 	// So you can't just do: this->m_2D_pixels.erase(std::advance(this->m_2D_pixels.begin(), 2));
 	// ...of course you can't.
-	std::advance(itRow, 2);
+	std::advance(itRow, rowIndex);
 
 	for (std::vector< sPixelRGBA >::iterator itPixel = itRow->begin(); itPixel != itRow->end(); itPixel++)
 	{
@@ -312,6 +345,28 @@ bool cImageThingy::m_bIsRowThisColour(unsigned int rowIndex, sPixelRGBA thisColo
 	// No different colours
 	return true;
 }
+
+
+bool cImageThingy::m_bIsRowTransparent(unsigned int rowIndex)
+{
+	std::vector< std::vector< sPixelRGBA > >::iterator itRow = this->m_2D_pixels.begin();
+	// Oh FFS... so no return on this one. Good gravy
+	// So you can't just do: this->m_2D_pixels.erase(std::advance(this->m_2D_pixels.begin(), 2));
+	// ...of course you can't.
+	std::advance(itRow, rowIndex);
+
+	for (std::vector< sPixelRGBA >::iterator itPixel = itRow->begin(); itPixel != itRow->end(); itPixel++)
+	{
+		if (itPixel->A != 0)
+		{
+			// This pixel isn't transparent
+			return false;
+		}
+	}
+	// No different colours
+	return true;
+}
+
 
 // Left column is index 0
 void cImageThingy::m_removeColumn(unsigned int colIndex)
@@ -342,6 +397,19 @@ bool cImageThingy::m_bIsColumnThisColour(unsigned int colIndex, sPixelRGBA thisC
 	return true;
 }
 
+bool cImageThingy::m_bIsColumnTransparent(unsigned int colIndex)
+{
+	for (std::vector< sPixelRGBA >& curRow : this->m_2D_pixels)
+	{
+		if (curRow[colIndex].A != 0)
+		{
+			// This pixel isn't transparent
+			return false;
+		}
+	}
+	// No different colours
+	return true;
+}
 
 void cImageThingy::m_resetLoadedDataToMatch2DPixelArray(void)
 {

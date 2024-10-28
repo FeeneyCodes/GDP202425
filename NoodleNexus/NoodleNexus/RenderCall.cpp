@@ -27,6 +27,9 @@ void DrawMesh(sMesh* pCurMesh, GLuint program)
         return;
     }
 
+    glCullFace(GL_BACK);
+    glEnable(GL_CULL_FACE);
+
     // Use lighting or not
     // uniform bool bDoNotLight;	
     GLint bDoNotLight_UL = glGetUniformLocation(program, "bDoNotLight");

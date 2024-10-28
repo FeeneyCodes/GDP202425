@@ -48,7 +48,7 @@ cVAOManager* g_pMeshManager = NULL;
 
 //cLightManager* g_pLightManager = NULL;
 
-void AddModelsToScene(void);
+void AddModelsToScene(cVAOManager* pMeshManager, GLuint shaderProgram);
 
 void DrawMesh(sMesh* pCurMesh, GLuint program);
 
@@ -69,6 +69,19 @@ bool isControlDown(GLFWwindow* window);
 //    }
 //    return false;
 //}
+
+// START OF: TANK GAME
+//#include "iTank.h"
+//#include "cTank.h"
+//#include "cSuperTank.h"
+#include "cTankFactory.h"
+void SetUpTankGame(void);
+void TankStepFrame(double timeStep);
+std::vector< iTank* > g_vecTheTanks;
+
+// END OF: TANK GAME
+
+
 
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
@@ -458,76 +471,24 @@ int main(void)
 //        sizeof(sVertex), 
 //        (void*)offsetof(sVertex, col));     // 3 floats or 12 bytes into the sVertex structure
 
+    // SET UP THE TANKS
+    SetUpTankGame();
+
 
     // Loading the TYPES of models I can draw...
 
 //    cVAOManager* pMeshManager = new cVAOManager();
     ::g_pMeshManager = new cVAOManager();
 
-    //sModelDrawInfo carModelInfo;
-    //pMeshManager->LoadModelIntoVAO("assets/models/VintageRacingCar_xyz_only.ply", 
-    //                               carModelInfo, program);
-    //std::cout << carModelInfo.numberOfVertices << " vertices loaded" << std::endl;
-
-    //sModelDrawInfo dragonModel;
-    //pMeshManager->LoadModelIntoVAO("assets/models/Dragon 2.5Edited_xyz_only.ply", 
-    //    dragonModel, program);
-    //std::cout << dragonModel.numberOfVertices << " vertices loaded" << std::endl;
-
-    sModelDrawInfo terrainModel;
-//    pMeshManager->LoadModelIntoVAO("assets/models/Simple_MeshLab_terrain_xyz_only.ply", 
-    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Simple_MeshLab_terrain_xyz_N.ply",
-        terrainModel, program);
-    std::cout << terrainModel.numberOfVertices << " vertices loaded" << std::endl;
-
-    sModelDrawInfo warehouseModel;
-    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Warehouse_xyz_n.ply",
-        warehouseModel, program);
-    std::cout << warehouseModel.numberOfVertices << " vertices loaded" << std::endl;
-
-    sModelDrawInfo bunnyModel;
-//    ::g_pMeshManager->LoadModelIntoVAO("assets/models/bun_zipper_res2_10x_size_xyz_only.ply",
-    ::g_pMeshManager->LoadModelIntoVAO("assets/models/bun_zipper_res2_10x_size_xyz_N_only.ply",
-        bunnyModel, program);
-    std::cout << bunnyModel.numberOfVertices << " vertices loaded" << std::endl;
-
-    sModelDrawInfo platPlaneDrawInfo;
-//    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Flat_Plane_xyz.ply", 
-    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Flat_Plane_xyz_N.ply", 
-        platPlaneDrawInfo, program);
-    std::cout << platPlaneDrawInfo.numberOfVertices << " vertices loaded" << std::endl;
-    
-    sModelDrawInfo sphereMesh;
-//    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Sphere_radius_1_xyz.ply",
-    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Sphere_radius_1_xyz_N.ply",
-        sphereMesh, program);
-    std::cout << sphereMesh.numberOfVertices << " vertices loaded" << std::endl;
-
-    sModelDrawInfo sphereShadowMesh;
-    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Sphere_radius_1_Flat_Shadow_xyz_N.ply",
-        sphereShadowMesh, program);
-    std::cout << sphereShadowMesh.numberOfVertices << " vertices loaded" << std::endl;
-
-    sModelDrawInfo hangarMesh;
-    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Demonstration_Interior - DO NOT USE THIS xyz_N.ply",
-        hangarMesh, program);
-    std::cout << hangarMesh.numberOfVertices << " vertices loaded" << std::endl;
-
-    //sModelDrawInfo backroomLevelMesh;
-    //::g_pMeshManager->LoadModelIntoVAO("assets/models/Backrooms_Level_0/tinker_adjusted_xyz_N.ply",
-    //    backroomLevelMesh, program);
-    //std::cout << backroomLevelMesh.numberOfVertices << " vertices loaded" << std::endl;
-
-    //    pMeshManager->LoadTheListOfModelsIWantFromASexyFile("MyModels.sexy");
-
-
     ::g_pPhysicEngine = new cPhysics();
-
     // For triangle meshes, let the physics object "know" about the VAO manager
     ::g_pPhysicEngine->setVAOManager(::g_pMeshManager);
 
+    // This also adds physics objects to the phsyics system
+    AddModelsToScene(::g_pMeshManager, program);
 
-    AddModelsToScene();
+
+
 
    
     ::g_pFlyCamera = new cBasicFlyCamera();
@@ -891,8 +852,70 @@ int main(void)
 }
 
 
-void AddModelsToScene(void)
+void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
 {
+
+    sModelDrawInfo tankModel;
+    pMeshManager->LoadModelIntoVAO("assets/models/Low_Poly_Tank_Model_3D_model.ply", 
+        tankModel, program);
+    std::cout << tankModel.meshName << " : " << tankModel.numberOfVertices << " vertices loaded" << std::endl;
+
+    //sModelDrawInfo carModelInfo;
+    //pMeshManager->LoadModelIntoVAO("assets/models/VintageRacingCar_xyz_only.ply", 
+    //                               carModelInfo, program);
+    //std::cout << carModelInfo.numberOfVertices << " vertices loaded" << std::endl;
+
+    //sModelDrawInfo dragonModel;
+    //pMeshManager->LoadModelIntoVAO("assets/models/Dragon 2.5Edited_xyz_only.ply", 
+    //    dragonModel, program);
+    //std::cout << dragonModel.numberOfVertices << " vertices loaded" << std::endl;
+
+    sModelDrawInfo terrainModel;
+    //    pMeshManager->LoadModelIntoVAO("assets/models/Simple_MeshLab_terrain_xyz_only.ply", 
+    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Simple_MeshLab_terrain_xyz_N.ply",
+        terrainModel, program);
+    std::cout << terrainModel.numberOfVertices << " vertices loaded" << std::endl;
+
+    sModelDrawInfo warehouseModel;
+    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Warehouse_xyz_n.ply",
+        warehouseModel, program);
+    std::cout << warehouseModel.numberOfVertices << " vertices loaded" << std::endl;
+
+    sModelDrawInfo bunnyModel;
+    //    ::g_pMeshManager->LoadModelIntoVAO("assets/models/bun_zipper_res2_10x_size_xyz_only.ply",
+    ::g_pMeshManager->LoadModelIntoVAO("assets/models/bun_zipper_res2_10x_size_xyz_N_only.ply",
+        bunnyModel, program);
+    std::cout << bunnyModel.numberOfVertices << " vertices loaded" << std::endl;
+
+    sModelDrawInfo platPlaneDrawInfo;
+    //    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Flat_Plane_xyz.ply", 
+    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Flat_Plane_xyz_N.ply",
+        platPlaneDrawInfo, program);
+    std::cout << platPlaneDrawInfo.numberOfVertices << " vertices loaded" << std::endl;
+
+    sModelDrawInfo sphereMesh;
+    //    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Sphere_radius_1_xyz.ply",
+    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Sphere_radius_1_xyz_N.ply",
+        sphereMesh, program);
+    std::cout << sphereMesh.numberOfVertices << " vertices loaded" << std::endl;
+
+    sModelDrawInfo sphereShadowMesh;
+    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Sphere_radius_1_Flat_Shadow_xyz_N.ply",
+        sphereShadowMesh, program);
+    std::cout << sphereShadowMesh.numberOfVertices << " vertices loaded" << std::endl;
+
+    sModelDrawInfo hangarMesh;
+    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Demonstration_Interior - DO NOT USE THIS xyz_N.ply",
+        hangarMesh, program);
+    std::cout << hangarMesh.numberOfVertices << " vertices loaded" << std::endl;
+
+    //sModelDrawInfo backroomLevelMesh;
+    //::g_pMeshManager->LoadModelIntoVAO("assets/models/Backrooms_Level_0/tinker_adjusted_xyz_N.ply",
+    //    backroomLevelMesh, program);
+    //std::cout << backroomLevelMesh.numberOfVertices << " vertices loaded" << std::endl;
+
+    //    pMeshManager->LoadTheListOfModelsIWantFromASexyFile("MyModels.sexy");
+
 
     // Load some models to draw
 
@@ -1348,5 +1371,64 @@ void ConsoleStuff(void)
     std::cin >> name;
 
     std::cout << "Hello " << name << std::endl;
+    return;
+}
+
+
+cTankFactory* pTankFactory = NULL;
+
+// This is here for speed 
+void SetUpTankGame(void)
+{
+    // Created yet? 
+    if (!pTankFactory)
+    {
+        // Create it
+        pTankFactory = new cTankFactory();
+    }
+
+    std::vector<std::string> vecTankTpyes;
+    pTankFactory->GetTankTypes(vecTankTpyes);
+    std::cout << "The tank factory can create "
+        << vecTankTpyes.size() << " types of tanks:" << std::endl;
+    for (std::string tankTypeString : vecTankTpyes)
+    {
+        std::cout << tankTypeString << std::endl;
+    }
+    std::cout << std::endl;
+
+    // Create 1 super tank
+    iTank* pTheTank = pTankFactory->CreateATank("Super Tank");
+    if (pTheTank)
+    {
+        ::g_vecTheTanks.push_back(pTheTank);
+    }
+
+    // Create 10 tanks
+    for (unsigned int count = 0; count != 10; count++)
+    {
+        iTank* pTheTank = pTankFactory->CreateATank("Regular Tank");
+        if (pTheTank)
+        {
+            ::g_vecTheTanks.push_back(pTheTank);
+        }
+    }
+    
+    // Also a hover tank
+    iTank* pHoverTank = pTankFactory->CreateATank("Hover Tank");
+    if (pHoverTank)
+    {
+        ::g_vecTheTanks.push_back(pHoverTank);
+    }
+
+    return;
+}
+
+
+void TankStepFrame(double timeStep)
+{
+
+
+
     return;
 }

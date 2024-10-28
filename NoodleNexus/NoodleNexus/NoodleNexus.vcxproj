@@ -140,9 +140,13 @@
     <ClCompile Include="Basic_Shader_Manager\cShader.cpp" />
     <ClCompile Include="Basic_Shader_Manager\cShaderManager.cpp" />
     <ClCompile Include="cBasicFlyCamera\cBasicFlyCamera.cpp" />
+    <ClCompile Include="cHoverTank.cpp" />
     <ClCompile Include="cLightHelper\cLightHelper.cpp" />
     <ClCompile Include="cLightManager.cpp" />
     <ClCompile Include="cPhysics.cpp" />
+    <ClCompile Include="cSuperTank.cpp" />
+    <ClCompile Include="cTank.cpp" />
+    <ClCompile Include="cTankFactory.cpp" />
     <ClCompile Include="cVAOManager\cVAOManager.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="mouse_keyboard_async.cpp" />
@@ -154,10 +158,15 @@
   <ItemGroup>
     <ClInclude Include="Basic_Shader_Manager\cShaderManager.h" />
     <ClInclude Include="cBasicFlyCamera\cBasicFlyCamera.h" />
+    <ClInclude Include="cHoverTank.h" />
     <ClInclude Include="cLightHelper\cLightHelper.h" />
     <ClInclude Include="cLightManager.h" />
     <ClInclude Include="cPhysics.h" />
+    <ClInclude Include="cSuperTank.h" />
+    <ClInclude Include="cTank.h" />
+    <ClInclude Include="cTankFactory.h" />
     <ClInclude Include="cVAOManager\cVAOManager.h" />
+    <ClInclude Include="iTank.h" />
     <ClInclude Include="sharedThings.h" />
     <ClInclude Include="sMesh.h" />
     <ClInclude Include="GLCommon.h" />

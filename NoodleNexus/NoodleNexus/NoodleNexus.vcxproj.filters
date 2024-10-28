@@ -33,6 +33,9 @@
     <Filter Include="RenderStuff">
       <UniqueIdentifier>{9cdea607-512f-4c0a-9b61-159d8362c1d3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="TankGameFiles">
+      <UniqueIdentifier>{a25051bd-cb9f-411f-9376-465f7bf07f7b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="theMain.cpp">
@@ -74,6 +77,18 @@
     <ClCompile Include="cLightHelper\cLightHelper.cpp">
       <Filter>LIghts</Filter>
     </ClCompile>
+    <ClCompile Include="cSuperTank.cpp">
+      <Filter>TankGameFiles</Filter>
+    </ClCompile>
+    <ClCompile Include="cTank.cpp">
+      <Filter>TankGameFiles</Filter>
+    </ClCompile>
+    <ClCompile Include="cTankFactory.cpp">
+      <Filter>TankGameFiles</Filter>
+    </ClCompile>
+    <ClCompile Include="cHoverTank.cpp">
+      <Filter>TankGameFiles</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PlyFileLoaders.h">
@@ -105,6 +120,21 @@
     </ClInclude>
     <ClInclude Include="cLightHelper\cLightHelper.h">
       <Filter>LIghts</Filter>
+    </ClInclude>
+    <ClInclude Include="cTank.h">
+      <Filter>TankGameFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="cSuperTank.h">
+      <Filter>TankGameFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="iTank.h">
+      <Filter>TankGameFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="cTankFactory.h">
+      <Filter>TankGameFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="cHoverTank.h">
+      <Filter>TankGameFiles</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

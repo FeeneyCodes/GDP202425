@@ -36,6 +36,9 @@
     <Filter Include="TankGameFiles">
       <UniqueIdentifier>{a25051bd-cb9f-411f-9376-465f7bf07f7b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="TankGameFiles\Weapons, etc.">
+      <UniqueIdentifier>{cbe55fce-e2c9-461c-ab1d-76ad87d122a5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="theMain.cpp">
@@ -89,6 +92,18 @@
     <ClCompile Include="cHoverTank.cpp">
       <Filter>TankGameFiles</Filter>
     </ClCompile>
+    <ClCompile Include="cSheild.cpp">
+      <Filter>TankGameFiles\Weapons, etc.</Filter>
+    </ClCompile>
+    <ClCompile Include="cRailGun.cpp">
+      <Filter>TankGameFiles\Weapons, etc.</Filter>
+    </ClCompile>
+    <ClCompile Include="cJetPack.cpp">
+      <Filter>TankGameFiles\Weapons, etc.</Filter>
+    </ClCompile>
+    <ClCompile Include="cTankBuilder.cpp">
+      <Filter>TankGameFiles</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PlyFileLoaders.h">
@@ -134,6 +149,18 @@
       <Filter>TankGameFiles</Filter>
     </ClInclude>
     <ClInclude Include="cHoverTank.h">
+      <Filter>TankGameFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="cRailGun.h">
+      <Filter>TankGameFiles\Weapons, etc.</Filter>
+    </ClInclude>
+    <ClInclude Include="cJetPack.h">
+      <Filter>TankGameFiles\Weapons, etc.</Filter>
+    </ClInclude>
+    <ClInclude Include="cSheild.h">
+      <Filter>TankGameFiles\Weapons, etc.</Filter>
+    </ClInclude>
+    <ClInclude Include="cTankBuilder.h">
       <Filter>TankGameFiles</Filter>
     </ClInclude>
   </ItemGroup>

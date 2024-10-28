@@ -74,7 +74,8 @@ bool isControlDown(GLFWwindow* window);
 //#include "iTank.h"
 //#include "cTank.h"
 //#include "cSuperTank.h"
-#include "cTankFactory.h"
+//#include "cTankFactory.h"
+#include "cTankBuilder.h"
 void SetUpTankGame(void);
 void TankStepFrame(double timeStep);
 std::vector< iTank* > g_vecTheTanks;
@@ -471,8 +472,6 @@ int main(void)
 //        sizeof(sVertex), 
 //        (void*)offsetof(sVertex, col));     // 3 floats or 12 bytes into the sVertex structure
 
-    // SET UP THE TANKS
-    SetUpTankGame();
 
 
     // Loading the TYPES of models I can draw...
@@ -506,6 +505,28 @@ int main(void)
 
     double currentFrameTime = glfwGetTime();
     double lastFrameTime = glfwGetTime();
+
+
+
+    // SET UP THE TANKS
+    SetUpTankGame();
+
+    while (true)
+    {
+        currentFrameTime = glfwGetTime();
+        double deltaTime = lastFrameTime - currentFrameTime;
+
+        for (iTank* pCurrentTank : ::g_vecTheTanks)
+        {
+            pCurrentTank->UpdateTick(deltaTime);
+        }
+
+        lastFrameTime = currentFrameTime;
+
+        Sleep(1000);
+        std::cout << "--------------------------------------------" << std::endl;
+    }
+
 
 
     // Set up the lights
@@ -1375,20 +1396,45 @@ void ConsoleStuff(void)
 }
 
 
-cTankFactory* pTankFactory = NULL;
+//int& getNumber(void)
+//{
+//    int p = 0;
+//    return p;
+//}
+
+//cTankFactory* pTankFactory = NULL;
+cTankBuilder* pTheTankBuilder = NULL;
 
 // This is here for speed 
 void SetUpTankGame(void)
 {
-    // Created yet? 
-    if (!pTankFactory)
+    //int& y = getNumber();
+
+    
+//    cTankFactory::shoeSize = -9;
+//
+//    // Created yet? 
+//    if (!pTankFactory)
+//    {   
+//        // Create it
+//        pTankFactory = new cTankFactory();
+//    }
+
+//    cTankFactory::getTankFactory().CreateATank("Regular Tank");
+
+    if (!pTheTankBuilder)
     {
-        // Create it
-        pTankFactory = new cTankFactory();
+        pTheTankBuilder = new cTankBuilder();
     }
 
+
+
+    
+
     std::vector<std::string> vecTankTpyes;
-    pTankFactory->GetTankTypes(vecTankTpyes);
+//    pTankFactory->GetTankTypes(vecTankTpyes);
+//    cTankFactory::get_pTankFactory()->GetTankTypes(vecTankTpyes);
+    pTheTankBuilder->GetTankTypes(vecTankTpyes);
     std::cout << "The tank factory can create "
         << vecTankTpyes.size() << " types of tanks:" << std::endl;
     for (std::string tankTypeString : vecTankTpyes)
@@ -1398,7 +1444,8 @@ void SetUpTankGame(void)
     std::cout << std::endl;
 
     // Create 1 super tank
-    iTank* pTheTank = pTankFactory->CreateATank("Super Tank");
+//    iTank* pTheTank = cTankFactory::get_pTankFactory()->CreateATank("Super Tank");
+    iTank* pTheTank = pTheTankBuilder->CreateATank("Super Tank!");
     if (pTheTank)
     {
         ::g_vecTheTanks.push_back(pTheTank);
@@ -1407,7 +1454,8 @@ void SetUpTankGame(void)
     // Create 10 tanks
     for (unsigned int count = 0; count != 10; count++)
     {
-        iTank* pTheTank = pTankFactory->CreateATank("Regular Tank");
+//        iTank* pTheTank = cTankFactory::get_pTankFactory()->CreateATank("Regular Tank");
+        iTank* pTheTank = pTheTankBuilder->CreateATank("Regular Tank with Shield");
         if (pTheTank)
         {
             ::g_vecTheTanks.push_back(pTheTank);
@@ -1415,7 +1463,8 @@ void SetUpTankGame(void)
     }
     
     // Also a hover tank
-    iTank* pHoverTank = pTankFactory->CreateATank("Hover Tank");
+//    iTank* pHoverTank = cTankFactory::get_pTankFactory()->CreateATank("Hover Tank");
+    iTank* pHoverTank = pTheTankBuilder->CreateATank("Hover Tank");
     if (pHoverTank)
     {
         ::g_vecTheTanks.push_back(pHoverTank);

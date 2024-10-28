@@ -7,6 +7,7 @@
 #include <glm/glm.hpp>
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
+#include <vector>
 
 struct sMesh
 {
@@ -31,4 +32,5 @@ struct sMesh
 	bool loadState(std::string newState);
 
 //	sMesh* pChildMeshes[100];
+	std::vector< sMesh* > vec_pChildMeshes;
 };

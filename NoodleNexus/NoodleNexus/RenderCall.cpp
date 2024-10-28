@@ -161,6 +161,12 @@ void DrawMesh(sMesh* pCurMesh, GLuint program)
     }
 
 
+//    // Check if there are child meshes
+//    for (unsigned int childIndex = 0; childIndex != pCurMesh->vec_pChildMeshes.size(); childIndex++)
+//    {
+//        DrawMesh(pCurMesh->vec_pChildMeshes[childIndex], program);
+//    }
+
 	return;
 }
 

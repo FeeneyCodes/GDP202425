@@ -39,6 +39,9 @@
     <Filter Include="TankGameFiles\Weapons, etc.">
       <UniqueIdentifier>{cbe55fce-e2c9-461c-ab1d-76ad87d122a5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="TankGameFiles\Cyclical_Depend">
+      <UniqueIdentifier>{6dc8aff9-71c0-4938-b1cc-b6aacc77d9c6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="theMain.cpp">
@@ -104,6 +107,12 @@
     <ClCompile Include="cTankBuilder.cpp">
       <Filter>TankGameFiles</Filter>
     </ClCompile>
+    <ClCompile Include="cMonster.cpp">
+      <Filter>TankGameFiles\Cyclical_Depend</Filter>
+    </ClCompile>
+    <ClCompile Include="cSword.cpp">
+      <Filter>TankGameFiles\Cyclical_Depend</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PlyFileLoaders.h">
@@ -162,6 +171,12 @@
     </ClInclude>
     <ClInclude Include="cTankBuilder.h">
       <Filter>TankGameFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="cMonster.h">
+      <Filter>TankGameFiles\Cyclical_Depend</Filter>
+    </ClInclude>
+    <ClInclude Include="cSword.h">
+      <Filter>TankGameFiles\Cyclical_Depend</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

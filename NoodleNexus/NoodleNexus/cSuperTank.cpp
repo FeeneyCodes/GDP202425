@@ -6,8 +6,9 @@ cSuperTank::cSuperTank()
 {
 	std::cout << "A super tank is created" << std::endl;
 	this->m_ID = cSuperTank::m_NextID++;
-	// Add a rail gun
-	this->pTheRailGun = new cRailGun();
+	//// Add a rail gun
+	//this->pTheRailGun = new cRailGun();
+	this->p_CurrentTarget = NULL;
 
 }
 
@@ -20,8 +21,13 @@ cSuperTank::~cSuperTank()
 //	delete this->pTheRailGun;
 }
 
-void cSuperTank::Attack(/*another tank*/)
+//void cSuperTank::Attack(/*another tank*/)
+void cSuperTank::Attack(iTank* pEnemyTank)
 {
+	if (this->p_CurrentTarget != NULL)
+	{
+		this->pTheRailGun->Shoot();
+	}
 
 	return;
 }
@@ -30,13 +36,31 @@ glm::vec3 cSuperTank::getLocation(void)
 {
 	// TODO: 
 
-	return glm::vec3(0.0f);
+	return this->m_location;
+}
+
+void cSuperTank::setLocation(glm::vec3 newLocation_)
+{
+	this->m_location = newLocation_;
+	return;
 }
 
 void cSuperTank::UpdateTick(double deltaTime)
 {
 	// TODO:
 	std::cout << "Tank# " << this->m_ID << " updating" << std::endl;
+
+	// Is there a target? 
+	if (this->p_CurrentTarget == NULL)
+	{
+		// Nope, so pick a new target
+		// How do we do this??? 
+	}
+	else
+	{
+		// Rail gun is the thing that actually hits the tank
+		this->pTheRailGun->Shoot(this->p_CurrentTarget);
+	}
 
 	return;
 }

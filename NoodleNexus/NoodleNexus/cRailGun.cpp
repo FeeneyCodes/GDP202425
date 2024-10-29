@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-void cRailGun::Shoot(void)
+void cRailGun::Shoot(iTank* pTarget)
 {
 	std::cout << "Rail gun goes: pew! Zapp!" << std::endl;
 	return;

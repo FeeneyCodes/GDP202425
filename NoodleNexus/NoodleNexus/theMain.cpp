@@ -196,6 +196,14 @@ float getRandomFloat(float a, float b) {
     return a + r;
 }
 
+glm::vec3 getRandom_vec3(glm::vec3 min, glm::vec3 max)
+{
+    return glm::vec3(
+        getRandomFloat(min.x, max.x),
+        getRandomFloat(min.y, max.y),
+        getRandomFloat(min.z, max.z));
+}
+
 // Returns NULL if NOT found
 sMesh* pFindMeshByFriendlyName(std::string theNameToFind)
 {
@@ -511,6 +519,14 @@ int main(void)
     // SET UP THE TANKS
     SetUpTankGame();
 
+    const glm::vec3 WORLD_SIZE(1000.0f);
+
+    for (iTank* pCurrentTank : ::g_vecTheTanks)
+    {
+        pCurrentTank->setLocation(getRandom_vec3(-WORLD_SIZE, WORLD_SIZE));
+    }
+
+
     while (true)
     {
         currentFrameTime = glfwGetTime();
@@ -519,6 +535,7 @@ int main(void)
         for (iTank* pCurrentTank : ::g_vecTheTanks)
         {
             pCurrentTank->UpdateTick(deltaTime);
+//            pCurrentTank->Attack();
         }
 
         lastFrameTime = currentFrameTime;

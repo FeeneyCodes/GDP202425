@@ -1,6 +1,7 @@
 #pragma once
 
-#include "cSword.h"
+//#include "cSword.h"
+class cSword;	// Forward declaration
 
 class cMonster
 {

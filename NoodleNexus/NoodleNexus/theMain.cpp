@@ -516,33 +516,33 @@ int main(void)
 
 
 
-    // SET UP THE TANKS
-    SetUpTankGame();
-
-    const glm::vec3 WORLD_SIZE(1000.0f);
-
-    for (iTank* pCurrentTank : ::g_vecTheTanks)
-    {
-        pCurrentTank->setLocation(getRandom_vec3(-WORLD_SIZE, WORLD_SIZE));
-    }
-
-
-    while (true)
-    {
-        currentFrameTime = glfwGetTime();
-        double deltaTime = lastFrameTime - currentFrameTime;
-
-        for (iTank* pCurrentTank : ::g_vecTheTanks)
-        {
-            pCurrentTank->UpdateTick(deltaTime);
-//            pCurrentTank->Attack();
-        }
-
-        lastFrameTime = currentFrameTime;
-
-        Sleep(1000);
-        std::cout << "--------------------------------------------" << std::endl;
-    }
+//    // SET UP THE TANKS
+//    SetUpTankGame();
+//
+//    const glm::vec3 WORLD_SIZE(1000.0f);
+//
+//    for (iTank* pCurrentTank : ::g_vecTheTanks)
+//    {
+//        pCurrentTank->setLocation(getRandom_vec3(-WORLD_SIZE, WORLD_SIZE));
+//    }
+//
+//
+//    while (true)
+//    {
+//        currentFrameTime = glfwGetTime();
+//        double deltaTime = lastFrameTime - currentFrameTime;
+//
+//        for (iTank* pCurrentTank : ::g_vecTheTanks)
+//        {
+//            pCurrentTank->UpdateTick(deltaTime);
+////            pCurrentTank->Attack();
+//        }
+//
+//        lastFrameTime = currentFrameTime;
+//
+//        Sleep(1000);
+//        std::cout << "--------------------------------------------" << std::endl;
+//    }
 
 
 

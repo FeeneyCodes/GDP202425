@@ -26,7 +26,7 @@ void cSuperTank::Attack(iTank* pEnemyTank)
 {
 	if (this->p_CurrentTarget != NULL)
 	{
-		this->pTheRailGun->Shoot();
+		this->pTheRailGun->Shoot(pEnemyTank);
 	}
 
 	return;

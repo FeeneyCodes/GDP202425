@@ -38,8 +38,6 @@ void cHoverTank::setLocation(glm::vec3 newLocation_)
 	return;
 }
 
-virtual void setLocation(glm::vec3 newLocation_) = 0;
-
 
 void cHoverTank::UpdateTick(double deltaTime)
 {

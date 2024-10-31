@@ -117,7 +117,8 @@ bool readPlyFile_XYZ(sModelDrawInfo& modelDrawInfo)
 	// Load the data from the file
 //    sPlyVertex* pPlyVertices = new sPlyVertex[numberOfVertices];
 //	modelDrawInfo.pVertices = new sVertex_SHADER_FORMAT_xyz_rgb[modelDrawInfo.numberOfVertices];
-	modelDrawInfo.pVertices = new sVertex_SHADER_FORMAT_xyz_rgb_N[modelDrawInfo.numberOfVertices];
+//	modelDrawInfo.pVertices = new sVertex_SHADER_FORMAT_xyz_rgb_N[modelDrawInfo.numberOfVertices];
+	modelDrawInfo.pVertices = new sVertex_SHADER_FORMAT_xyz_rgb_N_UV[modelDrawInfo.numberOfVertices];
 
 	// end_header
 	// -0.0369122 0.127512 0.00276757 0.850855 0.5
@@ -186,6 +187,18 @@ bool readPlyFile_XYZ_Normal(sModelDrawInfo& modelDrawInfo)
 	// ************************************************************
 		// Read the top of the file to get some info.
 
+//	ply
+//	format ascii 1.0
+//	comment VCGLIB generated
+//	element vertex 53903
+//	property float x
+//	property float y
+//	property float z
+//	property float nx
+//	property float ny
+//	property float nz
+//	element face 30320
+
 		// Read all the text until I get to the word "vertex"
 //    std::ifstream plyFile("assets/models/bun_zipper_res3.ply");
 	std::ifstream plyFile(modelDrawInfo.meshName);     // May also see .c_str() "c style string, char*"
@@ -230,7 +243,8 @@ bool readPlyFile_XYZ_Normal(sModelDrawInfo& modelDrawInfo)
 
 
 
-	modelDrawInfo.pVertices = new sVertex_SHADER_FORMAT_xyz_rgb_N[modelDrawInfo.numberOfVertices];
+//	modelDrawInfo.pVertices = new sVertex_SHADER_FORMAT_xyz_rgb_N[modelDrawInfo.numberOfVertices];
+	modelDrawInfo.pVertices = new sVertex_SHADER_FORMAT_xyz_rgb_N_UV[modelDrawInfo.numberOfVertices];
 
 	// end_header
 	// -0.0369122 0.127512 0.00276757 0.850855 0.5
@@ -248,6 +262,147 @@ bool readPlyFile_XYZ_Normal(sModelDrawInfo& modelDrawInfo)
 		modelDrawInfo.pVertices->r = 1.0f;
 		modelDrawInfo.pVertices->g = 1.0f;
 		modelDrawInfo.pVertices->b = 1.0f;
+
+		// There are no UVs in the file, so set them to 0.0
+		modelDrawInfo.pVertices[index].u = 0.0f;
+		modelDrawInfo.pVertices[index].v = 0.0f;
+
+
+
+		// Only has xyz, so stop here
+//        plyFile >> allFileInfo.pPlyVertices[index].confidence;
+//        plyFile >> allFileInfo.pPlyVertices[index].intensity;
+//		modelDrawInfo.pVertices[index].confidence = 0;
+//		modelDrawInfo.pVertices[index].intensity = 0;
+	}
+
+	// Load the triangle info from the file
+	struct sPlyFileTriangle
+	{
+		unsigned int vertIndex_0;
+		unsigned int vertIndex_1;
+		unsigned int vertIndex_2;
+	};
+	//    sTriangle* pPlyTriangles = new sTriangle[numberOfTriangles];
+	sPlyFileTriangle* pPlyFileTriangles = new sPlyFileTriangle[modelDrawInfo.numberOfTriangles];
+	for (unsigned int index = 0; index != modelDrawInfo.numberOfTriangles; index++)
+	{
+		// 3 737 103 17 
+		int discard = 0;
+		plyFile >> discard;
+		plyFile >> pPlyFileTriangles[index].vertIndex_0;
+		plyFile >> pPlyFileTriangles[index].vertIndex_1;
+		plyFile >> pPlyFileTriangles[index].vertIndex_2;
+	}
+
+	// Copy the triangle data to a 1D array...
+	modelDrawInfo.numberOfIndices = modelDrawInfo.numberOfTriangles * 3;
+
+	modelDrawInfo.pIndices = new unsigned int[modelDrawInfo.numberOfIndices];
+
+	unsigned int index = 0;
+	for (unsigned int triIndex = 0; triIndex != modelDrawInfo.numberOfTriangles; triIndex++)
+	{
+		modelDrawInfo.pIndices[index + 0] = pPlyFileTriangles[triIndex].vertIndex_0;
+		modelDrawInfo.pIndices[index + 1] = pPlyFileTriangles[triIndex].vertIndex_1;
+		modelDrawInfo.pIndices[index + 2] = pPlyFileTriangles[triIndex].vertIndex_2;
+		index += 3;
+	}
+
+
+	return true;
+}
+
+// Returns: true if the file is loaded
+bool readPlyFile_XYZ_Normal_UV(sModelDrawInfo& modelDrawInfo)
+{
+
+	// ************************************************************
+		// Read the top of the file to get some info.
+
+	//	ply
+	//	format ascii 1.0
+	//	comment VCGLIB generated
+	//	element vertex 53903
+	//	property float x
+	//	property float y
+	//	property float z
+	//	property float nx
+	//	property float ny
+	//	property float nz
+	//	property float texture_u
+	//	property float texture_v
+	//	element face 30320
+	//	property list uchar int vertex_indices
+	//	end_header
+
+		// Read all the text until I get to the word "vertex"
+//    std::ifstream plyFile("assets/models/bun_zipper_res3.ply");
+	std::ifstream plyFile(modelDrawInfo.meshName);     // May also see .c_str() "c style string, char*"
+
+	if (!plyFile.is_open())
+	{
+		return false;
+	}
+
+	std::string token = "";
+
+	if (!plyFile.is_open())
+	{
+		return false;
+	}
+
+	//element vertex 1889
+	while (token != "vertex")
+	{
+		plyFile >> token;
+	};
+	// Next info is the number of vertices
+	//int numberOfVertices = 0;
+	plyFile >> modelDrawInfo.numberOfVertices;
+
+
+	//element face 3851
+	while (token != "face")
+	{
+		plyFile >> token;
+	};
+	// Next info is the number of vertices
+	//int numberOfTriangles = 0;
+	plyFile >> modelDrawInfo.numberOfTriangles;
+
+	//end_header
+	// -0.0369122 0.127512 0.00276757 0.850855 0.5 
+	while (token != "end_header")
+	{
+		plyFile >> token;
+	};
+
+
+
+	//	modelDrawInfo.pVertices = new sVertex_SHADER_FORMAT_xyz_rgb_N[modelDrawInfo.numberOfVertices];
+	modelDrawInfo.pVertices = new sVertex_SHADER_FORMAT_xyz_rgb_N_UV[modelDrawInfo.numberOfVertices];
+
+	// end_header
+	// -0.0369122 0.127512 0.00276757 0.850855 0.5
+	for (unsigned index = 0; index != modelDrawInfo.numberOfVertices; index++)
+	{
+		plyFile >> modelDrawInfo.pVertices[index].x;
+		plyFile >> modelDrawInfo.pVertices[index].y;
+		plyFile >> modelDrawInfo.pVertices[index].z;
+
+		plyFile >> modelDrawInfo.pVertices[index].nx;
+		plyFile >> modelDrawInfo.pVertices[index].ny;
+		plyFile >> modelDrawInfo.pVertices[index].nz;
+
+		// Set all the vertices to white (1,1,1)
+		modelDrawInfo.pVertices->r = 1.0f;
+		modelDrawInfo.pVertices->g = 1.0f;
+		modelDrawInfo.pVertices->b = 1.0f;
+
+		// Load the texture coordinates, too
+		plyFile >> modelDrawInfo.pVertices[index].u;
+		plyFile >> modelDrawInfo.pVertices[index].v;
 
 
 		// Only has xyz, so stop here
@@ -312,11 +467,14 @@ bool cVAOManager::LoadModelIntoVAO(
 //	{
 //		return false;
 //	}
-	if (!readPlyFile_XYZ_Normal(drawInfo))
+//	if (!readPlyFile_XYZ_Normal(drawInfo))
+//	{
+//		return false;
+//	}
+	if ( ! readPlyFile_XYZ_Normal_UV(drawInfo) )
 	{
 		return false;
 	}
-
 	// Calculate extents
 	drawInfo.calculateExtents();
 
@@ -350,11 +508,14 @@ bool cVAOManager::LoadModelIntoVAO(
 //				  sizeof(sVertex_SHADER_FORMAT_xyz_rgb) * drawInfo.numberOfVertices,	// ::g_NumberOfVertsToDraw,	// sizeof(vertices), 
 //				  (GLvoid*) drawInfo.pVertices,							// pVertices,			//vertices, 
 //				  GL_STATIC_DRAW );
+//	glBufferData( GL_ARRAY_BUFFER, 
+//				  sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N) * drawInfo.numberOfVertices,	// ::g_NumberOfVertsToDraw,	// sizeof(vertices), 
+//				  (GLvoid*) drawInfo.pVertices,							// pVertices,			//vertices, 
+//				  GL_STATIC_DRAW );
 	glBufferData( GL_ARRAY_BUFFER, 
-				  sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N) * drawInfo.numberOfVertices,	// ::g_NumberOfVertsToDraw,	// sizeof(vertices), 
+				  sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV) * drawInfo.numberOfVertices,	// ::g_NumberOfVertsToDraw,	// sizeof(vertices), 
 				  (GLvoid*) drawInfo.pVertices,							// pVertices,			//vertices, 
 				  GL_STATIC_DRAW );
-
 
 	// Copy the index buffer into the video card, too
 	// Create an index buffer.
@@ -373,15 +534,18 @@ bool cVAOManager::LoadModelIntoVAO(
 // 	   If the shader changes or the vertex layout changes,
 // 		you have to change this part...
 // ************************************************************
-	GLint vpos_location = glGetAttribLocation(shaderProgramID, "vPos");	// program
-	GLint vcol_location = glGetAttribLocation(shaderProgramID, "vCol");	// program;
-	GLint vnorm_location = glGetAttribLocation(shaderProgramID, "vNormal");	// program;
+	GLint vpos_location = glGetAttribLocation(shaderProgramID, "vPos");			// in vec3 vPos;
+	GLint vcol_location = glGetAttribLocation(shaderProgramID, "vCol");			// in vec3 vCol;
+	GLint vnorm_location = glGetAttribLocation(shaderProgramID, "vNormal");		// in vec3 vNormal;
+	GLint vUV_location = glGetAttribLocation(shaderProgramID, "vUV");			// in vec2 vUV;
 
 
-	//struct sVertex_SHADER_FORMAT_xyz_rgb
+	//struct sVertex_SHADER_FORMAT_xyz_rgb_XXXXXXXXX
 	//{
 	//	float x, y, z;
 	//	float r, g, b;
+	//  float ny, ny, nz;	// When we added normals
+	//  float u, v;			// When we added texture coords
 	//};
 
 	// Set the vertex attributes for this shader
@@ -390,29 +554,41 @@ bool cVAOManager::LoadModelIntoVAO(
 		                   3,		// vPos
 						   GL_FLOAT, GL_FALSE,
 //						   sizeof(sVertex_SHADER_FORMAT_xyz_rgb),	//  sizeof(float) * 6,		// Stride
-						   sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N),	//  sizeof(float) * 6,		// Stride
+//						   sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N),	//  sizeof(float) * 6,		// Stride
+						   sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV),	//  sizeof(float) * 6,		// Stride
 //						   ( void* )offsetof(sVertex_SHADER_FORMAT_xyz_rgb, x) );				// Offset
-						   ( void* )offsetof(sVertex_SHADER_FORMAT_xyz_rgb_N, x) );				// Offset
+//						   ( void* )offsetof(sVertex_SHADER_FORMAT_xyz_rgb_N, x) );				// Offset
+						   ( void* )offsetof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV, x) );				// Offset
 
 	glEnableVertexAttribArray(vcol_location);	// vCol
 	glVertexAttribPointer( vcol_location, 
 		                   3,		// vCol
 						   GL_FLOAT, GL_FALSE,
 //		                   sizeof(sVertex_SHADER_FORMAT_xyz_rgb),						// sizeof(float) * 6,
-		                   sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N),			//( void* )( sizeof(float) * 3 ));
+//		                   sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N),			//( void* )( sizeof(float) * 3 ));
+		                   sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV),			//( void* )( sizeof(float) * 3 ));
 //		                   sizeof(sVertex_SHADER_FORMAT_xyz_rgb),						// sizeof(float) * 6,
-		                   (void*)offsetof(sVertex_SHADER_FORMAT_xyz_rgb_N, r));			//( void* )( sizeof(float) * 3 ));
+//		                   (void*)offsetof(sVertex_SHADER_FORMAT_xyz_rgb_N, r));			//( void* )( sizeof(float) * 3 ));
+		                   (void*)offsetof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV, r));			//( void* )( sizeof(float) * 3 ));
 
-	glEnableVertexAttribArray(vnorm_location);	// vCol
+	glEnableVertexAttribArray(vnorm_location);	// vNormal
 	glVertexAttribPointer( vnorm_location, 
-		                   3,		// vCol
+		                   3,		// vNormal
 						   GL_FLOAT, GL_FALSE,
-//		                   sizeof(sVertex_SHADER_FORMAT_xyz_rgb),						// sizeof(float) * 6,
-	                       sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N),			//( void* )( sizeof(float) * 3 ));
-//		                   sizeof(sVertex_SHADER_FORMAT_xyz_rgb),						// sizeof(float) * 6,
-		                   (void*)offsetof(sVertex_SHADER_FORMAT_xyz_rgb_N, nx));			//( void* )( sizeof(float) * 3 ));
+//	                       sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N),			//( void* )( sizeof(float) * 3 ));
+	                       sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV),			//( void* )( sizeof(float) * 3 ));
+//		                   (void*)offsetof(sVertex_SHADER_FORMAT_xyz_rgb_N, nx));			//( void* )( sizeof(float) * 3 ));
+		                   (void*)offsetof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV, nx));			//( void* )( sizeof(float) * 3 ));
 
-						   // Now that all the parts are set up, set the VAO to zero
+	glEnableVertexAttribArray(vUV_location);	// vUV
+	glVertexAttribPointer(vUV_location,
+		                   2,		// in vec2 vUV;
+						   GL_FLOAT, GL_FALSE,
+	                       sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV),			
+		                   (void*)offsetof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV, u));			
+
+	
+	// Now that all the parts are set up, set the VAO to zero
 	glBindVertexArray(0);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -421,6 +597,7 @@ bool cVAOManager::LoadModelIntoVAO(
 	glDisableVertexAttribArray(vpos_location);
 	glDisableVertexAttribArray(vcol_location);
 	glDisableVertexAttribArray(vnorm_location);
+	glDisableVertexAttribArray(vUV_location);
 
 
 	// Store the draw information into the map

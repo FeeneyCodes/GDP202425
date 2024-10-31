@@ -140,6 +140,9 @@
     <ClCompile Include="Basic_Shader_Manager\cShader.cpp" />
     <ClCompile Include="Basic_Shader_Manager\cShaderManager.cpp" />
     <ClCompile Include="cBasicFlyCamera\cBasicFlyCamera.cpp" />
+    <ClCompile Include="cBasicTextureManager\C24BitBMPpixel.cpp" />
+    <ClCompile Include="cBasicTextureManager\cBasicTextureManager.cpp" />
+    <ClCompile Include="cBasicTextureManager\CTextureFromBMP.cpp" />
     <ClCompile Include="cHoverTank.cpp" />
     <ClCompile Include="cJetPack.cpp" />
     <ClCompile Include="cLightHelper\cLightHelper.cpp" />
@@ -164,6 +167,9 @@
   <ItemGroup>
     <ClInclude Include="Basic_Shader_Manager\cShaderManager.h" />
     <ClInclude Include="cBasicFlyCamera\cBasicFlyCamera.h" />
+    <ClInclude Include="cBasicTextureManager\C24BitBMPpixel.h" />
+    <ClInclude Include="cBasicTextureManager\cBasicTextureManager.h" />
+    <ClInclude Include="cBasicTextureManager\CTextureFromBMP.h" />
     <ClInclude Include="cHoverTank.h" />
     <ClInclude Include="cJetPack.h" />
     <ClInclude Include="cLightHelper\cLightHelper.h" />

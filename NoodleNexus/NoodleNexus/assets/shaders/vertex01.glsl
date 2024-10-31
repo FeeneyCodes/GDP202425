@@ -3,10 +3,12 @@
 in vec3 vCol;
 in vec3 vPos;
 in vec3 vNormal;	// Normal from the model ("model" space)
+in vec2 vUV;		// Texture coordinates
 
 out vec3 fColour;
 out vec4 fvertexWorldLocation;
 out vec4 fvertexNormal;		// Normal in "world" space
+out vec2 fUV;				// Texture coordinates (to the fragment shader)
 
 //uniform mat4 MVP;
 uniform mat4 matView;
@@ -36,4 +38,5 @@ void main()
 	fvertexNormal.xyz = normalize(vNormNormalize);
 	
 	fColour = vCol;
+	fUV = vUV;			// Sent UVs to fragment shader
 }

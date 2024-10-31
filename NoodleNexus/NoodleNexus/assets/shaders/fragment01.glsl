@@ -3,6 +3,7 @@
 in vec3 fColour;			// Actual 3D model colour (from vertex buffer)
 in vec4 fvertexWorldLocation;
 in vec4 fvertexNormal;
+in vec2 fUV;				// Texture (UV) coordinates
 
 uniform vec4 objectColour;			// Override colour 
 uniform bool bUseObjectColour;
@@ -41,6 +42,10 @@ uniform sLight theLights[NUMBEROFLIGHTS];
 vec4 calculateLightContrib( vec3 vertexMaterialColour, vec3 vertexNormal, 
                             vec3 vertexWorldPos, vec4 vertexSpecular );
 
+// Allows us to lookup the RGB colour from a 2D texture
+// Give it the UV and it returns the colour at that UV location
+uniform sampler2D texture01;
+
 void main()
 {
 	vec3 vertexColour = fColour;
@@ -72,6 +77,15 @@ void main()
 											
 	finalPixelColour = pixelColour;
 	finalPixelColour.a = 1.0f;		
+
+	// Make the actual colour almost black
+	// Apply the UVs as a colour
+	finalPixelColour.rgb *= 0.001f;	// Almost black
+//	finalPixelColour.rg += fUV.xy;	// Add the UVs as colours
+
+	// uniform sampler2D texture01;
+	vec3 texColour = texture( texture01, fUV ).rgb;
+	finalPixelColour.rgb += texColour;
 
 }
 

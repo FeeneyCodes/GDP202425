@@ -19,11 +19,19 @@
 //	float r, g, b;		// in vec3 vCol;
 //};
 
-struct sVertex_SHADER_FORMAT_xyz_rgb_N
+//struct sVertex_SHADER_FORMAT_xyz_rgb_N
+//{
+//	float x, y, z;		// in vec3 vPos;
+//	float r, g, b;		// in vec3 vCol;
+//	float nx, ny, nz;	// in vec3 vNormal;
+//};
+
+struct sVertex_SHADER_FORMAT_xyz_rgb_N_UV
 {
 	float x, y, z;		// in vec3 vPos;
 	float r, g, b;		// in vec3 vCol;
 	float nx, ny, nz;	// in vec3 vNormal;
+	float u, v;			// in vec2 vUV;
 };
 
 struct sModelDrawInfo
@@ -45,7 +53,8 @@ struct sModelDrawInfo
 
 	// The "local" (i.e. "CPU side" temporary array)
 //	sVertex_SHADER_FORMAT_xyz_rgb* pVertices;	//  = 0;
-	sVertex_SHADER_FORMAT_xyz_rgb_N* pVertices;	//  = 0;
+//	sVertex_SHADER_FORMAT_xyz_rgb_N* pVertices;	//  = 0;
+	sVertex_SHADER_FORMAT_xyz_rgb_N_UV* pVertices;	//  = 0;
 	// The index buffer (CPU side)
 	unsigned int* pIndices;
 	// 

@@ -8,6 +8,7 @@
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
 #include <vector>
+#include <string>
 
 struct sMesh
 {
@@ -18,7 +19,7 @@ struct sMesh
 	glm::vec3 rotationEulerXYZ;		// 90 degrees around the x axis
 	float uniformScale = 1.0f;				// Same for each axis
 
-	glm::vec4 objectColourRGBA;
+	glm::vec4 objectColourRGBA;		// 0 - 1.0 
 	// If true, it uses the colour above
 	bool bOverrideObjectColour = true;
 
@@ -28,9 +29,23 @@ struct sMesh
 
 	unsigned int uniqueID = 0;
 
+//	std::string textureName;
+	static const unsigned int MAX_NUM_TEXTURES = 10;
+	std::string textures[MAX_NUM_TEXTURES];
+	float blendRatio[MAX_NUM_TEXTURES];
+
+
 	std::string getState(void);
 	bool loadState(std::string newState);
 
 //	sMesh* pChildMeshes[100];
 	std::vector< sMesh* > vec_pChildMeshes;
+
+	sMesh()
+	{
+		for (unsigned int index = 0; index != MAX_NUM_TEXTURES; index++)
+		{
+			this->blendRatio[MAX_NUM_TEXTURES] = 0.0f;
+		}
+	}
 };

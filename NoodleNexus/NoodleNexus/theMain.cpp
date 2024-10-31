@@ -34,6 +34,8 @@
 #include "cLightManager.h"
 #include <windows.h>    // Includes ALL of windows... MessageBox
 #include "cLightHelper/cLightHelper.h"
+//
+#include "cBasicTextureManager/cBasicTextureManager.h"
 
 //
 //const unsigned int MAX_NUMBER_OF_MESHES = 1000;
@@ -45,6 +47,8 @@ std::vector<sMesh*> g_vecMeshesToDraw;
 cPhysics* g_pPhysicEngine = NULL;
 // This loads the 3D models for drawing, etc.
 cVAOManager* g_pMeshManager = NULL;
+
+cBasicTextureManager* g_pTextures = NULL;
 
 //cLightManager* g_pLightManager = NULL;
 
@@ -491,10 +495,17 @@ int main(void)
     // For triangle meshes, let the physics object "know" about the VAO manager
     ::g_pPhysicEngine->setVAOManager(::g_pMeshManager);
 
+
+    ::g_pTextures = new cBasicTextureManager();
+
+    ::g_pTextures->SetBasePath("assets/textures");
+    ::g_pTextures->Create2DTextureFromBMPFile("bad_bunny_1920x1080.bmp");
+    ::g_pTextures->Create2DTextureFromBMPFile("dua-lipa-promo.bmp");
+    ::g_pTextures->Create2DTextureFromBMPFile("Puzzle_parts.bmp");
+
+
     // This also adds physics objects to the phsyics system
     AddModelsToScene(::g_pMeshManager, program);
-
-
 
 
    
@@ -573,6 +584,37 @@ int main(void)
     ::g_pLightManager->theLights[1].param1.z = 10.0f;  //  z = outer angle
 
     ::g_pLightManager->theLights[1].param2.x = 1.0f;    // Turn on (see shader)
+
+
+    // Set the texture sampler to one of the 3 textures we loaded
+//    GLuint badBunnyTexNum = ::g_pTextures->getTextureIDFromName("bad_bunny_1920x1080.bmp");
+//    GLuint badBunnyTexNum = ::g_pTextures->getTextureIDFromName("dua-lipa-promo.bmp");
+    GLuint badBunnyTexNum = ::g_pTextures->getTextureIDFromName("Puzzle_parts.bmp");
+
+    // Bund to texture unit #3 (just because. for no particular reason)
+    glActiveTexture(GL_TEXTURE3);	
+    glBindTexture(GL_TEXTURE_2D, badBunnyTexNum);
+    // glBindTextureUnit( texture00Unit, texture00Number );	// OpenGL 4.5+ only
+
+    //uniform sampler2D texture01;
+    GLint texture01_UL = glGetUniformLocation(program, "texture01");
+    // Connects the sampler to the texture unit
+    glUniform1i(texture01_UL, 3);       // <-- Note we use the NUMBER, not the GL_TEXTURE3 here
+
+
+
+    //GLuint badBunnyTextureID = ::g_pTextures->getTextureIDFromName("bad_bunny_1920x1080.bmp");
+    //// Texture binding...
+    //GLuint texture00Unit = 3;			// Texture unit go from 0 to 79
+    //glActiveTexture(GL_TEXTURE0 + texture00Unit);	// GL_TEXTURE0 = 33984
+    //glBindTexture(GL_TEXTURE_2D, badBunnyTextureID);
+    //// glBindTextureUnit( texture00Unit, texture00Number );	// OpenGL 4.5+ only
+    //// Set texture unit in the shader, too
+    //GLint texture01_UnLoc = glGetUniformLocation(program, "texture01");
+    //glUniform1i(texture01_UnLoc, texture00Unit);
+
+
+
 
 
     cLightHelper TheLightHelper;
@@ -892,9 +934,16 @@ int main(void)
 
 void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
 {
+    sModelDrawInfo warehouseModel;
+    //    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Warehouse_xyz_n.ply",
+    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Warehouse_xyz_n_uv.ply",
+        warehouseModel, program);
+    std::cout << warehouseModel.numberOfVertices << " vertices loaded" << std::endl;
+
 
     sModelDrawInfo tankModel;
-    pMeshManager->LoadModelIntoVAO("assets/models/Low_Poly_Tank_Model_3D_model.ply", 
+//    pMeshManager->LoadModelIntoVAO("assets/models/Low_Poly_Tank_Model_3D_model.ply", 
+    pMeshManager->LoadModelIntoVAO("assets/models/Low_Poly_Tank_Model_3D_model_xyz_n_uv.ply", 
         tankModel, program);
     std::cout << tankModel.meshName << " : " << tankModel.numberOfVertices << " vertices loaded" << std::endl;
 
@@ -910,42 +959,43 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
 
     sModelDrawInfo terrainModel;
     //    pMeshManager->LoadModelIntoVAO("assets/models/Simple_MeshLab_terrain_xyz_only.ply", 
-    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Simple_MeshLab_terrain_xyz_N.ply",
+//    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Simple_MeshLab_terrain_xyz_N.ply",
+    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Simple_MeshLab_terrain_xyz_N_uv.ply",
         terrainModel, program);
     std::cout << terrainModel.numberOfVertices << " vertices loaded" << std::endl;
 
-    sModelDrawInfo warehouseModel;
-    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Warehouse_xyz_n.ply",
-        warehouseModel, program);
-    std::cout << warehouseModel.numberOfVertices << " vertices loaded" << std::endl;
 
     sModelDrawInfo bunnyModel;
     //    ::g_pMeshManager->LoadModelIntoVAO("assets/models/bun_zipper_res2_10x_size_xyz_only.ply",
-    ::g_pMeshManager->LoadModelIntoVAO("assets/models/bun_zipper_res2_10x_size_xyz_N_only.ply",
+//    ::g_pMeshManager->LoadModelIntoVAO("assets/models/bun_zipper_res2_10x_size_xyz_N_only.ply",
+    ::g_pMeshManager->LoadModelIntoVAO("assets/models/bun_zipper_res2_10x_size_xyz_N_uv.ply",
         bunnyModel, program);
     std::cout << bunnyModel.numberOfVertices << " vertices loaded" << std::endl;
 
     sModelDrawInfo platPlaneDrawInfo;
     //    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Flat_Plane_xyz.ply", 
-    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Flat_Plane_xyz_N.ply",
+//    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Flat_Plane_xyz_N.ply",
+    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Flat_Plane_xyz_N_uv.ply",
         platPlaneDrawInfo, program);
     std::cout << platPlaneDrawInfo.numberOfVertices << " vertices loaded" << std::endl;
 
     sModelDrawInfo sphereMesh;
     //    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Sphere_radius_1_xyz.ply",
-    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Sphere_radius_1_xyz_N.ply",
+    //::g_pMeshManager->LoadModelIntoVAO("assets/models/Sphere_radius_1_xyz_N.ply",
+    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Sphere_radius_1_xyz_N_uv.ply",
         sphereMesh, program);
     std::cout << sphereMesh.numberOfVertices << " vertices loaded" << std::endl;
 
     sModelDrawInfo sphereShadowMesh;
-    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Sphere_radius_1_Flat_Shadow_xyz_N.ply",
+//    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Sphere_radius_1_Flat_Shadow_xyz_N.ply",
+    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Sphere_radius_1_Flat_Shadow_xyz_N_uv.ply",
         sphereShadowMesh, program);
     std::cout << sphereShadowMesh.numberOfVertices << " vertices loaded" << std::endl;
 
-    sModelDrawInfo hangarMesh;
-    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Demonstration_Interior - DO NOT USE THIS xyz_N.ply",
-        hangarMesh, program);
-    std::cout << hangarMesh.numberOfVertices << " vertices loaded" << std::endl;
+//    sModelDrawInfo hangarMesh;
+//    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Demonstration_Interior - DO NOT USE THIS xyz_N.ply",
+//        hangarMesh, program);
+//    std::cout << hangarMesh.numberOfVertices << " vertices loaded" << std::endl;
 
     //sModelDrawInfo backroomLevelMesh;
     //::g_pMeshManager->LoadModelIntoVAO("assets/models/Backrooms_Level_0/tinker_adjusted_xyz_N.ply",
@@ -957,16 +1007,16 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
 
     // Load some models to draw
 
-    {
-        sMesh* pHangar = new sMesh();
-        pHangar->modelFileName = "assets/models/Demonstration_Interior - DO NOT USE THIS xyz_N.ply";
-        pHangar->positionXYZ = glm::vec3(0.0f, 30.0f, 0.0f);
-        pHangar->bOverrideObjectColour = true;
-        pHangar->objectColourRGBA = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
-        pHangar->rotationEulerXYZ.x = -90.0f;
-        pHangar->rotationEulerXYZ.z = 180.0f;
-        ::g_vecMeshesToDraw.push_back(pHangar);
-    }
+//    {
+//        sMesh* pHangar = new sMesh();
+//        pHangar->modelFileName = "assets/models/Demonstration_Interior - DO NOT USE THIS xyz_N.ply";
+//        pHangar->positionXYZ = glm::vec3(0.0f, 30.0f, 0.0f);
+//        pHangar->bOverrideObjectColour = true;
+//        pHangar->objectColourRGBA = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
+//        pHangar->rotationEulerXYZ.x = -90.0f;
+//        pHangar->rotationEulerXYZ.z = 180.0f;
+//        ::g_vecMeshesToDraw.push_back(pHangar);
+//    }
 //    {
 //        sMesh* pSphereMesh = new sMesh();
 ////        pSphereMesh->modelFileName = "assets/models/Sphere_radius_1_xyz.ply";
@@ -1001,7 +1051,8 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
         {
             sMesh* pBunny = new sMesh();
 //            pBunny->modelFileName = "assets/models/bun_zipper_res2_10x_size_xyz_only.ply";
-            pBunny->modelFileName = "assets/models/bun_zipper_res2_10x_size_xyz_N_only.ply";
+//            pBunny->modelFileName = "assets/models/bun_zipper_res2_10x_size_xyz_N_only.ply";
+            pBunny->modelFileName = "assets/models/bun_zipper_res2_10x_size_xyz_N_uv.ply";
             pBunny->positionXYZ = glm::vec3(x, -3.0f, z);
             pBunny->objectColourRGBA 
                 = glm::vec4(getRandomFloat(0.0f, 1.0f),
@@ -1032,7 +1083,8 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
 //   |_| \_\___|_| |_|\__,_|\___|_|/_/ |_| |_| |_|\___||___/_| |_|
 //                                                                
         sMesh* pWarehouse = new sMesh();
-        pWarehouse->modelFileName = "assets/models/Warehouse_xyz_n.ply";
+//        pWarehouse->modelFileName = "assets/models/Warehouse_xyz_n.ply";
+        pWarehouse->modelFileName = "assets/models/Warehouse_xyz_n_uv.ply";
         pWarehouse->positionXYZ = glm::vec3(-10.0f, 5.0f, 0.0f);
         pWarehouse->rotationEulerXYZ.y = -90.0f;
         pWarehouse->objectColourRGBA = glm::vec4(0.6f, 0.6f, 0.6f, 1.0f);
@@ -1048,7 +1100,7 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
 //   |_|   |_| |_|\__, |___/_|\___|___/  \___/|_.__// |\___|\___|\__|
 //                |___/                           |__/               
          ::g_pPhysicEngine->addTriangleMesh(
-             "assets/models/Warehouse_xyz_n.ply",
+             "assets/models/Warehouse_xyz_n_uv.ply",
              pWarehouse->positionXYZ,
              pWarehouse->rotationEulerXYZ,
              pWarehouse->uniformScale);
@@ -1086,8 +1138,9 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
 
     {
         sMesh* pFlatPlane = new sMesh();
-        pFlatPlane->modelFileName = "assets/models/Flat_Plane_xyz_N.ply";
+        pFlatPlane->modelFileName = "assets/models/Flat_Plane_xyz_N_uv.ply";
         pFlatPlane->positionXYZ = glm::vec3(0.0f, -5.0f, 0.0f);
+        pFlatPlane->rotationEulerXYZ.y = 90.0f;
         pFlatPlane->objectColourRGBA = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
         pFlatPlane->uniqueFriendlyName = "Ground";
         //        pFlatPlane->bIsWireframe = true;
@@ -1129,7 +1182,8 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
     {
         sMesh* pFlatPlane = new sMesh();
 //        pFlatPlane->modelFileName = "assets/models/Flat_Plane_xyz.ply";
-        pFlatPlane->modelFileName = "assets/models/Flat_Plane_xyz_N.ply";
+//        pFlatPlane->modelFileName = "assets/models/Flat_Plane_xyz_N.ply";
+        pFlatPlane->modelFileName = "assets/models/Flat_Plane_xyz_N_uv.ply";
         pFlatPlane->positionXYZ = glm::vec3(0.0f, -5.0f, 0.0f);
         pFlatPlane->bIsWireframe = true;
         pFlatPlane->uniformScale = 1.01f;
@@ -1140,7 +1194,8 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
 
     sMesh* pBunny = new sMesh();
     //            pBunny->modelFileName = "assets/models/bun_zipper_res2_10x_size_xyz_only.ply";
-    pBunny->modelFileName = "assets/models/bun_zipper_res2_10x_size_xyz_N_only.ply";
+//    pBunny->modelFileName = "assets/models/bun_zipper_res2_10x_size_xyz_N_only.ply";
+    pBunny->modelFileName = "assets/models/bun_zipper_res2_10x_size_xyz_N_uv.ply";
     pBunny->positionXYZ = glm::vec3(10.0f, 10.0f, 0.0f);
     pBunny->objectColourRGBA
         = glm::vec4(getRandomFloat(0.0f, 1.0f),
@@ -1162,7 +1217,8 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
         //                                                                
         sMesh* pSphereMesh = new sMesh();
 //        pSphereMesh->modelFileName = "assets/models/Sphere_radius_1_xyz.ply";
-        pSphereMesh->modelFileName = "assets/models/Sphere_radius_1_xyz_N.ply";
+//        pSphereMesh->modelFileName = "assets/models/Sphere_radius_1_xyz_N.ply";
+        pSphereMesh->modelFileName = "assets/models/Sphere_radius_1_xyz_N_uv.ply";
         pSphereMesh->positionXYZ = glm::vec3(-15.0f, -3.0f, -20.0f);
         //pSphereMesh->bIsWireframe = true;
         pSphereMesh->objectColourRGBA = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
@@ -1174,7 +1230,8 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
 
         {
             sMesh* pSphereShadowMesh = new sMesh();
-            pSphereShadowMesh->modelFileName = "assets/models/Sphere_radius_1_Flat_Shadow_xyz_N.ply";
+//            pSphereShadowMesh->modelFileName = "assets/models/Sphere_radius_1_Flat_Shadow_xyz_N.ply";
+            pSphereShadowMesh->modelFileName = "assets/models/Sphere_radius_1_Flat_Shadow_xyz_N_uv.ply";
             pSphereShadowMesh->positionXYZ = pSphereMesh->positionXYZ;
             pSphereShadowMesh->positionXYZ.y = -3.95f;  // JUST above the ground
             pSphereShadowMesh->objectColourRGBA = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
@@ -1224,7 +1281,8 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
         //                                                                
         sMesh* pSphereMesh = new sMesh();
         //        pSphereMesh->modelFileName = "assets/models/Sphere_radius_1_xyz.ply";
-        pSphereMesh->modelFileName = "assets/models/Sphere_radius_1_xyz_N.ply";
+//        pSphereMesh->modelFileName = "assets/models/Sphere_radius_1_xyz_N.ply";
+        pSphereMesh->modelFileName = "assets/models/Sphere_radius_1_xyz_N_uv.ply";
         pSphereMesh->positionXYZ.x = getRandomFloat(-30.0f, 30.0f);
         pSphereMesh->positionXYZ.z = getRandomFloat(-30.0f, 30.0f);
         pSphereMesh->positionXYZ.y = getRandomFloat(0.0f, 40.0f);

@@ -588,15 +588,16 @@ int main(void)
 
     ::g_pTextures->SetBasePath("assets/textures");
     ::g_pTextures->Create2DTextureFromBMPFile("bad_bunny_1920x1080.bmp");
-    //::g_pTextures->Create2DTextureFromBMPFile("dua-lipa-promo.bmp");
-    //::g_pTextures->Create2DTextureFromBMPFile("Puzzle_parts.bmp");
-    //::g_pTextures->Create2DTextureFromBMPFile("Non-uniform concrete wall 0512-3-1024x1024.bmp");
+    ::g_pTextures->Create2DTextureFromBMPFile("dua-lipa-promo.bmp");
+    ::g_pTextures->Create2DTextureFromBMPFile("Puzzle_parts.bmp");
+    ::g_pTextures->Create2DTextureFromBMPFile("Non-uniform concrete wall 0512-3-1024x1024.bmp");
+    ::g_pTextures->Create2DTextureFromBMPFile("UV_Test_750x750.bmp");
 
     // Set the texture sampler to one of the 3 textures we loaded
-    GLuint badBunnyTexNum = ::g_pTextures->getTextureIDFromName("bad_bunny_1920x1080.bmp");
-//    GLuint badBunnyTexNum = ::g_pTextures->getTextureIDFromName("dua-lipa-promo.bmp");
-//    GLuint badBunnyTexNum = ::g_pTextures->getTextureIDFromName("Puzzle_parts.bmp");
-//    GLuint badBunnyTexNum = ::g_pTextures->getTextureIDFromName("Non-uniform concrete wall 0512-3-1024x1024.bmp");
+    //GLuint badBunnyTexNum = ::g_pTextures->getTextureIDFromName("bad_bunny_1920x1080.bmp");
+    //GLuint badBunnyTexNum = ::g_pTextures->getTextureIDFromName("dua-lipa-promo.bmp");
+    //GLuint badBunnyTexNum = ::g_pTextures->getTextureIDFromName("Puzzle_parts.bmp");
+    //GLuint badBunnyTexNum = ::g_pTextures->getTextureIDFromName("Non-uniform concrete wall 0512-3-1024x1024.bmp");
 
     //glGet with argument GL_ACTIVE_TEXTURE, or GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS.
     // 
@@ -612,15 +613,15 @@ int main(void)
 
 
 
-    // Bund to texture unit #3 (just because. for no particular reason)
-    glActiveTexture(GL_TEXTURE0 + 191);	
-    glBindTexture(GL_TEXTURE_2D, badBunnyTexNum);
-    // glBindTextureUnit( texture00Unit, texture00Number );	// OpenGL 4.5+ only
-
-    //uniform sampler2D texture01;
-    GLint texture01_UL = glGetUniformLocation(program, "texture01");
-    // Connects the sampler to the texture unit
-    glUniform1i(texture01_UL, 191);       // <-- Note we use the NUMBER, not the GL_TEXTURE3 here
+//    // Bund to texture unit #3 (just because. for no particular reason)
+//    glActiveTexture(GL_TEXTURE0 + 191);	
+//    glBindTexture(GL_TEXTURE_2D, badBunnyTexNum);
+//    // glBindTextureUnit( texture00Unit, texture00Number );	// OpenGL 4.5+ only
+//
+//    //uniform sampler2D texture01;
+//    GLint texture01_UL = glGetUniformLocation(program, "texture00");
+//    // Connects the sampler to the texture unit
+//    glUniform1i(texture01_UL, 191);       // <-- Note we use the NUMBER, not the GL_TEXTURE3 here
 
 
 
@@ -686,15 +687,15 @@ int main(void)
         lastFrameTime = currentFrameTime;
 
 
-//        // *******************************************************************
-//        // Place light #0 where the little yellow "light sphere" is
-//        // Find the Light_Sphere
-//        sMesh* pLightSphere = pFindMeshByFriendlyName("Light_Sphere");
-//        // 
-//        pLightSphere->positionXYZ = ::g_pLightManager->theLights[::g_selectedLightIndex].position;
+        //        // *******************************************************************
+        //        // Place light #0 where the little yellow "light sphere" is
+        //        // Find the Light_Sphere
+        //        sMesh* pLightSphere = pFindMeshByFriendlyName("Light_Sphere");
+        //        // 
+        //        pLightSphere->positionXYZ = ::g_pLightManager->theLights[::g_selectedLightIndex].position;
 
-        // Update the light info in the shader
-        // (Called every frame)
+                // Update the light info in the shader
+                // (Called every frame)
         ::g_pLightManager->updateShaderWithLightInfo();
         // *******************************************************************
         //    ____                       _                      
@@ -714,6 +715,13 @@ int main(void)
 
         }//for (unsigned int meshIndex..
         // *******************************************************************
+
+        sMesh* pTheGround = pFindMeshByFriendlyName("Ground");
+        if (pTheGround)
+        {
+            pTheGround->blendRatio[0] += 0.001f;
+            pTheGround->blendRatio[1] = 1.0f - pTheGround->blendRatio[0];
+        }
 
 
 //        // Draw all the tanks
@@ -1085,12 +1093,15 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
         sMesh* pWarehouse = new sMesh();
 //        pWarehouse->modelFileName = "assets/models/Warehouse_xyz_n.ply";
         pWarehouse->modelFileName = "assets/models/Warehouse_xyz_n_uv.ply";
-        pWarehouse->positionXYZ = glm::vec3(0.0f, 5.0f, 0.0f);
+        pWarehouse->positionXYZ = glm::vec3(-500.0f, 5.0f, 0.0f);
         pWarehouse->rotationEulerXYZ.y = -90.0f;
         pWarehouse->objectColourRGBA = glm::vec4(0.6f, 0.6f, 0.6f, 1.0f);
         //pWarehouse->bIsWireframe = true;
         pWarehouse->bOverrideObjectColour = true;
         pWarehouse->uniqueFriendlyName = "Warehouse";
+        //
+        pWarehouse->textures[0] = "bad_bunny_1920x1080.bmp";
+
          ::g_vecMeshesToDraw.push_back(pWarehouse);
 
 //    ____  _               _                  _     _           _   
@@ -1114,6 +1125,15 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
         pFlatPlane->rotationEulerXYZ.y = 90.0f;
         pFlatPlane->objectColourRGBA = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
         pFlatPlane->uniqueFriendlyName = "Ground";
+        //
+        pFlatPlane->textures[0] = "dua-lipa-promo.bmp";     // 1.0
+        pFlatPlane->textures[1] = "Puzzle_parts.bmp";       // 0.0
+
+        pFlatPlane->blendRatio[0] = 0.0f;
+        pFlatPlane->blendRatio[1] = 1.0f;
+
+
+        //
         //        pFlatPlane->bIsWireframe = true;
         //        ::g_myMeshes[::g_NumberOfMeshesToDraw] = pFlatPlane;
         //        ::g_NumberOfMeshesToDraw++;
@@ -1252,6 +1272,9 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
         std::stringstream ssBallName;
         ssBallName << "Bouncy_" << ballCount;
         pSphereMesh->uniqueFriendlyName = ssBallName.str();
+
+        //
+        pSphereMesh->textures[0] = "Non-uniform concrete wall 0512-3-1024x1024.bmp";
 
         ::g_vecMeshesToDraw.push_back(pSphereMesh);
 

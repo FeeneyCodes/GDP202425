@@ -31,7 +31,7 @@ struct sMesh
 	unsigned int uniqueID = 0;
 
 //	std::string textureName;
-	static const unsigned int MAX_NUM_TEXTURES = 10;
+	static const unsigned int MAX_NUM_TEXTURES = 8;
 	std::string textures[MAX_NUM_TEXTURES];
 	float blendRatio[MAX_NUM_TEXTURES];
 

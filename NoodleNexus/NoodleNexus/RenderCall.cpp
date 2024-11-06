@@ -7,12 +7,87 @@
 #include <glm/gtc/matrix_transform.hpp> 
 #include "sMesh.h"
 #include "cVAOManager/cVAOManager.h"
+#include "cBasicTextureManager/cBasicTextureManager.h"
 
 extern cVAOManager* g_pMeshManager;
+extern cBasicTextureManager* g_pTextures;
+
 
 //RenderCall
 
 sMesh* pDebugSphere = NULL;
+
+
+// Texture set up
+void SetUpTextures(sMesh* pCurMesh, GLuint program)
+{
+    GLuint MissingTexture_ID = ::g_pTextures->getTextureIDFromName("UV_Test_750x750.bmp");
+
+
+    {
+        GLuint textureID_00 = ::g_pTextures->getTextureIDFromName(pCurMesh->textures[0]);
+        if (textureID_00 == 0)
+        {
+            textureID_00 = MissingTexture_ID;
+        
+        }        
+        glActiveTexture(GL_TEXTURE0 + 0);
+        glBindTexture(GL_TEXTURE_2D, textureID_00);
+        GLint texture00_UL = glGetUniformLocation(program, "texture00");
+        glUniform1i(texture00_UL, 0);       // <-- Note we use the NUMBER, not the GL_TEXTURE3 here
+    }
+
+    {
+        GLuint textureID_01 = ::g_pTextures->getTextureIDFromName(pCurMesh->textures[1]);
+        if (textureID_01 == 0)
+        {
+            textureID_01 = MissingTexture_ID;
+
+        }        
+        glActiveTexture(GL_TEXTURE0 + 1);
+        glBindTexture(GL_TEXTURE_2D, textureID_01);
+        GLint texture01_UL = glGetUniformLocation(program, "texture01");
+        glUniform1i(texture01_UL, 1);       // <-- Note we use the NUMBER, not the GL_TEXTURE3 here
+    }
+
+    {
+        GLuint textureID_02 = ::g_pTextures->getTextureIDFromName(pCurMesh->textures[2]);
+        if (textureID_02 == 0)
+        {
+            textureID_02 = MissingTexture_ID;
+
+        }
+        glActiveTexture(GL_TEXTURE0 + 2);
+        glBindTexture(GL_TEXTURE_2D, textureID_02);
+        GLint texture02_UL = glGetUniformLocation(program, "texture02");
+        glUniform1i(texture02_UL, 2);       // <-- Note we use the NUMBER, not the GL_TEXTURE3 here
+    }
+
+    {
+        GLuint textureID_03 = ::g_pTextures->getTextureIDFromName(pCurMesh->textures[3]);
+        if (textureID_03 == 0)
+        {
+            textureID_03 = MissingTexture_ID;
+
+        }
+        glActiveTexture(GL_TEXTURE0 + 3);
+        glBindTexture(GL_TEXTURE_2D, textureID_03);
+        GLint texture03_UL = glGetUniformLocation(program, "texture03");
+        glUniform1i(texture03_UL, 3);       // <-- Note we use the NUMBER, not the GL_TEXTURE3 here
+    }    
+
+    // Now the ratios
+    // uniform vec4 texRatio_0_to_3;
+    GLint texRatio_0_to_3_UL = glGetUniformLocation(program, "texRatio_0_to_3");
+    glUniform4f(texRatio_0_to_3_UL,
+        pCurMesh->blendRatio[0],
+        pCurMesh->blendRatio[1],
+        pCurMesh->blendRatio[2],
+        pCurMesh->blendRatio[3]);
+    
+    return;
+}
+
 
 
 
@@ -44,6 +119,12 @@ void DrawMesh(sMesh* pCurMesh, GLuint program)
         glUniform1f(bDoNotLight_UL, (GLfloat)GL_FALSE);  // False
     }
 
+    // Set up the textures for THIS mesh
+    // uniform bool bUseTextureAsColour;	// If true, then sample the texture
+    GLint bUseTextureAsColour_UL = glGetUniformLocation(program, "bUseTextureAsColour");
+    glUniform1f(bUseTextureAsColour_UL, (GLfloat)GL_TRUE);
+
+    SetUpTextures(pCurMesh, program);
 
     // Could be called the "model" or "world" matrix
     glm::mat4 matModel = glm::mat4(1.0f);

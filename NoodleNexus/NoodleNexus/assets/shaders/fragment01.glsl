@@ -46,6 +46,14 @@ vec4 calculateLightContrib( vec3 vertexMaterialColour, vec3 vertexNormal,
 // Give it the UV and it returns the colour at that UV location
 uniform sampler2D texture00;
 uniform sampler2D texture01;
+uniform sampler2D texture02;
+uniform sampler2D texture03;
+uniform vec4 texRatio_0_to_3;	// x index 0, y index 1, etc/
+//uniform float texRatio[4];
+uniform bool bUseTextureAsColour;	// If true, then sample the texture
+//uniform sampler2D textures[4];
+//uniform sampler2DArray textures[3]
+
 
 // Later...
 uniform samplerCube mySkyBox;
@@ -57,6 +65,26 @@ void main()
 	{
 		vertexColour = objectColour.rgb;
 	}
+	
+	if ( bUseTextureAsColour )
+	{
+//			uniform sampler2D texture00;
+//		uniform sampler2D texture01;
+//		uniform sampler2D texture02;
+//		uniform sampler2D texture03;
+//		uniform vec4 texRatio_0_to_3;	// x index 0, y index 1, etc/
+	
+		vec3 texColour00 = texture( texture00, fUV.st ).rgb;	
+		vec3 texColour01 = texture( texture01, fUV.st ).rgb;	
+		vec3 texColour02 = texture( texture02, fUV.st ).rgb;	
+		vec3 texColour03 = texture( texture03, fUV.st ).rgb;	
+		
+		// All these ratios should add up to 1.0
+		vertexColour.rgb =   (texColour00.rgb * texRatio_0_to_3.x)
+		                   + (texColour01.rgb * texRatio_0_to_3.y)
+		                   + (texColour02.rgb * texRatio_0_to_3.z)
+		                   + (texColour03.rgb * texRatio_0_to_3.w);
+	} 
 	
 	// Use lighting?
 	if ( bDoNotLight )
@@ -84,12 +112,12 @@ void main()
 
 	// Make the actual colour almost black
 	// Apply the UVs as a colour
-	finalPixelColour.rgb *= 0.001f;	// Almost black
+//	finalPixelColour.rgb *= 0.001f;	// Almost black
 //	finalPixelColour.rg += fUV.xy;	// Add the UVs as colours
 
 	// uniform sampler2D texture01;
-	vec3 texColour = texture( texture01, fUV.st ).rgb;
-	finalPixelColour.rgb += texColour;
+	//vec3 texColour = texture( texture00, fUV.st ).rgb;
+	//finalPixelColour.rgb += texColour;
 
 }
 

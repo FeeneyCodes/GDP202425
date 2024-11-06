@@ -22,3 +22,22 @@ bool cSheild::bIsUp(void)
 	return this->m_bIsRaised;
 }
 
+
+
+// From the iMessaging interface
+// // Sent to the recieving object
+bool cSheild::Receive_Message(sNVPair theMesssage)
+{
+	// TODO: insert amazing code
+
+	return true;
+}
+
+// From the iMessaging interface
+// // Sent to the mediator to pass along
+bool cSheild::Send_Message(sNVPair theMesssage)
+{
+	// TODO: insert amazing code
+
+	return true;
+}

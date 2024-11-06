@@ -21,6 +21,12 @@ cSuperTank::~cSuperTank()
 //	delete this->pTheRailGun;
 }
 
+void cSuperTank::setMediator(iMessaging* pTheMediator)
+{
+	this->m_pTheMediator = pTheMediator;
+	return;
+}
+
 //void cSuperTank::Attack(/*another tank*/)
 void cSuperTank::Attack(iTank* pEnemyTank)
 {
@@ -68,4 +74,24 @@ void cSuperTank::UpdateTick(double deltaTime)
 unsigned int cSuperTank::getID(void)
 {
 	return this->m_ID;
+}
+
+
+
+// From the iMessaging interface
+// // Sent to the recieving object
+bool cSuperTank::Receive_Message(sNVPair theMesssage)
+{
+	// TODO: insert amazing code
+
+	return true;
+}
+
+// From the iMessaging interface
+// // Sent to the mediator to pass along
+bool cSuperTank::Send_Message(sNVPair theMesssage)
+{
+	// TODO: insert amazing code
+
+	return true;
 }

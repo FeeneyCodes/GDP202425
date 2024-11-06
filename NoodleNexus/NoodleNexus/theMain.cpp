@@ -80,9 +80,12 @@ bool isControlDown(GLFWwindow* window);
 //#include "cSuperTank.h"
 //#include "cTankFactory.h"
 #include "cTankBuilder.h"
+#include "cArena.h"
 void SetUpTankGame(void);
 void TankStepFrame(double timeStep);
 std::vector< iTank* > g_vecTheTanks;
+cArena* g_pTankArena = NULL;
+sMesh* g_pTankModel = NULL;
 
 // END OF: TANK GAME
 
@@ -225,7 +228,6 @@ sMesh* pFindMeshByFriendlyName(std::string theNameToFind)
 
 int main(void)
 {
-
     //    ConsoleStuff();
     //
         // On the stack, at compile time.
@@ -499,9 +501,10 @@ int main(void)
     ::g_pTextures = new cBasicTextureManager();
 
     ::g_pTextures->SetBasePath("assets/textures");
-    ::g_pTextures->Create2DTextureFromBMPFile("bad_bunny_1920x1080.bmp");
-    ::g_pTextures->Create2DTextureFromBMPFile("dua-lipa-promo.bmp");
-    ::g_pTextures->Create2DTextureFromBMPFile("Puzzle_parts.bmp");
+    //::g_pTextures->Create2DTextureFromBMPFile("bad_bunny_1920x1080.bmp");
+    //::g_pTextures->Create2DTextureFromBMPFile("dua-lipa-promo.bmp");
+    //::g_pTextures->Create2DTextureFromBMPFile("Puzzle_parts.bmp");
+    ::g_pTextures->Create2DTextureFromBMPFile("Non-uniform concrete wall 0512-3-1024x1024.bmp");
 
 
     // This also adds physics objects to the phsyics system
@@ -527,9 +530,9 @@ int main(void)
 
 
 
-//    // SET UP THE TANKS
-//    SetUpTankGame();
-//
+    // SET UP THE TANKS
+    SetUpTankGame();
+
 //    const glm::vec3 WORLD_SIZE(1000.0f);
 //
 //    for (iTank* pCurrentTank : ::g_vecTheTanks)
@@ -589,7 +592,8 @@ int main(void)
     // Set the texture sampler to one of the 3 textures we loaded
 //    GLuint badBunnyTexNum = ::g_pTextures->getTextureIDFromName("bad_bunny_1920x1080.bmp");
 //    GLuint badBunnyTexNum = ::g_pTextures->getTextureIDFromName("dua-lipa-promo.bmp");
-    GLuint badBunnyTexNum = ::g_pTextures->getTextureIDFromName("Puzzle_parts.bmp");
+//    GLuint badBunnyTexNum = ::g_pTextures->getTextureIDFromName("Puzzle_parts.bmp");
+    GLuint badBunnyTexNum = ::g_pTextures->getTextureIDFromName("Non-uniform concrete wall 0512-3-1024x1024.bmp");
 
     // Bund to texture unit #3 (just because. for no particular reason)
     glActiveTexture(GL_TEXTURE3);	
@@ -657,6 +661,14 @@ int main(void)
         const GLint matProjection_UL = glGetUniformLocation(program, "matProjection");
         glUniformMatrix4fv(matProjection_UL, 1, GL_FALSE, (const GLfloat*)&matProjection);
 
+
+        // Calculate elapsed time
+        // We'll enhance this
+        currentFrameTime = glfwGetTime();
+        double deltaTime = currentFrameTime - lastFrameTime;
+        lastFrameTime = currentFrameTime;
+
+
 //        // *******************************************************************
 //        // Place light #0 where the little yellow "light sphere" is
 //        // Find the Light_Sphere
@@ -668,8 +680,6 @@ int main(void)
         // (Called every frame)
         ::g_pLightManager->updateShaderWithLightInfo();
         // *******************************************************************
-
-
         //    ____                       _                      
         //   |  _ \ _ __ __ ___      __ | |    ___   ___  _ __  
         //   | | | | '__/ _` \ \ /\ / / | |   / _ \ / _ \| '_ \ 
@@ -686,6 +696,30 @@ int main(void)
             DrawMesh(pCurMesh, program);
 
         }//for (unsigned int meshIndex..
+        // *******************************************************************
+
+
+        // Draw all the tanks
+        for (iTank* pCurrentTank : ::g_vecTheTanks)
+        {
+            pCurrentTank->UpdateTick(deltaTime);
+
+            if (::g_pTankModel == NULL)
+            {
+                ::g_pTankModel = new sMesh();
+                ::g_pTankModel->modelFileName = "assets/models/Low_Poly_Tank_Model_3D_model_xyz_n_uv.ply";
+                ::g_pTankModel->bIsVisible = true;
+                ::g_pTankModel->bOverrideObjectColour = true;
+                ::g_pTankModel->objectColourRGBA = glm::vec4(2.0f / 256.0f, 480.0f / 256.0f, 32.0f / 256.0f, 1.0f);
+                //::g_pTankModel->bDoNotLight = true;
+                //::g_pTankModel->uniformScale = 10.0f;
+            }
+
+            ::g_pTankModel->positionXYZ = pCurrentTank->getLocation();
+
+            DrawMesh(::g_pTankModel, program);
+        }
+
 
 
         // Draw the LASER beam
@@ -828,11 +862,6 @@ int main(void)
 
 
 
-        // Calculate elapsed time
-        // We'll enhance this
-        currentFrameTime = glfwGetTime();
-        double deltaTime = currentFrameTime - lastFrameTime;
-        lastFrameTime = currentFrameTime;
 
         //sMesh* pBall = pFindMeshByFriendlyName("Ball");
         //if (pBall)
@@ -934,18 +963,21 @@ int main(void)
 
 void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
 {
-    sModelDrawInfo warehouseModel;
-    //    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Warehouse_xyz_n.ply",
-    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Warehouse_xyz_n_uv.ply",
-        warehouseModel, program);
-    std::cout << warehouseModel.numberOfVertices << " vertices loaded" << std::endl;
+    {
+        sModelDrawInfo warehouseModel;
+        //    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Warehouse_xyz_n.ply",
+        ::g_pMeshManager->LoadModelIntoVAO("assets/models/Warehouse_xyz_n_uv.ply",
+            warehouseModel, program);
+        std::cout << warehouseModel.numberOfVertices << " vertices loaded" << std::endl;
+    }
 
-
-    sModelDrawInfo tankModel;
-//    pMeshManager->LoadModelIntoVAO("assets/models/Low_Poly_Tank_Model_3D_model.ply", 
-    pMeshManager->LoadModelIntoVAO("assets/models/Low_Poly_Tank_Model_3D_model_xyz_n_uv.ply", 
-        tankModel, program);
-    std::cout << tankModel.meshName << " : " << tankModel.numberOfVertices << " vertices loaded" << std::endl;
+    {
+        sModelDrawInfo tankModel;
+        //    pMeshManager->LoadModelIntoVAO("assets/models/Low_Poly_Tank_Model_3D_model.ply", 
+        pMeshManager->LoadModelIntoVAO("assets/models/Low_Poly_Tank_Model_3D_model_xyz_n_uv.ply",
+            tankModel, program);
+        std::cout << tankModel.meshName << " : " << tankModel.numberOfVertices << " vertices loaded" << std::endl;
+    }
 
     //sModelDrawInfo carModelInfo;
     //pMeshManager->LoadModelIntoVAO("assets/models/VintageRacingCar_xyz_only.ply", 
@@ -957,123 +989,74 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
     //    dragonModel, program);
     //std::cout << dragonModel.numberOfVertices << " vertices loaded" << std::endl;
 
-    sModelDrawInfo terrainModel;
-    //    pMeshManager->LoadModelIntoVAO("assets/models/Simple_MeshLab_terrain_xyz_only.ply", 
-//    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Simple_MeshLab_terrain_xyz_N.ply",
-    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Simple_MeshLab_terrain_xyz_N_uv.ply",
-        terrainModel, program);
-    std::cout << terrainModel.numberOfVertices << " vertices loaded" << std::endl;
+    {
+        sModelDrawInfo terrainModel;
+        //    pMeshManager->LoadModelIntoVAO("assets/models/Simple_MeshLab_terrain_xyz_only.ply", 
+    //    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Simple_MeshLab_terrain_xyz_N.ply",
+        ::g_pMeshManager->LoadModelIntoVAO("assets/models/Simple_MeshLab_terrain_xyz_N_uv.ply",
+            terrainModel, program);
+        std::cout << terrainModel.numberOfVertices << " vertices loaded" << std::endl;
+    }
+
+    {
+        sModelDrawInfo bunnyModel;
+        //    ::g_pMeshManager->LoadModelIntoVAO("assets/models/bun_zipper_res2_10x_size_xyz_only.ply",
+    //    ::g_pMeshManager->LoadModelIntoVAO("assets/models/bun_zipper_res2_10x_size_xyz_N_only.ply",
+        ::g_pMeshManager->LoadModelIntoVAO("assets/models/bun_zipper_res2_10x_size_xyz_N_uv.ply",
+            bunnyModel, program);
+        std::cout << bunnyModel.numberOfVertices << " vertices loaded" << std::endl;
+    }
+
+    {
+        sModelDrawInfo platPlaneDrawInfo;
+        //    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Flat_Plane_xyz.ply", 
+    //    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Flat_Plane_xyz_N.ply",
+        ::g_pMeshManager->LoadModelIntoVAO("assets/models/Flat_Plane_xyz_N_uv.ply",
+            platPlaneDrawInfo, program);
+        std::cout << platPlaneDrawInfo.numberOfVertices << " vertices loaded" << std::endl;
+    }
+
+    {
+        sModelDrawInfo sphereMesh;
+        //    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Sphere_radius_1_xyz.ply",
+        //::g_pMeshManager->LoadModelIntoVAO("assets/models/Sphere_radius_1_xyz_N.ply",
+        ::g_pMeshManager->LoadModelIntoVAO("assets/models/Sphere_radius_1_xyz_N_uv.ply",
+            sphereMesh, program);
+        std::cout << sphereMesh.numberOfVertices << " vertices loaded" << std::endl;
+    }
+
+    {
+        sModelDrawInfo sphereShadowMesh;
+        //    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Sphere_radius_1_Flat_Shadow_xyz_N.ply",
+        ::g_pMeshManager->LoadModelIntoVAO("assets/models/Sphere_radius_1_Flat_Shadow_xyz_N_uv.ply",
+            sphereShadowMesh, program);
+        std::cout << sphereShadowMesh.numberOfVertices << " vertices loaded" << std::endl;
+    }
 
 
-    sModelDrawInfo bunnyModel;
-    //    ::g_pMeshManager->LoadModelIntoVAO("assets/models/bun_zipper_res2_10x_size_xyz_only.ply",
-//    ::g_pMeshManager->LoadModelIntoVAO("assets/models/bun_zipper_res2_10x_size_xyz_N_only.ply",
-    ::g_pMeshManager->LoadModelIntoVAO("assets/models/bun_zipper_res2_10x_size_xyz_N_uv.ply",
-        bunnyModel, program);
-    std::cout << bunnyModel.numberOfVertices << " vertices loaded" << std::endl;
-
-    sModelDrawInfo platPlaneDrawInfo;
-    //    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Flat_Plane_xyz.ply", 
-//    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Flat_Plane_xyz_N.ply",
-    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Flat_Plane_xyz_N_uv.ply",
-        platPlaneDrawInfo, program);
-    std::cout << platPlaneDrawInfo.numberOfVertices << " vertices loaded" << std::endl;
-
-    sModelDrawInfo sphereMesh;
-    //    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Sphere_radius_1_xyz.ply",
-    //::g_pMeshManager->LoadModelIntoVAO("assets/models/Sphere_radius_1_xyz_N.ply",
-    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Sphere_radius_1_xyz_N_uv.ply",
-        sphereMesh, program);
-    std::cout << sphereMesh.numberOfVertices << " vertices loaded" << std::endl;
-
-    sModelDrawInfo sphereShadowMesh;
-//    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Sphere_radius_1_Flat_Shadow_xyz_N.ply",
-    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Sphere_radius_1_Flat_Shadow_xyz_N_uv.ply",
-        sphereShadowMesh, program);
-    std::cout << sphereShadowMesh.numberOfVertices << " vertices loaded" << std::endl;
-
-//    sModelDrawInfo hangarMesh;
-//    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Demonstration_Interior - DO NOT USE THIS xyz_N.ply",
-//        hangarMesh, program);
-//    std::cout << hangarMesh.numberOfVertices << " vertices loaded" << std::endl;
-
-    //sModelDrawInfo backroomLevelMesh;
-    //::g_pMeshManager->LoadModelIntoVAO("assets/models/Backrooms_Level_0/tinker_adjusted_xyz_N.ply",
-    //    backroomLevelMesh, program);
-    //std::cout << backroomLevelMesh.numberOfVertices << " vertices loaded" << std::endl;
-
-    //    pMeshManager->LoadTheListOfModelsIWantFromASexyFile("MyModels.sexy");
-
-
-    // Load some models to draw
-
-//    {
-//        sMesh* pHangar = new sMesh();
-//        pHangar->modelFileName = "assets/models/Demonstration_Interior - DO NOT USE THIS xyz_N.ply";
-//        pHangar->positionXYZ = glm::vec3(0.0f, 30.0f, 0.0f);
-//        pHangar->bOverrideObjectColour = true;
-//        pHangar->objectColourRGBA = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
-//        pHangar->rotationEulerXYZ.x = -90.0f;
-//        pHangar->rotationEulerXYZ.z = 180.0f;
-//        ::g_vecMeshesToDraw.push_back(pHangar);
-//    }
-//    {
-//        sMesh* pSphereMesh = new sMesh();
-////        pSphereMesh->modelFileName = "assets/models/Sphere_radius_1_xyz.ply";
-//        pSphereMesh->modelFileName = "assets/models/Sphere_radius_1_xyz_N.ply";
-//        pSphereMesh->positionXYZ = glm::vec3(0.0f, 30.0f, 0.0f);
-//        pSphereMesh->bIsWireframe = true;
-//        pSphereMesh->objectColourRGBA = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
-//        pSphereMesh->uniformScale = 0.1f;
-//        pSphereMesh->uniqueFriendlyName = "Light_Sphere";
-//
-//        ::g_vecMeshesToDraw.push_back(pSphereMesh);
-//    }
-
-    //{
-    //    sMesh* pDebugSphere = new sMesh();
-    //    pDebugSphere->modelFileName = "assets/models/Sphere_radius_1_xyz_N.ply";
-    //    pDebugSphere->positionXYZ = glm::vec3(0.0f, 5.0f, 0.0f);
-    //    pDebugSphere->bIsWireframe = true;
-    //    pDebugSphere->objectColourRGBA = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
-    //    pDebugSphere->uniqueFriendlyName = "Debug_Sphere";
-    //    pDebugSphere->uniformScale = 10.0f;
-    //    pDebugSphere->bDoNotLight = true;
-    //    ::g_vecMeshesToDraw.push_back(pDebugSphere);
-    //}
 
     // Add a bunch of bunny rabbits
-    float boxLimit = 50.0f;
-    float boxStep = 10.0f;
-    for (float x = -boxLimit; x <= boxLimit; x += boxStep)
-    {
-        for (float z = -boxLimit; z <= boxLimit; z += boxStep)
-        {
-            sMesh* pBunny = new sMesh();
-//            pBunny->modelFileName = "assets/models/bun_zipper_res2_10x_size_xyz_only.ply";
-//            pBunny->modelFileName = "assets/models/bun_zipper_res2_10x_size_xyz_N_only.ply";
-            pBunny->modelFileName = "assets/models/bun_zipper_res2_10x_size_xyz_N_uv.ply";
-            pBunny->positionXYZ = glm::vec3(x, -3.0f, z);
-            pBunny->objectColourRGBA 
-                = glm::vec4(getRandomFloat(0.0f, 1.0f),
-                            getRandomFloat(0.0f, 1.0f),
-                            getRandomFloat(0.0f, 1.0f), 
-                            1.0f );
-            ::g_vecMeshesToDraw.push_back(pBunny);
-        }
-    }//for (float x = -boxLimit...
+    //float boxLimit = 50.0f;
+    //float boxStep = 10.0f;
+//    for (float x = -boxLimit; x <= boxLimit; x += boxStep)
+//    {
+//        for (float z = -boxLimit; z <= boxLimit; z += boxStep)
+//        {
+//            sMesh* pBunny = new sMesh();
+////            pBunny->modelFileName = "assets/models/bun_zipper_res2_10x_size_xyz_only.ply";
+////            pBunny->modelFileName = "assets/models/bun_zipper_res2_10x_size_xyz_N_only.ply";
+//            pBunny->modelFileName = "assets/models/bun_zipper_res2_10x_size_xyz_N_uv.ply";
+//            pBunny->positionXYZ = glm::vec3(x, -3.0f, z);
+//            pBunny->objectColourRGBA 
+//                = glm::vec4(getRandomFloat(0.0f, 1.0f),
+//                            getRandomFloat(0.0f, 1.0f),
+//                            getRandomFloat(0.0f, 1.0f), 
+//                            1.0f );
+//            ::g_vecMeshesToDraw.push_back(pBunny);
+//        }
+//    }//for (float x = -boxLimit...
 
 
-    //{
-    //    sMesh* pBackrooms = new sMesh();
-    //    pBackrooms->modelFileName = "assets/models/Backrooms_Level_0/tinker_adjusted_xyz_N.ply";
-    //    pBackrooms->objectColourRGBA = glm::vec4(::g_rgb_from_HTML(240, 230, 140), 1.0f);
-    //    pBackrooms->bIsWireframe = true;
-    //    pBackrooms->bDoNotLight = true;
-    //    pBackrooms->bOverrideObjectColour = true;
-    //    pBackrooms->uniqueFriendlyName = "Backrooms";
-    //     ::g_vecMeshesToDraw.push_back(pBackrooms);
-    //}
 
     {
 //    ____                _            __                   _     
@@ -1085,7 +1068,7 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
         sMesh* pWarehouse = new sMesh();
 //        pWarehouse->modelFileName = "assets/models/Warehouse_xyz_n.ply";
         pWarehouse->modelFileName = "assets/models/Warehouse_xyz_n_uv.ply";
-        pWarehouse->positionXYZ = glm::vec3(-10.0f, 5.0f, 0.0f);
+        pWarehouse->positionXYZ = glm::vec3(-1000.0f, 5.0f, 0.0f);
         pWarehouse->rotationEulerXYZ.y = -90.0f;
         pWarehouse->objectColourRGBA = glm::vec4(0.6f, 0.6f, 0.6f, 1.0f);
         //pWarehouse->bIsWireframe = true;
@@ -1106,40 +1089,11 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
              pWarehouse->uniformScale);
 
     }
-    //{
-    //    //    ____                _            __                   _     
-    //    //   |  _ \ ___ _ __   __| | ___ _ __ / / __ ___   ___  ___| |__  
-    //    //   | |_) / _ \ '_ \ / _` |/ _ \ '__/ / '_ ` _ \ / _ \/ __| '_ \ 
-    //    //   |  _ <  __/ | | | (_| |  __/ | / /| | | | | |  __/\__ \ | | |
-    //    //   |_| \_\___|_| |_|\__,_|\___|_|/_/ |_| |_| |_|\___||___/_| |_|
-    //    //                                                                
-    //    sMesh* pWarehouse = new sMesh();
-    //    pWarehouse->modelFileName = "assets/models/Warehouse_xyz_n.ply";
-    //    pWarehouse->positionXYZ = glm::vec3(100.0f, -5.0f, 0.0f);
-    //    pWarehouse->rotationEulerXYZ.y = -90.0f;
-    //    pWarehouse->objectColourRGBA = glm::vec4(0.6f, 0.6f, 0.6f, 1.0f);
-    //    pWarehouse->uniqueFriendlyName = "Warehouse";
-    //    ::g_vecMeshesToDraw.push_back(pWarehouse);
-
-    //    //    ____  _               _                  _     _           _   
-    //    //   |  _ \| |__  _   _ ___(_) ___ ___    ___ | |__ (_) ___  ___| |_ 
-    //    //   | |_) | '_ \| | | / __| |/ __/ __|  / _ \| '_ \| |/ _ \/ __| __|
-    //    //   |  __/| | | | |_| \__ \ | (__\__ \ | (_) | |_) | |  __/ (__| |_ 
-    //    //   |_|   |_| |_|\__, |___/_|\___|___/  \___/|_.__// |\___|\___|\__|
-    //    //                |___/                           |__/               
-    //    ::g_pPhysicEngine->addTriangleMesh(
-    //        "assets/models/Warehouse_xyz_n.ply",
-    //        pWarehouse->positionXYZ,
-    //        pWarehouse->rotationEulerXYZ,
-    //        pWarehouse->uniformScale);
-
-    //}
-
 
     {
         sMesh* pFlatPlane = new sMesh();
         pFlatPlane->modelFileName = "assets/models/Flat_Plane_xyz_N_uv.ply";
-        pFlatPlane->positionXYZ = glm::vec3(0.0f, -5.0f, 0.0f);
+        pFlatPlane->positionXYZ = glm::vec3(0.0f, -5.5f, 0.0f);
         pFlatPlane->rotationEulerXYZ.y = 90.0f;
         pFlatPlane->objectColourRGBA = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
         pFlatPlane->uniqueFriendlyName = "Ground";
@@ -1156,7 +1110,7 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
         ::g_pMeshManager->FindDrawInfoByModelName(pFlatPlane->modelFileName, planeMeshInfo);
 
        // Manually enter the AABB info:
-        pAABBGround->centreXYZ = glm::vec3(0.0f, 0.0f, 0.0f);   // From the mesh model
+        pAABBGround->centreXYZ = glm::vec3(0.0f, 0.0f, 0.0f);   
         // How far from the centre the XYZ min and max are
         // This information is from the mesh we loaded
         // WARNING: We need to be careful about the scale
@@ -1179,31 +1133,18 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
 
         ::g_pPhysicEngine->vecAABBs.push_back(pAABBGround);
     }
-    {
-        sMesh* pFlatPlane = new sMesh();
-//        pFlatPlane->modelFileName = "assets/models/Flat_Plane_xyz.ply";
-//        pFlatPlane->modelFileName = "assets/models/Flat_Plane_xyz_N.ply";
-        pFlatPlane->modelFileName = "assets/models/Flat_Plane_xyz_N_uv.ply";
-        pFlatPlane->positionXYZ = glm::vec3(0.0f, -5.0f, 0.0f);
-        pFlatPlane->bIsWireframe = true;
-        pFlatPlane->uniformScale = 1.01f;
-        pFlatPlane->objectColourRGBA = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-
-        ::g_vecMeshesToDraw.push_back(pFlatPlane);
-    }
-
-    sMesh* pBunny = new sMesh();
-    //            pBunny->modelFileName = "assets/models/bun_zipper_res2_10x_size_xyz_only.ply";
-//    pBunny->modelFileName = "assets/models/bun_zipper_res2_10x_size_xyz_N_only.ply";
-    pBunny->modelFileName = "assets/models/bun_zipper_res2_10x_size_xyz_N_uv.ply";
-    pBunny->positionXYZ = glm::vec3(10.0f, 10.0f, 0.0f);
-    pBunny->objectColourRGBA
-        = glm::vec4(getRandomFloat(0.0f, 1.0f),
-            getRandomFloat(0.0f, 1.0f),
-            getRandomFloat(0.0f, 1.0f),
-            1.0f);
-    pBunny->uniqueFriendlyName = "Ground";
-    ::g_vecMeshesToDraw.push_back(pBunny);
+//    {
+//        sMesh* pFlatPlane = new sMesh();
+////        pFlatPlane->modelFileName = "assets/models/Flat_Plane_xyz.ply";
+////        pFlatPlane->modelFileName = "assets/models/Flat_Plane_xyz_N.ply";
+//        pFlatPlane->modelFileName = "assets/models/Flat_Plane_xyz_N_uv.ply";
+//        pFlatPlane->positionXYZ = glm::vec3(0.0f, -5.0f, 0.0f);
+//        pFlatPlane->bIsWireframe = true;
+//        pFlatPlane->uniformScale = 1.01f;
+//        pFlatPlane->objectColourRGBA = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+//
+//        ::g_vecMeshesToDraw.push_back(pFlatPlane);
+//    }
 
 
 
@@ -1316,65 +1257,6 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
         ::g_pPhysicEngine->vecSpheres.push_back(pSphereInfo);
     }//for ( unsigned int ballCount
 
-    //    sMesh* pDragon = new sMesh();
-    //    pDragon->modelFileName = "assets/models/Dragon 2.5Edited_xyz_only.ply";
-    //    pDragon->positionXYZ = glm::vec3(20.0f, 0.0f, 0.0f);
-    //    pDragon->rotationEulerXYZ.x = -90.0f;
-    //    pDragon->uniformScale = 0.1f;
-    //    pDragon->objectColourRGBA = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f); 
-    //
-    //    ::g_myMeshes[0] = pDragon;
-    //
-    //
-    //    sMesh* pDragon2 = new sMesh();
-    //    pDragon2->modelFileName = "assets/models/Dragon 2.5Edited_xyz_only.ply";
-    //    pDragon2->positionXYZ = glm::vec3(-20.0f, 0.0f, 0.0f);
-    //    pDragon2->rotationEulerXYZ.x = 90.0f;
-    //    pDragon2->objectColourRGBA = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
-    //    pDragon2->uniformScale = 0.2f;
-    //
-    //
-    //    ::g_myMeshes[1] = pDragon2;
-    //
-    //    ::g_NumberOfMeshesToDraw = 2;
-    //
-    //
-    //    sMesh* pTerrainMesh = new sMesh();
-    //    pTerrainMesh->modelFileName = "assets/models/Simple_MeshLab_terrain_xyz_only.ply";
-    //    pTerrainMesh->positionXYZ = glm::vec3(0.0f, -25.0f, 0.0f);
-    //    //pTerrainMesh->rotationEulerXYZ.x = 90.0f;
-    //    pTerrainMesh->objectColourRGBA = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-    //    pTerrainMesh->bOverrideObjectColour = true;
-    ////    pTerrainMesh->bIsWireframe = true;
-    //    ::g_myMeshes[::g_NumberOfMeshesToDraw] = pTerrainMesh;
-    //    ::g_NumberOfMeshesToDraw++;
-    //
-    //
-    //    for (int count = 0; count != 100; count++)
-    //    {
-    //        sMesh* pDragon = new sMesh();
-    //        pDragon->modelFileName = "assets/models/VintageRacingCar_xyz_only.ply";
-    //        pDragon->positionXYZ = glm::vec3(getRandomFloat(-5.0f, 5.0f),
-    //                                         getRandomFloat(-5.0f, 5.0f),
-    //                                         getRandomFloat(-5.0f, 5.0f));
-    //        pDragon->rotationEulerXYZ.x = 90.0f;
-    //        pDragon->objectColourRGBA
-    //            = glm::vec4(getRandomFloat(0.0f, 1.0f),
-    //                        getRandomFloat(0.0f, 1.0f),
-    //                        getRandomFloat(0.0f, 1.0f),
-    //                        1.0f);
-    //
-    //
-    //        pDragon->uniformScale = 0.2f;
-    //
-    //        // This is evil, nasty code. 
-    //        // Do this if you hate humanity...
-    ////        pDragon->bIsWireframe = rand() % 2;
-    //
-    //        ::g_myMeshes[::g_NumberOfMeshesToDraw] = pDragon;
-    //
-    //        ::g_NumberOfMeshesToDraw++;
-    //    }
 
 
 
@@ -1483,19 +1365,8 @@ cTankBuilder* pTheTankBuilder = NULL;
 // This is here for speed 
 void SetUpTankGame(void)
 {
-    //int& y = getNumber();
-
-    
-//    cTankFactory::shoeSize = -9;
-//
-//    // Created yet? 
-//    if (!pTankFactory)
-//    {   
-//        // Create it
-//        pTankFactory = new cTankFactory();
-//    }
-
-//    cTankFactory::getTankFactory().CreateATank("Regular Tank");
+ 
+    ::g_pTankArena = new cArena();
 
     if (!pTheTankBuilder)
     {
@@ -1527,7 +1398,7 @@ void SetUpTankGame(void)
     }
 
     // Create 10 tanks
-    for (unsigned int count = 0; count != 10; count++)
+    for (unsigned int count = 0; count != 50; count++)
     {
 //        iTank* pTheTank = cTankFactory::get_pTankFactory()->CreateATank("Regular Tank");
         iTank* pTheTank = pTheTankBuilder->CreateATank("Regular Tank with Shield");
@@ -1543,6 +1414,32 @@ void SetUpTankGame(void)
     if (pHoverTank)
     {
         ::g_vecTheTanks.push_back(pHoverTank);
+    }
+
+
+
+    const float WORLD_SIZE(100.0f);
+
+    for (iTank* pCurrentTank : ::g_vecTheTanks)
+    {
+        glm::vec3 tankLocXYZ;
+        tankLocXYZ.x = getRandomFloat(-WORLD_SIZE, WORLD_SIZE);
+        tankLocXYZ.y = -5.0f;
+        tankLocXYZ.z = getRandomFloat(-WORLD_SIZE, WORLD_SIZE);
+
+        pCurrentTank->setLocation(tankLocXYZ);
+    }
+
+    // Tell the tanks about the mediator
+    for (iTank* pCurrentTank : ::g_vecTheTanks)
+    {
+        pCurrentTank->setMediator(::g_pTankArena);
+    }
+
+
+    for (iTank* pCurrentTank : ::g_vecTheTanks)
+    {
+        ::g_pTankArena->AddTank(pCurrentTank);
     }
 
     return;

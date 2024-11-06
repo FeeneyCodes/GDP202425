@@ -7,6 +7,8 @@ cTank::cTank()
 	this->m_ID = cTank::m_NextID++;
 	this->health = 100.0f;
 	this->p_CurrentTarget = NULL;
+	// 
+	this->m_CurrentState = eState::IDLE;
 }
 
 /*static*/
@@ -47,8 +49,67 @@ void cTank::setLocation(glm::vec3 newLocation_)
 void cTank::UpdateTick(double deltaTime)
 {
 	// TODO:
-	std::cout << "Tank# " << this->m_ID << " updating" << std::endl;
+//	std::cout << "Tank# " << this->m_ID << " updating" << std::endl;
+
+	switch (this->m_CurrentState)
+	{
+	case eState::IDLE:
+		// Immediately attack
+		this->m_CurrentState = eState::ATTACKING;
+		break;
+	case eState::ATTACKING:
+		 
+		if (this->m_FireCoolDownTimer <= 0.0)
+		{
+			// We can fire again
+			// Find a target location (FindFarthestTank)
+			sNVPair message;
+			message.theCommand = "FindFarthestTank";
+			message.vecDetails.push_back(glm::vec4( this->m_location, 1.0f));
+
+			this->m_pTheMediator->Receive_Message(message);
+			// Shoot at it
+		}
+		else
+		{
+			this->m_FireCoolDownTimer -= deltaTime;
+		}
+		break;
+
+	case eState::MOVING:
+
+		break;
+
+	default:
+		// What's going on?? 
+		// Maybe log an error?? 
+		break;
+	}
+
 	return;
 }
 
+void cTank::setMediator(iMessaging* pTheMediator)
+{
+	this->m_pTheMediator = pTheMediator;
+	return;
+}
+
+// From the iMessaging interface
+// // Sent to the recieving object
+bool cTank::Receive_Message(sNVPair theMesssage)
+{
+	// TODO: insert amazing code
+
+	return true;
+}
+
+// From the iMessaging interface
+// // Sent to the mediator to pass along
+bool cTank::Send_Message(sNVPair theMesssage)
+{
+	// TODO: insert amazing code
+
+	return true;
+}
 

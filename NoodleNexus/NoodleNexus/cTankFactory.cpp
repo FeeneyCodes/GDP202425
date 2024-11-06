@@ -57,7 +57,6 @@ cTankFactory& cTankFactory::getTankFactory(void)
 // Returns NULL if unknown type
 iTank* cTankFactory::CreateATank(std::string tankType)
 {
-
 	if (tankType == "Regular Tank")
 	{
 		return new cTank();

@@ -1,7 +1,7 @@
-#pragma once
+#ifndef _cMonster_HG_
+#define _cMonster_HG_
 
-//#include "cSword.h"
-class cSword;	// Forward declaration
+#include "cSword.h"
 
 class cMonster
 {
@@ -10,3 +10,5 @@ public:
 	void Attack(cMonster *EnemyMonster);
 	float health;
 };
+
+#endif 

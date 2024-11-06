@@ -1,10 +1,12 @@
-#pragma once
+#ifndef _cSword_HG_
+#define _cSword_HG_  
 
 #include "cMonster.h"
-class cMonster;
 
 class cSword
 {
 public:
 	void Swish(cMonster* pEnemyMonster);
 };
+
+#endif

@@ -139,6 +139,7 @@
   <ItemGroup>
     <ClCompile Include="Basic_Shader_Manager\cShader.cpp" />
     <ClCompile Include="Basic_Shader_Manager\cShaderManager.cpp" />
+    <ClCompile Include="cArena.cpp" />
     <ClCompile Include="cBasicFlyCamera\cBasicFlyCamera.cpp" />
     <ClCompile Include="cBasicTextureManager\C24BitBMPpixel.cpp" />
     <ClCompile Include="cBasicTextureManager\cBasicTextureManager.cpp" />
@@ -147,12 +148,18 @@
     <ClCompile Include="cJetPack.cpp" />
     <ClCompile Include="cLightHelper\cLightHelper.cpp" />
     <ClCompile Include="cLightManager.cpp" />
-    <ClCompile Include="cMonster.cpp" />
+    <ClCompile Include="cMonster.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="cPhysics.cpp" />
     <ClCompile Include="cRailGun.cpp" />
     <ClCompile Include="cSheild.cpp" />
     <ClCompile Include="cSuperTank.cpp" />
-    <ClCompile Include="cSword.cpp" />
+    <ClCompile Include="cSword.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="cTank.cpp" />
     <ClCompile Include="cTankBuilder.cpp" />
     <ClCompile Include="cTankFactory.cpp" />
@@ -162,6 +169,7 @@
     <ClCompile Include="PlyFileLoaders.cpp" />
     <ClCompile Include="RenderCall.cpp" />
     <ClCompile Include="sharedThings.cpp" />
+    <ClCompile Include="sMesh.cpp" />
     <ClCompile Include="theMain.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -174,16 +182,24 @@
     <ClInclude Include="cJetPack.h" />
     <ClInclude Include="cLightHelper\cLightHelper.h" />
     <ClInclude Include="cLightManager.h" />
-    <ClInclude Include="cMonster.h" />
+    <ClInclude Include="cArena.h" />
+    <ClInclude Include="cMonster.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="cPhysics.h" />
     <ClInclude Include="cRailGun.h" />
     <ClInclude Include="cSheild.h" />
     <ClInclude Include="cSuperTank.h" />
-    <ClInclude Include="cSword.h" />
+    <ClInclude Include="cSword.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="cTank.h" />
     <ClInclude Include="cTankBuilder.h" />
     <ClInclude Include="cTankFactory.h" />
     <ClInclude Include="cVAOManager\cVAOManager.h" />
+    <ClInclude Include="iMessaging.h" />
     <ClInclude Include="iTank.h" />
     <ClInclude Include="sharedThings.h" />
     <ClInclude Include="sMesh.h" />

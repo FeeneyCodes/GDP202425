@@ -80,12 +80,12 @@ void main()
 
 	// Make the actual colour almost black
 	// Apply the UVs as a colour
-	finalPixelColour.rgb *= 0.001f;	// Almost black
+//	finalPixelColour.rgb *= 0.001f;	// Almost black
 //	finalPixelColour.rg += fUV.xy;	// Add the UVs as colours
 
 	// uniform sampler2D texture01;
-	vec3 texColour = texture( texture01, fUV ).rgb;
-	finalPixelColour.rgb += texColour;
+//	vec3 texColour = texture( texture01, fUV ).rgb;
+//	finalPixelColour.rgb += texColour;
 
 }
 

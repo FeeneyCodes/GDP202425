@@ -2,5 +2,5 @@
 
 void cMonster::Attack(cMonster* EnemyMonster)
 {
-//	this->pSword->Swish(EnemyMonster);
+	this->pSword->Swish(EnemyMonster);
 }

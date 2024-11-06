@@ -2,6 +2,8 @@
 
 #include <glm/glm.hpp>
 #include <glm/vec3.hpp>
+//#include "iMessaging.h"
+class iMessaging;
 
 class iTank
 {
@@ -9,6 +11,7 @@ public:
 	// If this is a virtual interface, 
 	// make sure that you add a virtual destructor
 	virtual ~iTank() {}
+
 
 	// Pure vitual method 
 	// "= 0" mean there is no method
@@ -21,5 +24,7 @@ public:
 	virtual void UpdateTick(double deltaTime) = 0;
 
 	virtual unsigned int getID(void) = 0;
+
+	virtual void setMediator(iMessaging* pTheMediator) = 0;
 
 };

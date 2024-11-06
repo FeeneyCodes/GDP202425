@@ -18,6 +18,12 @@ cHoverTank::~cHoverTank()
 
 }
 
+void cHoverTank::setMediator(iMessaging* pTheMediator)
+{
+	this->m_pTheMediator = pTheMediator;
+	return;
+}
+
 //void cHoverTank::Attack(/*another tank*/)
 void cHoverTank::Attack(iTank* pEnemyTank)
 {
@@ -50,4 +56,22 @@ void cHoverTank::UpdateTick(double deltaTime)
 unsigned int cHoverTank::getID(void)
 {
 	return this->m_ID;
+}
+
+// From the iMessaging interface
+// // Sent to the recieving object
+bool cHoverTank::Receive_Message(sNVPair theMesssage)
+{
+	// TODO: insert amazing code
+
+	return true;
+}
+
+// From the iMessaging interface
+// // Sent to the mediator to pass along
+bool cHoverTank::Send_Message(sNVPair theMesssage)
+{
+	// TODO: insert amazing code
+
+	return true;
 }

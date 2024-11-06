@@ -45,6 +45,9 @@
     <Filter Include="Textures">
       <UniqueIdentifier>{6d89f04c-612e-47be-bc69-8198f8d61d8e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="TankGameFiles\Mediator">
+      <UniqueIdentifier>{ae1ea03c-7722-4bbe-b4c6-8ea103529977}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="theMain.cpp">
@@ -125,6 +128,12 @@
     <ClCompile Include="cBasicTextureManager\CTextureFromBMP.cpp">
       <Filter>Textures</Filter>
     </ClCompile>
+    <ClCompile Include="cArena.cpp">
+      <Filter>TankGameFiles\Mediator</Filter>
+    </ClCompile>
+    <ClCompile Include="sMesh.cpp">
+      <Filter>Meshes, etc.</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PlyFileLoaders.h">
@@ -198,6 +207,12 @@
     </ClInclude>
     <ClInclude Include="cBasicTextureManager\CTextureFromBMP.h">
       <Filter>Textures</Filter>
+    </ClInclude>
+    <ClInclude Include="cArena.h">
+      <Filter>TankGameFiles\Mediator</Filter>
+    </ClInclude>
+    <ClInclude Include="iMessaging.h">
+      <Filter>TankGameFiles\Mediator</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

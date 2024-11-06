@@ -12,6 +12,7 @@
 
 struct sMesh
 {
+	sMesh();
 	std::string modelFileName;			// "bunny.ply"
 	std::string uniqueFriendlyName;		// "Fred", "Ali", "Bunny_007"
 
@@ -41,11 +42,5 @@ struct sMesh
 //	sMesh* pChildMeshes[100];
 	std::vector< sMesh* > vec_pChildMeshes;
 
-	sMesh()
-	{
-		for (unsigned int index = 0; index != MAX_NUM_TEXTURES; index++)
-		{
-			this->blendRatio[MAX_NUM_TEXTURES] = 0.0f;
-		}
-	}
+
 };

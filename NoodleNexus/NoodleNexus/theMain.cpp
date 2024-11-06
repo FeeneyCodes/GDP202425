@@ -592,6 +592,8 @@ int main(void)
     ::g_pTextures->Create2DTextureFromBMPFile("Puzzle_parts.bmp");
     ::g_pTextures->Create2DTextureFromBMPFile("Non-uniform concrete wall 0512-3-1024x1024.bmp");
     ::g_pTextures->Create2DTextureFromBMPFile("UV_Test_750x750.bmp");
+    ::g_pTextures->Create2DTextureFromBMPFile("shape-element-splattered-texture-stroke_1194-8223.bmp");
+    ::g_pTextures->Create2DTextureFromBMPFile("Grey_Brick_Wall_Texture.bmp");
 
     // Set the texture sampler to one of the 3 textures we loaded
     //GLuint badBunnyTexNum = ::g_pTextures->getTextureIDFromName("bad_bunny_1920x1080.bmp");
@@ -716,12 +718,12 @@ int main(void)
         }//for (unsigned int meshIndex..
         // *******************************************************************
 
-        sMesh* pTheGround = pFindMeshByFriendlyName("Ground");
-        if (pTheGround)
-        {
-            pTheGround->blendRatio[0] += 0.001f;
-            pTheGround->blendRatio[1] = 1.0f - pTheGround->blendRatio[0];
-        }
+//       sMesh* pTheGround = pFindMeshByFriendlyName("Ground");
+//       if (pTheGround)
+//       {
+//           pTheGround->blendRatio[0] += 0.001f;
+//           pTheGround->blendRatio[1] = 1.0f - pTheGround->blendRatio[0];
+//       }
 
 
 //        // Draw all the tanks
@@ -1128,6 +1130,8 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
         //
         pFlatPlane->textures[0] = "dua-lipa-promo.bmp";     // 1.0
         pFlatPlane->textures[1] = "Puzzle_parts.bmp";       // 0.0
+        pFlatPlane->textures[2] = "shape-element-splattered-texture-stroke_1194-8223.bmp";
+        pFlatPlane->textures[3] = "Grey_Brick_Wall_Texture.bmp";
 
         pFlatPlane->blendRatio[0] = 0.0f;
         pFlatPlane->blendRatio[1] = 1.0f;

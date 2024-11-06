@@ -79,11 +79,17 @@ void main()
 		vec3 texColour02 = texture( texture02, fUV.st ).rgb;	
 		vec3 texColour03 = texture( texture03, fUV.st ).rgb;	
 		
+		
 		// All these ratios should add up to 1.0
-		vertexColour.rgb =   (texColour00.rgb * texRatio_0_to_3.x)
-		                   + (texColour01.rgb * texRatio_0_to_3.y)
-		                   + (texColour02.rgb * texRatio_0_to_3.z)
-		                   + (texColour03.rgb * texRatio_0_to_3.w);
+//		vertexColour.rgb =   (texColour00.rgb * texRatio_0_to_3.x)
+//		                   + (texColour01.rgb * texRatio_0_to_3.y)
+//		                   + (texColour02.rgb * texRatio_0_to_3.z)
+//		                   + (texColour03.rgb * texRatio_0_to_3.w);
+				
+		// Use #2 texture to modulate the 1st texture		
+		vertexColour.rgb =   (texColour03.rgb * texColour02.r) 
+		                   + (texColour00.rgb * (1.0f - texColour02.r));
+						   
 	} 
 	
 	// Use lighting?

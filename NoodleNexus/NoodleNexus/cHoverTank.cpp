@@ -48,7 +48,7 @@ void cHoverTank::setLocation(glm::vec3 newLocation_)
 void cHoverTank::UpdateTick(double deltaTime)
 {
 	// TODO:
-	std::cout << "Tank# " << this->m_ID << " updating" << std::endl;
+//	std::cout << "Tank# " << this->m_ID << " updating" << std::endl;
 
 	return;
 }

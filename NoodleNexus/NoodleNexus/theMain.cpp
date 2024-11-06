@@ -498,13 +498,6 @@ int main(void)
     ::g_pPhysicEngine->setVAOManager(::g_pMeshManager);
 
 
-    ::g_pTextures = new cBasicTextureManager();
-
-    ::g_pTextures->SetBasePath("assets/textures");
-    //::g_pTextures->Create2DTextureFromBMPFile("bad_bunny_1920x1080.bmp");
-    //::g_pTextures->Create2DTextureFromBMPFile("dua-lipa-promo.bmp");
-    //::g_pTextures->Create2DTextureFromBMPFile("Puzzle_parts.bmp");
-    ::g_pTextures->Create2DTextureFromBMPFile("Non-uniform concrete wall 0512-3-1024x1024.bmp");
 
 
     // This also adds physics objects to the phsyics system
@@ -531,7 +524,7 @@ int main(void)
 
 
     // SET UP THE TANKS
-    SetUpTankGame();
+//    SetUpTankGame();
 
 //    const glm::vec3 WORLD_SIZE(1000.0f);
 //
@@ -589,21 +582,45 @@ int main(void)
     ::g_pLightManager->theLights[1].param2.x = 1.0f;    // Turn on (see shader)
 
 
+
+
+    ::g_pTextures = new cBasicTextureManager();
+
+    ::g_pTextures->SetBasePath("assets/textures");
+    ::g_pTextures->Create2DTextureFromBMPFile("bad_bunny_1920x1080.bmp");
+    //::g_pTextures->Create2DTextureFromBMPFile("dua-lipa-promo.bmp");
+    //::g_pTextures->Create2DTextureFromBMPFile("Puzzle_parts.bmp");
+    //::g_pTextures->Create2DTextureFromBMPFile("Non-uniform concrete wall 0512-3-1024x1024.bmp");
+
     // Set the texture sampler to one of the 3 textures we loaded
-//    GLuint badBunnyTexNum = ::g_pTextures->getTextureIDFromName("bad_bunny_1920x1080.bmp");
+    GLuint badBunnyTexNum = ::g_pTextures->getTextureIDFromName("bad_bunny_1920x1080.bmp");
 //    GLuint badBunnyTexNum = ::g_pTextures->getTextureIDFromName("dua-lipa-promo.bmp");
 //    GLuint badBunnyTexNum = ::g_pTextures->getTextureIDFromName("Puzzle_parts.bmp");
-    GLuint badBunnyTexNum = ::g_pTextures->getTextureIDFromName("Non-uniform concrete wall 0512-3-1024x1024.bmp");
+//    GLuint badBunnyTexNum = ::g_pTextures->getTextureIDFromName("Non-uniform concrete wall 0512-3-1024x1024.bmp");
+
+    //glGet with argument GL_ACTIVE_TEXTURE, or GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS.
+    // 
+    // void glGetIntegerv(GLenum pname, GLint* data);
+    // 
+    //GLint iActiveTextureUnits = 0;
+    //glGetIntegerv(GL_ACTIVE_TEXTURE, &iActiveTextureUnits);
+    //std::cout << "GL_ACTIVE_TEXTURE = " << (iActiveTextureUnits - GL_TEXTURE0) << std::endl;
+
+    GLint iMaxCombinedTextureInmageUnits = 0;
+    glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &iMaxCombinedTextureInmageUnits);
+    std::cout << "GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS = " << iMaxCombinedTextureInmageUnits << std::endl;
+
+
 
     // Bund to texture unit #3 (just because. for no particular reason)
-    glActiveTexture(GL_TEXTURE3);	
+    glActiveTexture(GL_TEXTURE0 + 191);	
     glBindTexture(GL_TEXTURE_2D, badBunnyTexNum);
     // glBindTextureUnit( texture00Unit, texture00Number );	// OpenGL 4.5+ only
 
     //uniform sampler2D texture01;
     GLint texture01_UL = glGetUniformLocation(program, "texture01");
     // Connects the sampler to the texture unit
-    glUniform1i(texture01_UL, 3);       // <-- Note we use the NUMBER, not the GL_TEXTURE3 here
+    glUniform1i(texture01_UL, 191);       // <-- Note we use the NUMBER, not the GL_TEXTURE3 here
 
 
 
@@ -699,26 +716,26 @@ int main(void)
         // *******************************************************************
 
 
-        // Draw all the tanks
-        for (iTank* pCurrentTank : ::g_vecTheTanks)
-        {
-            pCurrentTank->UpdateTick(deltaTime);
-
-            if (::g_pTankModel == NULL)
-            {
-                ::g_pTankModel = new sMesh();
-                ::g_pTankModel->modelFileName = "assets/models/Low_Poly_Tank_Model_3D_model_xyz_n_uv.ply";
-                ::g_pTankModel->bIsVisible = true;
-                ::g_pTankModel->bOverrideObjectColour = true;
-                ::g_pTankModel->objectColourRGBA = glm::vec4(2.0f / 256.0f, 480.0f / 256.0f, 32.0f / 256.0f, 1.0f);
-                //::g_pTankModel->bDoNotLight = true;
-                //::g_pTankModel->uniformScale = 10.0f;
-            }
-
-            ::g_pTankModel->positionXYZ = pCurrentTank->getLocation();
-
-            DrawMesh(::g_pTankModel, program);
-        }
+//        // Draw all the tanks
+//        for (iTank* pCurrentTank : ::g_vecTheTanks)
+//        {
+//            pCurrentTank->UpdateTick(deltaTime);
+//
+//            if (::g_pTankModel == NULL)
+//            {
+//                ::g_pTankModel = new sMesh();
+//                ::g_pTankModel->modelFileName = "assets/models/Low_Poly_Tank_Model_3D_model_xyz_n_uv.ply";
+//                ::g_pTankModel->bIsVisible = true;
+//                ::g_pTankModel->bOverrideObjectColour = true;
+//                ::g_pTankModel->objectColourRGBA = glm::vec4(2.0f / 256.0f, 480.0f / 256.0f, 32.0f / 256.0f, 1.0f);
+//                //::g_pTankModel->bDoNotLight = true;
+//                //::g_pTankModel->uniformScale = 10.0f;
+//            }
+//
+//            ::g_pTankModel->positionXYZ = pCurrentTank->getLocation();
+//
+//            DrawMesh(::g_pTankModel, program);
+//        }
 
 
 
@@ -1068,7 +1085,7 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
         sMesh* pWarehouse = new sMesh();
 //        pWarehouse->modelFileName = "assets/models/Warehouse_xyz_n.ply";
         pWarehouse->modelFileName = "assets/models/Warehouse_xyz_n_uv.ply";
-        pWarehouse->positionXYZ = glm::vec3(-1000.0f, 5.0f, 0.0f);
+        pWarehouse->positionXYZ = glm::vec3(0.0f, 5.0f, 0.0f);
         pWarehouse->rotationEulerXYZ.y = -90.0f;
         pWarehouse->objectColourRGBA = glm::vec4(0.6f, 0.6f, 0.6f, 1.0f);
         //pWarehouse->bIsWireframe = true;

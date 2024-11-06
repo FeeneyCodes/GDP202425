@@ -44,7 +44,11 @@ vec4 calculateLightContrib( vec3 vertexMaterialColour, vec3 vertexNormal,
 
 // Allows us to lookup the RGB colour from a 2D texture
 // Give it the UV and it returns the colour at that UV location
+uniform sampler2D texture00;
 uniform sampler2D texture01;
+
+// Later...
+uniform samplerCube mySkyBox;
 
 void main()
 {
@@ -80,12 +84,12 @@ void main()
 
 	// Make the actual colour almost black
 	// Apply the UVs as a colour
-//	finalPixelColour.rgb *= 0.001f;	// Almost black
+	finalPixelColour.rgb *= 0.001f;	// Almost black
 //	finalPixelColour.rg += fUV.xy;	// Add the UVs as colours
 
 	// uniform sampler2D texture01;
-//	vec3 texColour = texture( texture01, fUV ).rgb;
-//	finalPixelColour.rgb += texColour;
+	vec3 texColour = texture( texture01, fUV.st ).rgb;
+	finalPixelColour.rgb += texColour;
 
 }
 

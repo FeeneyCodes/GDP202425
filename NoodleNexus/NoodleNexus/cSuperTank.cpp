@@ -54,7 +54,7 @@ void cSuperTank::setLocation(glm::vec3 newLocation_)
 void cSuperTank::UpdateTick(double deltaTime)
 {
 	// TODO:
-	std::cout << "Tank# " << this->m_ID << " updating" << std::endl;
+//	std::cout << "Tank# " << this->m_ID << " updating" << std::endl;
 
 	// Is there a target? 
 	if (this->p_CurrentTarget == NULL)

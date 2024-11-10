@@ -1095,7 +1095,7 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
         sMesh* pWarehouse = new sMesh();
 //        pWarehouse->modelFileName = "assets/models/Warehouse_xyz_n.ply";
         pWarehouse->modelFileName = "assets/models/Warehouse_xyz_n_uv.ply";
-        pWarehouse->positionXYZ = glm::vec3(-500.0f, 5.0f, 0.0f);
+        pWarehouse->positionXYZ = glm::vec3(-200.0f, 5.0f, 0.0f);
         pWarehouse->rotationEulerXYZ.y = -90.0f;
         pWarehouse->objectColourRGBA = glm::vec4(0.6f, 0.6f, 0.6f, 1.0f);
         //pWarehouse->bIsWireframe = true;

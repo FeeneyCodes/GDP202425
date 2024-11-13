@@ -72,6 +72,10 @@ cLuaBrain::cLuaBrain()
 	lua_setglobal( this->m_pLuaState, "getMeMyTayTayTickets" );
 
 
+	lua_pushcfunction(this->m_pLuaState, cLuaBrain::l_GetObjectModelName);
+	lua_setglobal(this->m_pLuaState, "getTheObjectPLYFileName");
+
+
 	lua_pushcfunction( this->m_pLuaState, MakeTheCowsBigger);
 	// In Lue, the function is called "AlterCows"
 	// - Takes 1 parameter, which is the change in scale
@@ -214,6 +218,29 @@ void cLuaBrain::Update(float deltaTime)
 
 	// TODO: Lots of Lua stuff here...
 	return;
+}
+
+//static 
+int cLuaBrain::l_GetObjectModelName(lua_State* L)
+{
+	int objectID = (int)lua_tonumber(L, 1);	/* get argument */
+
+	// Exist? 
+	cGameObject* pGO = cLuaBrain::m_findObjectByID(objectID);
+
+	if (pGO == nullptr)
+	{	// No, it's invalid
+		lua_pushboolean(L, false);
+		// I pushed 1 thing on stack, so return 1;
+		return 1;
+	}
+
+	// Object ID is valid
+	lua_pushboolean(L, true);	// index is OK
+	// Put the mesh name on the stack
+	lua_pushstring(L, pGO->meshName.c_str() );
+	// Put 2 things on the Lua stack, so return 2
+	return 2;
 }
 
 // Called by Lua

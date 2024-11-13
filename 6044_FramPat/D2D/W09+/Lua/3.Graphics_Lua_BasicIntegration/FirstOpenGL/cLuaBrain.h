@@ -31,6 +31,8 @@ public:
 
 	static int l_GetTaylorSwiftTickets(  lua_State *L );	
 
+	static int l_GetObjectModelName(lua_State* L);
+
 	static int l_KillAllHumans( lua_State *L );	
 	// Called by Lua
 	// Passes object ID, new velocity, etc.

@@ -105,6 +105,29 @@ void DrawMesh(sMesh* pCurMesh, GLuint program)
         return;
     }
 
+    // HACK:
+    // For the discard example
+	// uniform bool bUseStencilTexture;
+    GLint bUseStencilTexture_UL = glGetUniformLocation(program, "bUseStencilTexture");
+
+    if (pCurMesh->uniqueFriendlyName == "Ground")
+    {
+        glUniform1f(bUseStencilTexture_UL, (GLfloat)GL_TRUE);
+
+        // uniform sampler2D stencilTexture;
+        GLuint stencilTextureID = ::g_pTextures->getTextureIDFromName("SurprisedChildFace.bmp");
+
+        glActiveTexture(GL_TEXTURE0 + 40);
+        glBindTexture(GL_TEXTURE_2D, stencilTextureID);
+
+        GLint stencilTexture_UL = glGetUniformLocation(program, "stencilTexture");
+        glUniform1i(stencilTexture_UL, 40);       // <-- Note we use the NUMBER, not the GL_TEXTURE3 here
+    }
+    else
+    {
+        glUniform1f(bUseStencilTexture_UL, (GLfloat)GL_FALSE);
+    }
+
     glCullFace(GL_BACK);
     glEnable(GL_CULL_FACE);
 

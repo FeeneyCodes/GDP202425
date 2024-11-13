@@ -594,6 +594,8 @@ int main(void)
     ::g_pTextures->Create2DTextureFromBMPFile("UV_Test_750x750.bmp");
     ::g_pTextures->Create2DTextureFromBMPFile("shape-element-splattered-texture-stroke_1194-8223.bmp");
     ::g_pTextures->Create2DTextureFromBMPFile("Grey_Brick_Wall_Texture.bmp");
+    //
+    ::g_pTextures->Create2DTextureFromBMPFile("SurprisedChildFace.bmp");
 
     // Set the texture sampler to one of the 3 textures we loaded
     //GLuint badBunnyTexNum = ::g_pTextures->getTextureIDFromName("bad_bunny_1920x1080.bmp");

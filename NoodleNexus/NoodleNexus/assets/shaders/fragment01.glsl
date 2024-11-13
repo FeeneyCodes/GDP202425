@@ -54,6 +54,11 @@ uniform sampler2D texture03;
 uniform vec4 texRatio_0_to_3;	// x index 0, y index 1, etc/
 //uniform float texRatio[4];
 uniform bool bUseTextureAsColour;	// If true, then sample the texture
+
+// For discard stencil example
+uniform sampler2D stencilTexture;
+uniform bool bUseStencilTexture;
+
 //uniform sampler2D textures[4];
 //uniform sampler2DArray textures[3]
 
@@ -63,6 +68,21 @@ uniform samplerCube mySkyBox;
 
 void main()
 {
+	// discard transparency
+	// uniform sampler2D stencilTexture;
+	// uniform bool bUseStencilTexture;
+	if ( bUseStencilTexture )
+	{
+		float stencilColour = texture( stencilTexture, fUV.st ).r;
+		//
+		if ( stencilColour < 0.5f )	// Is it "black enough"
+		{
+			discard;	// don't draw this pixel
+		}
+	}
+
+
+
 	vec3 vertexColour = fColour;
 	if ( bUseObjectColour )
 	{

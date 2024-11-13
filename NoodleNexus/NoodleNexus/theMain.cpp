@@ -559,10 +559,10 @@ int main(void)
     ::g_pLightManager->loadUniformLocations(program);
 
     // Set up one of the lights in the scene
-    ::g_pLightManager->theLights[0].position = glm::vec4(-15.0f, 30.0f, 0.0f, 1.0f);
+    ::g_pLightManager->theLights[0].position = glm::vec4(-10.8f, 85.0f, 0.0f, 1.0f);
     ::g_pLightManager->theLights[0].diffuse = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-    ::g_pLightManager->theLights[0].atten.y = 0.01f;
-    ::g_pLightManager->theLights[0].atten.z = 0.001f;
+    ::g_pLightManager->theLights[0].atten.y = 0.006877f;
+    ::g_pLightManager->theLights[0].atten.z = 0.0001184f;
 
     ::g_pLightManager->theLights[0].param1.x = 0.0f;    // Point light (see shader)
     ::g_pLightManager->theLights[0].param2.x = 1.0f;    // Turn on (see shader)
@@ -613,7 +613,19 @@ int main(void)
     glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &iMaxCombinedTextureInmageUnits);
     std::cout << "GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS = " << iMaxCombinedTextureInmageUnits << std::endl;
 
+    // data returns one value, the maximum number of components of the inputs read by the fragment shader, 
+    // which must be at least 128.
+    GLint iMaxFragmentInputComponents = 0;
+    glGetIntegerv(GL_MAX_FRAGMENT_INPUT_COMPONENTS, &iMaxFragmentInputComponents);
+    std::cout << "GL_MAX_FRAGMENT_INPUT_COMPONENTS = " << iMaxFragmentInputComponents << std::endl;
+    
 
+    // data returns one value, the maximum number of individual floating - point, integer, or boolean values 
+    // that can be held in uniform variable storage for a fragment shader.The value must be at least 1024. 
+    GLint iMaxFragmentUniformComponents = 0;
+    glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_COMPONENTS, &iMaxFragmentUniformComponents);
+    std::cout << "GL_MAX_FRAGMENT_UNIFORM_COMPONENTS = " << iMaxFragmentUniformComponents << std::endl;
+        
 
 //    // Bund to texture unit #3 (just because. for no particular reason)
 //    glActiveTexture(GL_TEXTURE0 + 191);	
@@ -638,7 +650,10 @@ int main(void)
     //glUniform1i(texture01_UnLoc, texture00Unit);
 
 
-
+    //  Turn on the blend operation
+    glEnable(GL_BLEND);
+    // Do alpha channel transparency
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 
     cLightHelper TheLightHelper;
@@ -1063,25 +1078,30 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
 
 
     // Add a bunch of bunny rabbits
-    //float boxLimit = 50.0f;
-    //float boxStep = 10.0f;
-//    for (float x = -boxLimit; x <= boxLimit; x += boxStep)
-//    {
-//        for (float z = -boxLimit; z <= boxLimit; z += boxStep)
-//        {
-//            sMesh* pBunny = new sMesh();
-////            pBunny->modelFileName = "assets/models/bun_zipper_res2_10x_size_xyz_only.ply";
-////            pBunny->modelFileName = "assets/models/bun_zipper_res2_10x_size_xyz_N_only.ply";
-//            pBunny->modelFileName = "assets/models/bun_zipper_res2_10x_size_xyz_N_uv.ply";
-//            pBunny->positionXYZ = glm::vec3(x, -3.0f, z);
-//            pBunny->objectColourRGBA 
-//                = glm::vec4(getRandomFloat(0.0f, 1.0f),
-//                            getRandomFloat(0.0f, 1.0f),
-//                            getRandomFloat(0.0f, 1.0f), 
-//                            1.0f );
-//            ::g_vecMeshesToDraw.push_back(pBunny);
-//        }
-//    }//for (float x = -boxLimit...
+    float boxLimit = 100.0f;
+    float boxStep = 20.0f;
+    for (float x = -boxLimit; x <= boxLimit; x += boxStep)
+    {
+        for (float z = -(2.0f * boxLimit); z <= boxLimit; z += boxStep)
+        {
+            sMesh* pBunny = new sMesh();
+//            pBunny->modelFileName = "assets/models/bun_zipper_res2_10x_size_xyz_only.ply";
+//            pBunny->modelFileName = "assets/models/bun_zipper_res2_10x_size_xyz_N_only.ply";
+            pBunny->modelFileName = "assets/models/bun_zipper_res2_10x_size_xyz_N_uv.ply";
+            pBunny->positionXYZ = glm::vec3(x, 0.0f, z);
+            pBunny->uniformScale = 5.0f;
+            pBunny->objectColourRGBA 
+                = glm::vec4(getRandomFloat(0.0f, 1.0f),
+                            getRandomFloat(0.0f, 1.0f),
+                            getRandomFloat(0.0f, 1.0f), 
+                            1.0f );
+            // Set some transparency
+            pBunny->alphaTransparency = getRandomFloat(0.25f, 1.0f);
+//            pBunny->alphaTransparency = 0.0f;
+
+            ::g_vecMeshesToDraw.push_back(pBunny);
+        }
+    }//for (float x = -boxLimit...
 
 
 
@@ -1132,6 +1152,8 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
         pFlatPlane->textures[1] = "Puzzle_parts.bmp";       // 0.0
         pFlatPlane->textures[2] = "shape-element-splattered-texture-stroke_1194-8223.bmp";
         pFlatPlane->textures[3] = "Grey_Brick_Wall_Texture.bmp";
+
+//        pFlatPlane->alphaTransparency = 0.5f;
 
         pFlatPlane->blendRatio[0] = 0.0f;
         pFlatPlane->blendRatio[1] = 1.0f;

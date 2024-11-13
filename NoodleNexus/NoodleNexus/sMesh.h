@@ -35,6 +35,9 @@ struct sMesh
 	std::string textures[MAX_NUM_TEXTURES];
 	float blendRatio[MAX_NUM_TEXTURES];
 
+	// 0.0 = invisible
+	// 1.0 = solid 
+	float alphaTransparency = 1.0f;
 
 	std::string getState(void);
 	bool loadState(std::string newState);

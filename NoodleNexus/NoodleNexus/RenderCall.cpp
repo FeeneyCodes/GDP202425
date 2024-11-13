@@ -33,6 +33,9 @@ void SetUpTextures(sMesh* pCurMesh, GLuint program)
         }        
         glActiveTexture(GL_TEXTURE0 + 0);
         glBindTexture(GL_TEXTURE_2D, textureID_00);
+
+        //glBindTextureUnit(0, textureID_00);
+
         GLint texture00_UL = glGetUniformLocation(program, "texture00");
         glUniform1i(texture00_UL, 0);       // <-- Note we use the NUMBER, not the GL_TEXTURE3 here
     }
@@ -211,6 +214,11 @@ void DrawMesh(sMesh* pCurMesh, GLuint program)
         pCurMesh->objectColourRGBA.g,
         pCurMesh->objectColourRGBA.b,
         1.0f);
+
+
+    ///uniform float wholeObjectTransparencyAlpha;
+    GLint wholeObjectTransparencyAlpha_UL = glGetUniformLocation(program, "wholeObjectTransparencyAlpha");
+    glUniform1f(wholeObjectTransparencyAlpha_UL, pCurMesh->alphaTransparency);
 
 
     // solid or wireframe, etc.

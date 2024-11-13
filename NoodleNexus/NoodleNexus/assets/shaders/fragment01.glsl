@@ -9,6 +9,9 @@ uniform vec4 objectColour;			// Override colour
 uniform bool bUseObjectColour;
 uniform vec4 eyeLocation;			// Where the camera is
 uniform bool bDoNotLight;			// if true, skips lighting
+// 0.0 to 1.0 (invisible to solid)
+// Controls the alpha channel
+uniform float wholeObjectTransparencyAlpha;
 
 out vec4 finalPixelColour;
 
@@ -32,7 +35,7 @@ struct sLight
 	                // yzw are TBD
 };
 
-const int NUMBEROFLIGHTS = 100;
+const int NUMBEROFLIGHTS = 20;
 uniform sLight theLights[NUMBEROFLIGHTS]; 
 // uniform vec4 thelights[0].position;
 // uniform vec4 thelights[1].position;
@@ -74,7 +77,7 @@ void main()
 //		uniform sampler2D texture03;
 //		uniform vec4 texRatio_0_to_3;	// x index 0, y index 1, etc/
 	
-		vec3 texColour00 = texture( texture00, fUV.st ).rgb;	
+		vec3 texColour00 = texture( texture00, fUV.st ).rgb;
 		vec3 texColour01 = texture( texture01, fUV.st ).rgb;	
 		vec3 texColour02 = texture( texture02, fUV.st ).rgb;	
 		vec3 texColour03 = texture( texture03, fUV.st ).rgb;	
@@ -115,7 +118,10 @@ void main()
 
 											
 	finalPixelColour = pixelColour;
-	finalPixelColour.a = 1.0f;		
+	// Set the alpha channel
+	finalPixelColour.a = wholeObjectTransparencyAlpha;	
+//	finalPixelColour.a = 1.0f;		
+//	finalPixelColour.a = 0.9f;		
 
 	// Make the actual colour almost black
 	// Apply the UVs as a colour

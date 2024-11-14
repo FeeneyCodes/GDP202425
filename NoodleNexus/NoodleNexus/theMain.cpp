@@ -225,9 +225,14 @@ sMesh* pFindMeshByFriendlyName(std::string theNameToFind)
     return NULL;
 }
 
+void AABBOctTree(void);
 
 int main(void)
 {
+    
+    AABBOctTree();
+
+
     //    ConsoleStuff();
     //
         // On the stack, at compile time.
@@ -498,15 +503,17 @@ int main(void)
     ::g_pPhysicEngine->setVAOManager(::g_pMeshManager);
 
 
-
-
     // This also adds physics objects to the phsyics system
     AddModelsToScene(::g_pMeshManager, program);
+    
+    
+
 
 
    
     ::g_pFlyCamera = new cBasicFlyCamera();
-    ::g_pFlyCamera->setEyeLocation(glm::vec3(0.0f, 10.0f, 50.0f));
+//    ::g_pFlyCamera->setEyeLocation(glm::vec3(0.0f, 10.0f, 50.0f));
+    ::g_pFlyCamera->setEyeLocation(glm::vec3(10'000.0f, 25'000.0f, 160'000.0f));
     // Rotate the camera 180 degrees
     ::g_pFlyCamera->rotateLeftRight_Yaw_NoScaling(glm::radians(180.0f));
 
@@ -559,10 +566,10 @@ int main(void)
     ::g_pLightManager->loadUniformLocations(program);
 
     // Set up one of the lights in the scene
-    ::g_pLightManager->theLights[0].position = glm::vec4(-10.8f, 85.0f, 0.0f, 1.0f);
+    ::g_pLightManager->theLights[0].position = glm::vec4(2'000.0f, 100'000.0f, 10'000.0f, 1.0f);
     ::g_pLightManager->theLights[0].diffuse = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-    ::g_pLightManager->theLights[0].atten.y = 0.006877f;
-    ::g_pLightManager->theLights[0].atten.z = 0.0001184f;
+    ::g_pLightManager->theLights[0].atten.y = 0.000006877f;
+    ::g_pLightManager->theLights[0].atten.z = 0.0000000001184f;
 
     ::g_pLightManager->theLights[0].param1.x = 0.0f;    // Point light (see shader)
     ::g_pLightManager->theLights[0].param2.x = 1.0f;    // Turn on (see shader)
@@ -674,8 +681,10 @@ int main(void)
 
         matProjection = glm::perspective(0.6f,           // FOV
             ratio,          // Aspect ratio of screen
-            0.1f,           // Near plane
-            1000.0f);       // Far plane
+            1'000.1f,           // Near plane (as far from the camera as possible)
+            1'000'000.0f);       // Far plane (as near to the camera as possible)
+//            0.1f,           // Near plane (as far from the camera as possible)
+//            1000.0f);       // Far plane (as near to the camera as possible)
 
         // View or "camera"
         glm::mat4 matView = glm::mat4(1.0f);
@@ -1008,6 +1017,13 @@ int main(void)
 void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
 {
     {
+        sModelDrawInfo galacticaModel;
+        ::g_pMeshManager->LoadModelIntoVAO("assets/models/Battlestar_Galactica_Res_0_(444,087 faces)_xyz_n_uv (facing +z, up +y).ply",
+            galacticaModel, program);
+        std::cout << galacticaModel.meshName << ": " << galacticaModel.numberOfVertices << " vertices loaded" << std::endl;
+    }
+
+    {
         sModelDrawInfo warehouseModel;
         //    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Warehouse_xyz_n.ply",
         ::g_pMeshManager->LoadModelIntoVAO("assets/models/Warehouse_xyz_n_uv.ply",
@@ -1075,6 +1091,65 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
         ::g_pMeshManager->LoadModelIntoVAO("assets/models/Sphere_radius_1_Flat_Shadow_xyz_N_uv.ply",
             sphereShadowMesh, program);
         std::cout << sphereShadowMesh.numberOfVertices << " vertices loaded" << std::endl;
+    }
+    
+
+    {
+        sMesh* pGalactica = new sMesh();
+        pGalactica->modelFileName = "assets/models/Battlestar_Galactica_Res_0_(444,087 faces)_xyz_n_uv (facing +z, up +y).ply";
+        pGalactica->positionXYZ = glm::vec3(0.0f, 0.0f, 0.0f);
+        //       pGalactica->rotationEulerXYZ.y = -90.0f;
+        pGalactica->objectColourRGBA = glm::vec4(0.6f, 0.6f, 0.6f, 1.0f);
+        //pGalactica->bIsWireframe = true;
+        pGalactica->bOverrideObjectColour = true;
+        pGalactica->uniqueFriendlyName = "Galactica";
+        //pGalactica->bDoNotLight = true;
+        pGalactica->bIsVisible = true;
+        pGalactica->uniformScale = 1.0f;
+        //
+        pGalactica->textures[0] = "Non-uniform concrete wall 0512-3-1024x1024.bmp";
+        pGalactica->blendRatio[0] = 1.0f;
+
+        ::g_vecMeshesToDraw.push_back(pGalactica);
+
+        // This is just for testing to see if the xyz locations correctly map to a gridID and the other way around
+        unsigned long long gridIndex = ::g_pPhysicEngine->calcBP_GridIndex(0.0f, 0.0f, 0.0f, 1000.0f); // 0, 0, 0
+        glm::vec3 minXYZ = ::g_pPhysicEngine->calcBP_MinXYZ_FromID(gridIndex, 1000.0f);
+        gridIndex = ::g_pPhysicEngine->calcBP_GridIndex(500.0f, 500.0f, 500.0f, 1000.0f);              // 0, 0, 0
+        minXYZ = ::g_pPhysicEngine->calcBP_MinXYZ_FromID(gridIndex, 1000.0f);
+        gridIndex = ::g_pPhysicEngine->calcBP_GridIndex(-500.0f, -500.0f, -500.0f, 1000.0f);           // 
+        minXYZ = ::g_pPhysicEngine->calcBP_MinXYZ_FromID(gridIndex, 1000.0f);
+        gridIndex = ::g_pPhysicEngine->calcBP_GridIndex(10.0f, 2500.0f, 10.0f, 1000.0f);               // 0, 2, 0
+        minXYZ = ::g_pPhysicEngine->calcBP_MinXYZ_FromID(gridIndex, 1000.0f);
+        gridIndex = ::g_pPhysicEngine->calcBP_GridIndex(2500.0f, 10.0f, 10.0f, 1000.0f);               // 2, 0, 0
+        minXYZ = ::g_pPhysicEngine->calcBP_MinXYZ_FromID(gridIndex, 1000.0f);
+        gridIndex = ::g_pPhysicEngine->calcBP_GridIndex(10.0f, 10.0f, 2500.0f, 1000.0f);               // 0, 0, 2
+        minXYZ = ::g_pPhysicEngine->calcBP_MinXYZ_FromID(gridIndex, 1000.0f);
+        gridIndex = ::g_pPhysicEngine->calcBP_GridIndex(8745.0f, 3723.0f, 2500.0f, 1000.0f);           // 8, 3, 2
+        minXYZ = ::g_pPhysicEngine->calcBP_MinXYZ_FromID(gridIndex, 1000.0f);
+        gridIndex = ::g_pPhysicEngine->calcBP_GridIndex(-8745.0f, -3723.0f, -2500.0f, 1000.0f);           // 8, 3, 2
+        minXYZ = ::g_pPhysicEngine->calcBP_MinXYZ_FromID(gridIndex, 1000.0f);
+        gridIndex = ::g_pPhysicEngine->calcBP_GridIndex(-999.0f, -999.0f, -999.0f, 1000.0f);           // -1, -1, -1
+        minXYZ = ::g_pPhysicEngine->calcBP_MinXYZ_FromID(gridIndex, 1000.0f);
+
+
+
+        // 1000x1000x1000 aabbs
+        //::g_pPhysicEngine->initBroadPhaseGrid();
+        ::g_pPhysicEngine->generateBroadPhaseGrid(
+            "assets/models/Battlestar_Galactica_Res_0_(444,087 faces)_xyz_n_uv (facing +z, up +y).ply",
+            1000.0f);
+
+    }
+    {
+        sMesh* pGalacticaWireframe = new sMesh();
+        pGalacticaWireframe->modelFileName = "assets/models/Battlestar_Galactica_Res_0_(444,087 faces)_xyz_n_uv (facing +z, up +y).ply";
+        pGalacticaWireframe->objectColourRGBA = glm::vec4(0.0f, 0.0f, 0.5f, 1.0f);
+        pGalacticaWireframe->bIsWireframe = true;
+        pGalacticaWireframe->bOverrideObjectColour = true;
+        pGalacticaWireframe->bDoNotLight = true;
+
+        ::g_vecMeshesToDraw.push_back(pGalacticaWireframe);
     }
 
 
@@ -1516,6 +1591,59 @@ void SetUpTankGame(void)
 
 void TankStepFrame(double timeStep)
 {
+
+
+
+    return;
+}
+
+// x = 5, y = 15    --> 0, 1
+// x = 40.0, y = 80.0   --> [4][8]
+// (40.0, 80.0) --> box size = 100
+//   [0][0]   
+void calcBoxXYFromCoord(float x, float y, int &xIndex, int &yIndex, float boxSize)
+{
+    xIndex = (int)(x / boxSize);
+    yIndex = (int)(y / boxSize);
+    return;
+}
+
+
+void AABBOctTree(void)
+{
+    struct sSquare
+    {
+        //       vector< cTriangles* > vecTriangleInThisSquare
+        glm::vec2 minXY;
+        glm::vec2 maxXY;
+        float width;
+        unsigned int indexColRow;
+    };
+
+    sSquare grid[10][10];
+    float sqaureWidth = 10;
+
+    for (unsigned int x = 0; x < 10; x++)
+    {
+        for (unsigned int y = 0; y < 10; y++)
+        {
+            grid[x][y].width = sqaureWidth;
+            grid[x][y].minXY.x = sqaureWidth * x;
+            grid[x][y].minXY.y = sqaureWidth * y;
+
+            grid[x][y].maxXY.x = sqaureWidth * x + sqaureWidth;
+            grid[x][y].maxXY.y = sqaureWidth * y + sqaureWidth;
+        }
+    }
+
+    int xIndex, yIndex;
+    calcBoxXYFromCoord(5.0f, 15.0f, xIndex, yIndex, sqaureWidth);
+    std::cout << xIndex << ", " << yIndex << std::endl;
+
+
+    calcBoxXYFromCoord(40.0f, 80.0f, xIndex, yIndex, sqaureWidth);
+    std::cout << xIndex << ", " << yIndex << std::endl;
+
 
 
 

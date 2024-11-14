@@ -92,7 +92,8 @@ void handleMouseAsync(GLFWwindow* window)
 
 void handleKeyboardAsync(GLFWwindow* window)
 {
-    const float CAMERA_MOVE_SPEED = 0.1f;
+    const float CAMERA_MOVE_SPEED = 100.0f;
+//    const float CAMERA_MOVE_SPEED = 0.1f;
     const float CAMERA_TURN_SPEED = 0.1f;
 
     if ( isShiftDown(window) )

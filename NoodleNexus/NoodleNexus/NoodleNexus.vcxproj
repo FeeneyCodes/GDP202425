@@ -153,6 +153,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="cPhysics.cpp" />
+    <ClCompile Include="cPhysics_BroadPhase.cpp" />
     <ClCompile Include="cRailGun.cpp" />
     <ClCompile Include="cSheild.cpp" />
     <ClCompile Include="cSuperTank.cpp" />

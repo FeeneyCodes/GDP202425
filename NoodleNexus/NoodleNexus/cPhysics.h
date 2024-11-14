@@ -1,9 +1,10 @@
 #pragma once
 
-#include <vector>
 #include <glm/glm.hpp>
 #include <glm/vec3.hpp>
 #include <vector>
+#include <vector>
+#include <map>
 // 
 #include "sMesh.h"
 #include "cVAOManager/cVAOManager.h"
@@ -118,6 +119,54 @@ public:
 		std::string meshInstanceName;	// Friendly name?
 		std::vector<sTriangle> vecTriangles;
 	};
+
+	
+	// BROAD phase objects
+	class cBroad_Cube		// Really an AABB
+	{
+	private:
+		// Can't call default constructor
+		cBroad_Cube() {
+			this->m_minXYZ = glm::vec3(0.0f);
+			this->m_maxXYZ = glm::vec3(0.0f);
+			this->m_size = 0.0f;
+			this->m_indexXYZ = 0;
+		};
+		unsigned long long m_indexXYZ;
+		glm::vec3 m_minXYZ;
+		glm::vec3 m_maxXYZ;
+		float m_size;	// witdh, heitht, etc.
+	public:
+		// When creating, we need to be careful that 
+		// our index matches these min and max
+		cBroad_Cube(
+			glm::vec3 minXYZ, glm::vec3 maxXYZ,
+			float sizeOrWidth,
+			unsigned long long indexXYZ);
+		unsigned long long getGridIndexID(void);
+		float getSize(void);
+		glm::vec3 getMinXYZ(void);
+		glm::vec3 getMaxXYZ(void);
+
+		std::vector< sTriangle > vec_pTriangles;
+	};
+
+	unsigned long long calcBP_GridIndex(float x, float y, float z, float sizeOrWidth);
+	glm::vec3 calcBP_MinXYZ_FromID(unsigned long long BP_CubeID, float sizeOrWidth);
+	std::map< unsigned long long /*index*/, cBroad_Cube* > map_BP_CubeGrid;
+
+	// Is this too big for the stack?
+	// sBroad_Cube BP_CubeArray[1000][1000][1000];
+	//std::vector< std::vector< std::vector< sBroad_Cube* > > > vec_3D_CubeArray;
+//	void initBroadPhaseGrid(void);
+	//
+	// Using model space (i.e. model is at origin)
+	bool generateBroadPhaseGrid(std::string meshModelName, float AABBCubeSize_or_Width);
+	// TODO: Model is NOT at the origin
+	bool generateBroadPhaseGrid(std::string meshModelName, float AABBCubeSize_or_Width,
+		glm::vec3 meshWorldPosition,
+		glm::vec3 meshWorldOrientation,
+		float uniformScale);
 
 	// Other types soon, likely
 	// struct sPlane

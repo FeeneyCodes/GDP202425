@@ -134,6 +134,9 @@
     <ClCompile Include="sMesh.cpp">
       <Filter>Meshes, etc.</Filter>
     </ClCompile>
+    <ClCompile Include="cPhysics_BroadPhase.cpp">
+      <Filter>Phsyics_Stuff</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PlyFileLoaders.h">

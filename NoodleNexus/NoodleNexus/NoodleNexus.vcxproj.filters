@@ -48,6 +48,9 @@
     <Filter Include="TankGameFiles\Mediator">
       <UniqueIdentifier>{ae1ea03c-7722-4bbe-b4c6-8ea103529977}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Commands">
+      <UniqueIdentifier>{af26309b-2955-4be9-a898-42165798e9bd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="theMain.cpp">
@@ -71,7 +74,7 @@
     <ClCompile Include="cBasicFlyCamera\cBasicFlyCamera.cpp">
       <Filter>Mouse, Keyboard, FlyCamera</Filter>
     </ClCompile>
-    <ClCompile Include="mouse_keyboard_async.cpp">
+    <ClCompile Include="mouse_keyboard.cpp">
       <Filter>Mouse, Keyboard, FlyCamera</Filter>
     </ClCompile>
     <ClCompile Include="sharedThings.cpp">
@@ -139,6 +142,15 @@
     </ClCompile>
     <ClCompile Include="cLowPassFilter.cpp">
       <Filter>Phsyics_Stuff</Filter>
+    </ClCompile>
+    <ClCompile Include="cFollowObject_A.cpp">
+      <Filter>Commands</Filter>
+    </ClCompile>
+    <ClCompile Include="cMoveRelativeTime.cpp">
+      <Filter>Commands</Filter>
+    </ClCompile>
+    <ClCompile Include="cCommandGroup.cpp">
+      <Filter>Commands</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -222,6 +234,18 @@
     </ClInclude>
     <ClInclude Include="cLowPassFilter.h">
       <Filter>Phsyics_Stuff</Filter>
+    </ClInclude>
+    <ClInclude Include="iCommand.h">
+      <Filter>Commands</Filter>
+    </ClInclude>
+    <ClInclude Include="cMoveRelativeTime.h">
+      <Filter>Commands</Filter>
+    </ClInclude>
+    <ClInclude Include="cFollowObject_A.h">
+      <Filter>Commands</Filter>
+    </ClInclude>
+    <ClInclude Include="cCommandGroup.h">
+      <Filter>Commands</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

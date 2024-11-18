@@ -10,6 +10,11 @@
 
 #include "cLightManager.h"
 
+// The commands
+#include "cMoveRelativeTime.h"
+
+//#include <Windows.h>
+
 //extern cLightManager* g_pLightManager;
 
 // Defined in theMain.cpp
@@ -390,3 +395,99 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 
 
 
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, GLFW_TRUE);
+
+    const float CAMERA_MOVE_SPEED = 0.1f;
+
+    if (mods == GLFW_MOD_SHIFT)
+    {
+        if (key == GLFW_KEY_F9 && action == GLFW_PRESS)
+        {
+            // Save state to file
+//            MyAmazingStateThing->saveToFile("MySaveFile.sexy");
+        }
+//        if (key == GLFW_KEY_F10 && action == GLFW_PRESS)
+//        {
+//            // Save state to file
+//            // https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-messagebox
+////            MessageBox(NULL, L"Hello!", L"The title", MB_OK);
+//            if (MessageBox(NULL, L"Kill all humans?", L"Bender asks", MB_YESNO) == IDYES)
+//            {
+//                std::cout << "You are heartless" << std::endl;
+//            }
+//            else
+//            {
+//                std::cout << "Humans still live..." << std::endl;
+//            }
+//        }
+    }//if (mods == GLFW_MOD_SHIFT)
+
+ //   if (mods == GLFW_KEY_LEFT_CONTROL)
+    if (isControlDown(window))
+    {
+        if (key == GLFW_KEY_5 && action == GLFW_PRESS)
+        {
+            // check if you are out of bounds
+            if (::g_selectedLightIndex > 0)
+            {
+
+                ::g_selectedLightIndex--;
+            }
+            //// 0 to 10
+            //if (::g_selectedLightIndex < 0)
+            //{
+            //    ::g_selectedLightIndex = 0;
+            //}
+
+        }
+        if (key == GLFW_KEY_6 && action == GLFW_PRESS)
+        {
+            ::g_selectedLightIndex++;
+            if (::g_selectedLightIndex >= 10)
+            {
+                ::g_selectedLightIndex = 9;
+            }
+        }
+
+        if (key == GLFW_KEY_9 && action == GLFW_PRESS)
+        {
+            ::g_bShowDebugSpheres = true;
+        }
+        if (key == GLFW_KEY_0 && action == GLFW_PRESS)
+        {
+            ::g_bShowDebugSpheres = false;
+        }
+    }//if (mods == GLFW_KEY_LEFT_CONTROL)
+
+    if (areAllModifiersUp(window))
+    {
+        // Pressing F8 moves the viper to the bunny #15
+        if (key == GLFW_KEY_F8 && action == GLFW_PRESS)
+        {
+            // Find the bunny and viper
+            // Create a move command passing this inforamtion
+            // Add it to the command manager thing
+            sMesh* pBunny_15 = pFindMeshByFriendlyName("Bunny_15");
+            cPhysics::sPhysInfo* pViperPhys = ::g_pPhysicEngine->pFindAssociateMeshByFriendlyName("New_Viper_Player");
+            if (pBunny_15 && pViperPhys)
+            {
+                // both exist
+                cMoveRelativeTime* pMoveViper = new cMoveRelativeTime();
+                //moveViper.
+                pMoveViper->Init(pViperPhys, pBunny_15->positionXYZ, 5.0);
+
+                // 
+                ::g_pCommandDirector->addSerial(pMoveViper);
+            }
+
+        }//if (key == GLFW_KEY_F8 && action == GLFW_PRESS)
+
+    }//if (areAllModifiersUp(window))
+
+
+
+    return;
+}

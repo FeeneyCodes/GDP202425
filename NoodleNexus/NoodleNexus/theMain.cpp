@@ -52,6 +52,9 @@ cVAOManager* g_pMeshManager = NULL;
 
 cBasicTextureManager* g_pTextures = NULL;
 
+cCommandGroup* g_pCommandDirector = NULL;
+
+
 //cLightManager* g_pLightManager = NULL;
 
 void AddModelsToScene(cVAOManager* pMeshManager, GLuint shaderProgram);
@@ -93,107 +96,7 @@ sMesh* g_pTankModel = NULL;
 
 
 
-static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
-{
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, GLFW_TRUE);
 
-    const float CAMERA_MOVE_SPEED = 0.1f;
-
-    if (mods == GLFW_MOD_SHIFT)
-    {
-        if (key == GLFW_KEY_F9 && action == GLFW_PRESS)
-        {
-            // Save state to file
-//            MyAmazingStateThing->saveToFile("MySaveFile.sexy");
-        }
-        if (key == GLFW_KEY_F10 && action == GLFW_PRESS)
-        {
-            // Save state to file
-            // https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-messagebox
-//            MessageBox(NULL, L"Hello!", L"The title", MB_OK);
-            if (MessageBox(NULL, L"Kill all humans?", L"Bender asks", MB_YESNO) == IDYES)
-            {
-                std::cout << "You are heartless" << std::endl;
-            }
-            else
-            {
-                std::cout << "Humans still live..." << std::endl;
-            }
-        }
-    }//if (mods == GLFW_MOD_SHIFT)
-
- //   if (mods == GLFW_KEY_LEFT_CONTROL)
-    if (isControlDown(window))
-    {
-        if (key == GLFW_KEY_5 && action == GLFW_PRESS)
-        {
-            // check if you are out of bounds
-            if (::g_selectedLightIndex > 0)
-            {
-
-                ::g_selectedLightIndex--;
-            }
-            //// 0 to 10
-            //if (::g_selectedLightIndex < 0)
-            //{
-            //    ::g_selectedLightIndex = 0;
-            //}
-
-        }
-        if (key == GLFW_KEY_6 && action == GLFW_PRESS)
-        {
-            ::g_selectedLightIndex++;
-            if (::g_selectedLightIndex >= 10)
-            {
-                ::g_selectedLightIndex = 9;
-            }
-        }
-
-        if (key == GLFW_KEY_9 && action == GLFW_PRESS)
-        {
-            ::g_bShowDebugSpheres = true;
-        }
-        if (key == GLFW_KEY_0 && action == GLFW_PRESS)
-        {
-            ::g_bShowDebugSpheres = false;
-        }
-    }//if (mods == GLFW_KEY_LEFT_CONTROL)
-
-//    if (key == GLFW_KEY_A)
-//    {
-//        cameraEye.x -= CAMERA_MOVE_SPEED;
-////        g_myMeshes[::g_SelectedObjectIndex]->positionXYZ.x += CAMERA_MOVE_SPEED;
-//    }
-//
-//    if (key == GLFW_KEY_D)
-//    {
-//        cameraEye.x += CAMERA_MOVE_SPEED;
-////        g_myMeshes[0]->positionXYZ.x -= CAMERA_MOVE_SPEED;
-//    }
-//
-//    if (key == GLFW_KEY_W)
-//    {
-//        cameraEye.z += CAMERA_MOVE_SPEED;
-//    }
-//
-//    if (key == GLFW_KEY_S)
-//    {
-//        cameraEye.z -= CAMERA_MOVE_SPEED;
-//    }
-//
-//    if (key == GLFW_KEY_Q)
-//    {
-//        cameraEye.y -= CAMERA_MOVE_SPEED;
-//    }
-//    if (key == GLFW_KEY_E)
-//    {
-//        cameraEye.y += CAMERA_MOVE_SPEED;
-//    }
-
-
-    return;
-}
 
 void ConsoleStuff(void);
 
@@ -511,6 +414,8 @@ int main(void)
     // For triangle meshes, let the physics object "know" about the VAO manager
     ::g_pPhysicEngine->setVAOManager(::g_pMeshManager);
 
+
+    ::g_pCommandDirector = new cCommandGroup();
 
     // This also adds physics objects to the phsyics system
     AddModelsToScene(::g_pMeshManager, program);
@@ -962,6 +867,10 @@ int main(void)
         ::g_pPhysicEngine->StepTick(deltaTime);
 
 
+        // Update the commands, too
+        ::g_pCommandDirector->Update(deltaTime);
+
+
         // Handle any collisions
         if (::g_pPhysicEngine->vec_SphereAABB_Collisions.size() > 0 )
         {
@@ -1208,6 +1117,7 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
     {
         pBunny_15->positionXYZ = glm::vec3(-50.0f, -5.0f, 30.0f);
     }
+
 
 
         

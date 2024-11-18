@@ -5,6 +5,7 @@
 #include "cBasicFlyCamera/cBasicFlyCamera.h"
 #include "cLightManager.h"
 #include "cPhysics.h"
+#include "cCommandGroup.h"
 
 extern cBasicFlyCamera* g_pFlyCamera;
 extern cPhysics* g_pPhysicEngine;
@@ -12,6 +13,9 @@ extern cPhysics* g_pPhysicEngine;
 
 extern cLightManager* g_pLightManager;
 extern unsigned int g_selectedLightIndex;
+
+// Place all the commands here
+extern cCommandGroup* g_pCommandDirector;
 
 
 // GLFW callback function signatures
@@ -22,6 +26,10 @@ void cursor_enter_callback(GLFWwindow* window, int entered);
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
 // Mouse scroll wheel
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+
+
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
+
 
 // WE call these (not GLFW)
 void handleKeyboardAsync(GLFWwindow* window);

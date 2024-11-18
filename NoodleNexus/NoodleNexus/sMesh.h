@@ -46,4 +46,13 @@ struct sMesh
 	std::vector< sMesh* > vec_pChildMeshes;
 
 
+	// I'm going to remove this...
+	// //
+	// Relative (start where I'm at, then move to endXYZ)
+//	void MoveTo(glm::vec3 endXYZ, double timeToMove);
+	//
+//	void MoveTo(glm::vec3 startXYZ, glm::vec3 endXYZ, double timeToMove);
+	//
+//	void MoveTo(glm::vec3 startXYZ, glm::vec3 endXYZ, double maxVelocity);
+
 };

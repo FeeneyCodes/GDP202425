@@ -4,8 +4,11 @@
 
 #include "cBasicFlyCamera/cBasicFlyCamera.h"
 #include "cLightManager.h"
+#include "cPhysics.h"
 
 extern cBasicFlyCamera* g_pFlyCamera;
+extern cPhysics* g_pPhysicEngine;
+
 
 extern cLightManager* g_pLightManager;
 extern unsigned int g_selectedLightIndex;

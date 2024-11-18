@@ -48,6 +48,12 @@ void cPhysics::StepTick(double deltaTime)
 		vec_Temp_pPhysInfos.push_back(pCurrentAABB->pPhysicInfo);
 	}
 
+	// Copy any other objects that's moving with the integration step
+	for (sPhysInfo* pCurPhysObject : this->vecGeneralPhysicsObjects)
+	{
+		vec_Temp_pPhysInfos.push_back(pCurPhysObject);
+	}
+
 
 
 	// Now ALL the physical properties we are integrating are in one step
@@ -70,6 +76,7 @@ void cPhysics::StepTick(double deltaTime)
 		// i.e. how much this objects velocity is changing THIS step (this frame)
 		glm::vec3 deltaPosition = pCurObject->velocity * (float)deltaTime;
 		pCurObject->position += deltaPosition;
+
 	}//for (unsigned int index
 
 	// ***********************************************************************************
@@ -283,6 +290,45 @@ bool cPhysics::addTriangleMesh(std::string meshModelName)
 	// TODO: 
 	return false;
 }
+
+
+// This is used to find a particular mesh that's connected to this phsyics object
+// Reutrns NULL if not found
+cPhysics::sPhysInfo* cPhysics::pFindAssociateMeshByFriendlyName(std::string friendlyName)
+{
+	// All the general objects
+	for (sPhysInfo* pCurPhysObject : this->vecGeneralPhysicsObjects)
+	{
+		if (pCurPhysObject->pAssociatedDrawingMeshInstance->uniqueFriendlyName == friendlyName)
+		{
+			// Found it 
+			return pCurPhysObject;
+		}
+	}
+
+	for (cPhysics::sSphere* pCurSphere : this->vecSpheres )
+	{
+		if (pCurSphere->pPhysicInfo->pAssociatedDrawingMeshInstance->uniqueFriendlyName == friendlyName)
+		{
+			// Found it
+			return pCurSphere->pPhysicInfo;
+		}
+	}
+
+	for (cPhysics::sAABB* pCurAABB : this->vecAABBs)
+	{
+		if (pCurAABB->pPhysicInfo->pAssociatedDrawingMeshInstance->uniqueFriendlyName == friendlyName)
+		{
+			// Found it
+			return pCurAABB->pPhysicInfo;
+		}
+	}
+
+	// Didn't find it.
+	return NULL;
+}
+
+
 
 bool cPhysics::addTriangleMesh(
 	std::string meshModelName,

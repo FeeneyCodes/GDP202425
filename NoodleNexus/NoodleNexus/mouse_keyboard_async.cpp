@@ -92,8 +92,8 @@ void handleMouseAsync(GLFWwindow* window)
 
 void handleKeyboardAsync(GLFWwindow* window)
 {
-    const float CAMERA_MOVE_SPEED = 100.0f;
-//    const float CAMERA_MOVE_SPEED = 0.1f;
+//    const float CAMERA_MOVE_SPEED = 100.0f;
+    const float CAMERA_MOVE_SPEED = 0.1f;
     const float CAMERA_TURN_SPEED = 0.1f;
 
     if ( isShiftDown(window) )
@@ -181,7 +181,8 @@ void handleKeyboardAsync(GLFWwindow* window)
         return;
     }
 
-    if (areAllModifiersUp(window))
+    // Camera now moves when shift is down
+    if (isShiftDown(window))
     {
 
         // Move the camera 
@@ -251,6 +252,46 @@ void handleKeyboardAsync(GLFWwindow* window)
 
     }//if (areAllModifiersUp(window)
 
+
+    // This will control the player's character
+    if (areAllModifiersUp(window))
+    {
+        cPhysics::sPhysInfo* pViperPhys = ::g_pPhysicEngine->pFindAssociateMeshByFriendlyName("New_Viper_Player");
+
+        // Exists? 
+        if (pViperPhys)         // or != NULL
+        {
+            // Go forward
+            if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+            {
+                // Accelerate
+                pViperPhys->velocity.z += 0.01f;
+            }
+
+            if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+            {
+                // Accelerate
+                pViperPhys->velocity.z -= 0.01f;
+            }
+
+            if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+            {
+            }
+            if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+            {
+            }
+            if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+            {
+            }
+            if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+            {
+            }
+
+
+        }// if (pViperPhys)
+
+    }
+        
     return;
 }
 

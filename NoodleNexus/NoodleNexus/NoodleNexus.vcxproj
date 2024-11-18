@@ -148,6 +148,7 @@
     <ClCompile Include="cJetPack.cpp" />
     <ClCompile Include="cLightHelper\cLightHelper.cpp" />
     <ClCompile Include="cLightManager.cpp" />
+    <ClCompile Include="cLowPassFilter.cpp" />
     <ClCompile Include="cMonster.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -184,6 +185,7 @@
     <ClInclude Include="cLightHelper\cLightHelper.h" />
     <ClInclude Include="cLightManager.h" />
     <ClInclude Include="cArena.h" />
+    <ClInclude Include="cLowPassFilter.h" />
     <ClInclude Include="cMonster.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>

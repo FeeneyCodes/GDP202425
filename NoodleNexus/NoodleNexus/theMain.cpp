@@ -37,6 +37,8 @@
 //
 #include "cBasicTextureManager/cBasicTextureManager.h"
 
+#include "cLowPassFilter.h"
+
 //
 //const unsigned int MAX_NUMBER_OF_MESHES = 1000;
 //unsigned int g_NumberOfMeshesToDraw;
@@ -209,6 +211,13 @@ glm::vec3 getRandom_vec3(glm::vec3 min, glm::vec3 max)
         getRandomFloat(min.x, max.x),
         getRandomFloat(min.y, max.y),
         getRandomFloat(min.z, max.z));
+}
+
+std::string getStringVec3(glm::vec3 theVec3)
+{
+    std::stringstream ssVec;
+    ssVec << "(" << theVec3.x << ", " << theVec3.y << ", " << theVec3.z << ")";
+    return ssVec.str();
 }
 
 // Returns NULL if NOT found
@@ -512,10 +521,11 @@ int main(void)
 
    
     ::g_pFlyCamera = new cBasicFlyCamera();
-//    ::g_pFlyCamera->setEyeLocation(glm::vec3(0.0f, 10.0f, 50.0f));
-    ::g_pFlyCamera->setEyeLocation(glm::vec3(10'000.0f, 25'000.0f, 160'000.0f));
+    ::g_pFlyCamera->setEyeLocation(glm::vec3(0.0f, 5.0f, -50.0f));
+    // To see the Galactica:
+    //::g_pFlyCamera->setEyeLocation(glm::vec3(10'000.0f, 25'000.0f, 160'000.0f));
     // Rotate the camera 180 degrees
-    ::g_pFlyCamera->rotateLeftRight_Yaw_NoScaling(glm::radians(180.0f));
+//    ::g_pFlyCamera->rotateLeftRight_Yaw_NoScaling(glm::radians(180.0f));
 
 
 
@@ -524,6 +534,9 @@ int main(void)
     // Enable depth buffering (z buffering)
     // https://registry.khronos.org/OpenGL-Refpages/gl4/html/glEnable.xhtml
     glEnable(GL_DEPTH_TEST);
+
+    cLowPassFilter frameTimeFilter;
+//    frameTimeFilter.setNumSamples(30000);
 
     double currentFrameTime = glfwGetTime();
     double lastFrameTime = glfwGetTime();
@@ -601,6 +614,7 @@ int main(void)
     ::g_pTextures->Create2DTextureFromBMPFile("UV_Test_750x750.bmp");
     ::g_pTextures->Create2DTextureFromBMPFile("shape-element-splattered-texture-stroke_1194-8223.bmp");
     ::g_pTextures->Create2DTextureFromBMPFile("Grey_Brick_Wall_Texture.bmp");
+    ::g_pTextures->Create2DTextureFromBMPFile("dirty-metal-texture_1048-4784.bmp");
     //
     ::g_pTextures->Create2DTextureFromBMPFile("SurprisedChildFace.bmp");
 
@@ -681,10 +695,11 @@ int main(void)
 
         matProjection = glm::perspective(0.6f,           // FOV
             ratio,          // Aspect ratio of screen
-            1'000.1f,           // Near plane (as far from the camera as possible)
-            1'000'000.0f);       // Far plane (as near to the camera as possible)
-//            0.1f,           // Near plane (as far from the camera as possible)
-//            1000.0f);       // Far plane (as near to the camera as possible)
+            0.1f,           // Near plane (as far from the camera as possible)
+            1000.0f);       // Far plane (as near to the camera as possible)
+// For a "far" view of the large Galactica
+//            1'000.1f,           // Near plane (as far from the camera as possible)
+//            1'000'000.0f);       // Far plane (as near to the camera as possible)
 
         // View or "camera"
         glm::mat4 matView = glm::mat4(1.0f);
@@ -711,8 +726,21 @@ int main(void)
         // Calculate elapsed time
         // We'll enhance this
         currentFrameTime = glfwGetTime();
-        double deltaTime = currentFrameTime - lastFrameTime;
+        double tempDeltaTime = currentFrameTime - lastFrameTime;
         lastFrameTime = currentFrameTime;
+
+        // Set a limit on the maximum frame time
+        const double MAX_FRAME_TIME = 1.0 / 60.0;   // 60Hz (16 ms)
+        if (tempDeltaTime > MAX_FRAME_TIME)
+        {
+            tempDeltaTime = MAX_FRAME_TIME;
+        }
+
+        // Add this sample to the low pass filer ("averager")
+        frameTimeFilter.addSample(tempDeltaTime);
+        // 
+        double deltaTime = frameTimeFilter.getAverage();
+
 
 
         //        // *******************************************************************
@@ -995,6 +1023,23 @@ int main(void)
             << "   "
             << "quad: " << ::g_pLightManager->theLights[0].atten.z;
 
+        // Add the viper info, too
+        cPhysics::sPhysInfo* pViperPhys = ::g_pPhysicEngine->pFindAssociateMeshByFriendlyName("New_Viper_Player");
+        if (pViperPhys)
+        {
+            ssTitle
+                << " Viper XYZ:" << getStringVec3(pViperPhys->position)
+                << " vel:" << getStringVec3(pViperPhys->velocity)
+                << " acc:" << getStringVec3(pViperPhys->acceleration);
+
+        }//if (pViperPhys)
+
+        // Show frame time
+        ssTitle << " deltaTime = " << deltaTime
+            << " FPS: " << 1.0 / deltaTime;
+
+        std::cout << " deltaTime = " << deltaTime << " FPS: " << 1.0 / deltaTime << std::endl;
+
 
 //        glfwSetWindowTitle(window, "Hey!");
         glfwSetWindowTitle(window, ssTitle.str().c_str());
@@ -1053,7 +1098,8 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
         sModelDrawInfo terrainModel;
         //    pMeshManager->LoadModelIntoVAO("assets/models/Simple_MeshLab_terrain_xyz_only.ply", 
     //    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Simple_MeshLab_terrain_xyz_N.ply",
-        ::g_pMeshManager->LoadModelIntoVAO("assets/models/Simple_MeshLab_terrain_xyz_N_uv.ply",
+    //    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Simple_MeshLab_terrain_xyz_N_uv.ply",
+        ::g_pMeshManager->LoadModelIntoVAO("assets/models/Simple_MeshLab_terrain_x5_xyz_N_uv.ply",
             terrainModel, program);
         std::cout << terrainModel.numberOfVertices << " vertices loaded" << std::endl;
     }
@@ -1092,12 +1138,83 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
             sphereShadowMesh, program);
         std::cout << sphereShadowMesh.numberOfVertices << " vertices loaded" << std::endl;
     }
-    
 
     {
+        sModelDrawInfo newViperModelInfo;
+        ::g_pMeshManager->LoadModelIntoVAO("assets/models/Viper_MkVII_xyz_n_uv.ply",
+            newViperModelInfo, program);
+        std::cout << newViperModelInfo.numberOfVertices << " vertices loaded" << std::endl;
+    }
+
+
+    // Add a bunch of bunny rabbits
+    float boxLimit = 100.0f;
+    float boxStep = 20.0f;
+    unsigned int ID_count = 0;
+    for (float x = -boxLimit; x <= boxLimit; x += boxStep)
+    {
+        for (float z = -(2.0f * boxLimit); z <= boxLimit; z += boxStep)
+        {
+            sMesh* pBunny = new sMesh();
+            //            pBunny->modelFileName = "assets/models/bun_zipper_res2_10x_size_xyz_only.ply";
+            //            pBunny->modelFileName = "assets/models/bun_zipper_res2_10x_size_xyz_N_only.ply";
+            pBunny->modelFileName = "assets/models/bun_zipper_res2_10x_size_xyz_N_uv.ply";
+            pBunny->positionXYZ = glm::vec3(x, 30.0f, z);
+            pBunny->uniformScale = 5.0f;
+            pBunny->objectColourRGBA
+                = glm::vec4(getRandomFloat(0.0f, 1.0f),
+                    getRandomFloat(0.0f, 1.0f),
+                    getRandomFloat(0.0f, 1.0f),
+                    1.0f);
+            // Set some transparency
+            pBunny->alphaTransparency = getRandomFloat(0.25f, 1.0f);
+            //            pBunny->alphaTransparency = 0.0f;
+            std::stringstream ssName;
+            ssName << "Bunny_" << ID_count;
+            pBunny->uniqueFriendlyName = ssName.str();
+            ID_count++;
+
+            ::g_vecMeshesToDraw.push_back(pBunny);
+        }
+    }//for (float x = -boxLimit...
+
+
+    // this is the object that the Lua script, etc. is going to handle
+    {
+        sMesh* pNewViper = new sMesh();
+        pNewViper->modelFileName = "assets/models/Viper_MkVII_xyz_n_uv.ply";
+        pNewViper->positionXYZ = glm::vec3(0.0f, 0.0f, 0.0f);
+        pNewViper->objectColourRGBA = glm::vec4(0.6f, 0.6f, 0.6f, 1.0f);
+        pNewViper->bOverrideObjectColour = true;
+        pNewViper->uniqueFriendlyName = "New_Viper_Player";
+        pNewViper->bIsVisible = true;
+        pNewViper->textures[0] = "dirty-metal-texture_1048-4784.bmp";
+        pNewViper->blendRatio[0] = 1.0f;
+
+        ::g_vecMeshesToDraw.push_back(pNewViper);
+
+        // Add a associated physics object to have the phsyics "move" this
+        cPhysics::sPhysInfo* pViperPhysObject = new  cPhysics::sPhysInfo();
+        pViperPhysObject->bDoesntMove = false;
+        pViperPhysObject->position = pNewViper->positionXYZ;
+        pViperPhysObject->velocity = glm::vec3(0.0f);
+        pViperPhysObject->pAssociatedDrawingMeshInstance = pNewViper;
+        g_pPhysicEngine->vecGeneralPhysicsObjects.push_back(pViperPhysObject);
+    }
+
+    // Place a bunny somewhere else in the scene
+    sMesh* pBunny_15 = pFindMeshByFriendlyName("Bunny_15");
+    if (pBunny_15)
+    {
+        pBunny_15->positionXYZ = glm::vec3(-50.0f, -5.0f, 30.0f);
+    }
+
+
+        
+   {
         sMesh* pGalactica = new sMesh();
         pGalactica->modelFileName = "assets/models/Battlestar_Galactica_Res_0_(444,087 faces)_xyz_n_uv (facing +z, up +y).ply";
-        pGalactica->positionXYZ = glm::vec3(0.0f, 0.0f, 0.0f);
+        pGalactica->positionXYZ = glm::vec3(-10000.0f, 0.0f, 0.0f);
         //       pGalactica->rotationEulerXYZ.y = -90.0f;
         pGalactica->objectColourRGBA = glm::vec4(0.6f, 0.6f, 0.6f, 1.0f);
         //pGalactica->bIsWireframe = true;
@@ -1140,11 +1257,11 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
             "assets/models/Battlestar_Galactica_Res_0_(444,087 faces)_xyz_n_uv (facing +z, up +y).ply",
             1000.0f);
 
-    }
-    {
+
         sMesh* pGalacticaWireframe = new sMesh();
         pGalacticaWireframe->modelFileName = "assets/models/Battlestar_Galactica_Res_0_(444,087 faces)_xyz_n_uv (facing +z, up +y).ply";
         pGalacticaWireframe->objectColourRGBA = glm::vec4(0.0f, 0.0f, 0.5f, 1.0f);
+        pGalacticaWireframe->positionXYZ = pGalactica->positionXYZ;
         pGalacticaWireframe->bIsWireframe = true;
         pGalacticaWireframe->bOverrideObjectColour = true;
         pGalacticaWireframe->bDoNotLight = true;
@@ -1154,43 +1271,18 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
 
 
 
-    // Add a bunch of bunny rabbits
-    float boxLimit = 100.0f;
-    float boxStep = 20.0f;
-    for (float x = -boxLimit; x <= boxLimit; x += boxStep)
-    {
-        for (float z = -(2.0f * boxLimit); z <= boxLimit; z += boxStep)
-        {
-            sMesh* pBunny = new sMesh();
-//            pBunny->modelFileName = "assets/models/bun_zipper_res2_10x_size_xyz_only.ply";
-//            pBunny->modelFileName = "assets/models/bun_zipper_res2_10x_size_xyz_N_only.ply";
-            pBunny->modelFileName = "assets/models/bun_zipper_res2_10x_size_xyz_N_uv.ply";
-            pBunny->positionXYZ = glm::vec3(x, 0.0f, z);
-            pBunny->uniformScale = 5.0f;
-            pBunny->objectColourRGBA 
-                = glm::vec4(getRandomFloat(0.0f, 1.0f),
-                            getRandomFloat(0.0f, 1.0f),
-                            getRandomFloat(0.0f, 1.0f), 
-                            1.0f );
-            // Set some transparency
-            pBunny->alphaTransparency = getRandomFloat(0.25f, 1.0f);
-//            pBunny->alphaTransparency = 0.0f;
-
-            ::g_vecMeshesToDraw.push_back(pBunny);
-        }
-    }//for (float x = -boxLimit...
 
 
 
     {
-//    ____                _            __                   _     
-//   |  _ \ ___ _ __   __| | ___ _ __ / / __ ___   ___  ___| |__  
-//   | |_) / _ \ '_ \ / _` |/ _ \ '__/ / '_ ` _ \ / _ \/ __| '_ \ 
-//   |  _ <  __/ | | | (_| |  __/ | / /| | | | | |  __/\__ \ | | |
-//   |_| \_\___|_| |_|\__,_|\___|_|/_/ |_| |_| |_|\___||___/_| |_|
-//                                                                
+        //    ____                _            __                   _     
+        //   |  _ \ ___ _ __   __| | ___ _ __ / / __ ___   ___  ___| |__  
+        //   | |_) / _ \ '_ \ / _` |/ _ \ '__/ / '_ ` _ \ / _ \/ __| '_ \ 
+        //   |  _ <  __/ | | | (_| |  __/ | / /| | | | | |  __/\__ \ | | |
+        //   |_| \_\___|_| |_|\__,_|\___|_|/_/ |_| |_| |_|\___||___/_| |_|
+        //                                                                
         sMesh* pWarehouse = new sMesh();
-//        pWarehouse->modelFileName = "assets/models/Warehouse_xyz_n.ply";
+        //        pWarehouse->modelFileName = "assets/models/Warehouse_xyz_n.ply";
         pWarehouse->modelFileName = "assets/models/Warehouse_xyz_n_uv.ply";
         pWarehouse->positionXYZ = glm::vec3(-200.0f, 5.0f, 0.0f);
         pWarehouse->rotationEulerXYZ.y = -90.0f;
@@ -1201,23 +1293,36 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
         //
         pWarehouse->textures[0] = "bad_bunny_1920x1080.bmp";
 
-         ::g_vecMeshesToDraw.push_back(pWarehouse);
+        ::g_vecMeshesToDraw.push_back(pWarehouse);
 
-//    ____  _               _                  _     _           _   
-//   |  _ \| |__  _   _ ___(_) ___ ___    ___ | |__ (_) ___  ___| |_ 
-//   | |_) | '_ \| | | / __| |/ __/ __|  / _ \| '_ \| |/ _ \/ __| __|
-//   |  __/| | | | |_| \__ \ | (__\__ \ | (_) | |_) | |  __/ (__| |_ 
-//   |_|   |_| |_|\__, |___/_|\___|___/  \___/|_.__// |\___|\___|\__|
-//                |___/                           |__/               
-         ::g_pPhysicEngine->addTriangleMesh(
-             "assets/models/Warehouse_xyz_n_uv.ply",
-             pWarehouse->positionXYZ,
-             pWarehouse->rotationEulerXYZ,
-             pWarehouse->uniformScale);
+        //    ____  _               _                  _     _           _   
+        //   |  _ \| |__  _   _ ___(_) ___ ___    ___ | |__ (_) ___  ___| |_ 
+        //   | |_) | '_ \| | | / __| |/ __/ __|  / _ \| '_ \| |/ _ \/ __| __|
+        //   |  __/| | | | |_| \__ \ | (__\__ \ | (_) | |_) | |  __/ (__| |_ 
+        //   |_|   |_| |_|\__, |___/_|\___|___/  \___/|_.__// |\___|\___|\__|
+        //                |___/                           |__/               
+        ::g_pPhysicEngine->addTriangleMesh(
+            "assets/models/Warehouse_xyz_n_uv.ply",
+            pWarehouse->positionXYZ,
+            pWarehouse->rotationEulerXYZ,
+            pWarehouse->uniformScale);
 
     }
 
     {
+        sMesh* pTerrain = new sMesh();
+        pTerrain->modelFileName = "assets/models/Simple_MeshLab_terrain_x5_xyz_N_uv.ply";
+        pTerrain->positionXYZ = glm::vec3(0.0f, -150.0f, 0.0f);
+        pTerrain->uniqueFriendlyName = "Terrain";
+        pTerrain->rotationEulerXYZ.y = 90.0f;
+        pTerrain->textures[0] = "Grey_Brick_Wall_Texture.bmp";
+        pTerrain->blendRatio[0] = 1.0f;
+        ::g_vecMeshesToDraw.push_back(pTerrain);
+    }
+        
+    {
+
+
         sMesh* pFlatPlane = new sMesh();
         pFlatPlane->modelFileName = "assets/models/Flat_Plane_xyz_N_uv.ply";
         pFlatPlane->positionXYZ = glm::vec3(0.0f, -5.5f, 0.0f);
@@ -1235,6 +1340,7 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
         pFlatPlane->blendRatio[0] = 0.0f;
         pFlatPlane->blendRatio[1] = 1.0f;
 
+        pFlatPlane->bIsVisible = false;
 
         //
         //        pFlatPlane->bIsWireframe = true;

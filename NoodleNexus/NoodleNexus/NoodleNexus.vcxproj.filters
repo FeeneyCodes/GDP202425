@@ -137,6 +137,9 @@
     <ClCompile Include="cPhysics_BroadPhase.cpp">
       <Filter>Phsyics_Stuff</Filter>
     </ClCompile>
+    <ClCompile Include="cLowPassFilter.cpp">
+      <Filter>Phsyics_Stuff</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PlyFileLoaders.h">
@@ -216,6 +219,9 @@
     </ClInclude>
     <ClInclude Include="iMessaging.h">
       <Filter>TankGameFiles\Mediator</Filter>
+    </ClInclude>
+    <ClInclude Include="cLowPassFilter.h">
+      <Filter>Phsyics_Stuff</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

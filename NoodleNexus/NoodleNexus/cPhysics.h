@@ -173,10 +173,17 @@ public:
 	// struct sCapsule
 	// etc.
 
-
+	// The objects that are handled by the integration step, etc.
 	std::vector<sSphere*> vecSpheres;
 	std::vector<sAABB*> vecAABBs;
 	std::vector< sTriangleMesh*> vecMeshes;
+	// This is anything else that is using the integration step
+	// ...but DON'T have collision detection
+	std::vector< sPhysInfo* > vecGeneralPhysicsObjects;
+
+	// This is used to find a particular mesh that's connected to this phsyics object
+	// Reutrns NULL if not found
+	sPhysInfo* pFindAssociateMeshByFriendlyName(std::string friendlyName);
 
 
 	// Looks up the mesh information from the VAO manager

@@ -55,6 +55,10 @@ uniform sampler2D texture03;
 uniform vec4 texRatio_0_to_3;	// x index 0, y index 1, etc/
 //uniform float texRatio[4];
 uniform bool bUseTextureAsColour;	// If true, then sample the texture
+
+// Skybox (or reflection, refraction, etc.)
+uniform samplerCube skyBoxTextureSampler;
+uniform bool bIsSkyBoxObject;
 //
 
 // For discard stencil example
@@ -65,8 +69,6 @@ uniform bool bUseStencilTexture;
 //uniform sampler2DArray textures[3]
 
 
-// Later...
-uniform samplerCube mySkyBox;
 
 void main()
 {
@@ -82,6 +84,21 @@ void main()
 			discard;	// don't draw this pixel
 		}
 	}
+
+
+	// For the skybox object
+	if ( bIsSkyBoxObject )
+	{
+		//finalPixelColour.rgb = fvertexNormal.xyz;
+		//uniform samplerCube skyBoxTextureSampler;
+		// Note: We are passing the NORMALS (a ray to hit the inside
+		// 	of the cube) and NOT the texture coordinates
+		finalPixelColour.rgb = texture( skyBoxTextureSampler, fvertexNormal.xyz ).rgb;
+		finalPixelColour.a = 1.0f;
+		return;
+	}
+	
+	
 
 
 
@@ -144,7 +161,7 @@ void main()
 	finalPixelColour.a = wholeObjectTransparencyAlpha;	
 	
 	// Use the 4th value (alpha) as the transparency
-	finalPixelColour.a = 1.0f - texture( texture03, fUV.st ).r;
+//	finalPixelColour.a = 1.0f - texture( texture03, fUV.st ).r;
 
 //	finalPixelColour.a = 1.0f;		
 //	finalPixelColour.a = 0.9f;		

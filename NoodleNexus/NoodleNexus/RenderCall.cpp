@@ -128,8 +128,8 @@ void DrawMesh(sMesh* pCurMesh, GLuint program)
         glUniform1f(bUseStencilTexture_UL, (GLfloat)GL_FALSE);
     }
 
-    glCullFace(GL_BACK);
-    glEnable(GL_CULL_FACE);
+    //glCullFace(GL_BACK);
+    //glEnable(GL_CULL_FACE);
 
     // Use lighting or not
     // uniform bool bDoNotLight;	

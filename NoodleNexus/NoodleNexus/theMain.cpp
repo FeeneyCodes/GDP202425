@@ -150,9 +150,12 @@ int main(void)
     if (!glfwInit())
         exit(EXIT_FAILURE);
 
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+//    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+//    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+//    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+//    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
+//    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    //glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
 
     GLFWwindow* window = glfwCreateWindow(640, 480, "OpenGL Triangle", NULL, NULL);
     if (!window)
@@ -287,6 +290,53 @@ int main(void)
     //
     ::g_pTextures->Create2DTextureFromBMPFile("SurprisedChildFace.bmp");
 
+    // Load the space skybox
+    std::string errorString;
+    ::g_pTextures->SetBasePath("assets/textures/CubeMaps");
+    if (::g_pTextures->CreateCubeTextureFromBMPFiles("Space",
+        "SpaceBox_right1_posX.bmp", 
+        "SpaceBox_left2_negX.bmp",
+        "SpaceBox_top3_posY.bmp", 
+        "SpaceBox_bottom4_negY.bmp",
+        "SpaceBox_front5_posZ.bmp", 
+        "SpaceBox_back6_negZ.bmp", true, errorString))
+    {
+        std::cout << "Loaded space skybox" << std::endl;
+    }
+    else
+    {
+        std::cout << "ERROR: Didn't load space skybox because: " << errorString << std::endl;
+    }
+        
+    //std::cout << "glTexStorage2D():" << glTexStorage2D << std::endl;
+    //std::cout << "glCompileShader():" << glCompileShader << std::endl;
+
+    //FARPROC glTexStorage2DProc = GetProcAddress(GetModuleHandle(TEXT("kernel32.dll")), "glTexStorage2D");
+    //std::cout << "glCompileShader():" << glTexStorage2DProc << std::endl;
+    //FARPROC glCompileShaderProc = GetProcAddress(GetModuleHandle(TEXT("kernel32.dll")), "glCompileShader");
+    //std::cout << "glCompileShader():" << glCompileShaderProc << std::endl;
+
+    // Load the sunny day cube map
+    if (::g_pTextures->CreateCubeTextureFromBMPFiles("SunnyDay",
+        "TropicalSunnyDayLeft2048.bmp",
+        "TropicalSunnyDayRight2048.bmp",
+        "TropicalSunnyDayUp2048.bmp",
+        "TropicalSunnyDayDown2048.bmp",
+        "TropicalSunnyDayFront2048.bmp",
+        "TropicalSunnyDayBack2048.bmp",
+        true, errorString))
+    {
+        std::cout << "Loaded space SunnyDay" << std::endl;
+    }
+    else
+    {
+        std::cout << "ERROR: Didn't load space SunnyDay because: " << errorString << std::endl;
+    }
+        
+        
+        
+        
+
 
     //glGet with argument GL_ACTIVE_TEXTURE, or GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS.
     // 
@@ -322,6 +372,10 @@ int main(void)
 
     cLightHelper TheLightHelper;
 
+    // Is the default (cull back facing polygons)
+    glCullFace(GL_BACK);
+    glEnable(GL_CULL_FACE);
+
     while (!glfwWindowShouldClose(window))
     {
         float ratio;
@@ -337,7 +391,7 @@ int main(void)
         matProjection = glm::perspective(0.6f,           // FOV
             ratio,          // Aspect ratio of screen
             0.1f,           // Near plane (as far from the camera as possible)
-            1000.0f);       // Far plane (as near to the camera as possible)
+            1'000.0f);       // Far plane (as near to the camera as possible)
 // For a "far" view of the large Galactica
 //            1'000.1f,           // Near plane (as far from the camera as possible)
 //            1'000'000.0f);       // Far plane (as near to the camera as possible)
@@ -383,6 +437,61 @@ int main(void)
         double deltaTime = frameTimeFilter.getAverage();
 
 
+        // **************************************************************
+// Sky box
+// Move the sky sphere with the camera
+        sMesh* pSkySphere = pFindMeshByFriendlyName("SkySphere");
+        pSkySphere->positionXYZ = ::g_pFlyCamera->getEyeLocation();
+
+        // Disable backface culling (so BOTH sides are drawn)
+        glDisable(GL_CULL_FACE);
+        // Don't perform depth buffer testing
+        glDisable(GL_DEPTH_TEST);
+        // Don't write to the depth buffer when drawing to colour (back) buffer
+//        glDepthMask(GL_FALSE);
+//        glDepthFunc(GL_ALWAYS);// or GL_LESS (default)
+        // GL_DEPTH_TEST : do or not do the test against what's already on the depth buffer
+
+        pSkySphere->bIsVisible = true;
+        //        pSkySphere->bDoNotLight = true;
+
+        pSkySphere->uniformScale = 1.0f;
+
+        // Tell the shader this is the skybox, so use the cube map
+        // uniform samplerCube skyBoxTexture;
+        // uniform bool bIsSkyBoxObject;
+        GLuint bIsSkyBoxObject_UL = glGetUniformLocation(program, "bIsSkyBoxObject");
+        glUniform1f(bIsSkyBoxObject_UL, (GLfloat)GL_TRUE);
+        
+        // Set the cube map texture, just like we do with the 2D
+//        GLuint cubeSamplerID = ::g_pTextures->getTextureIDFromName("Space");
+        GLuint cubeSamplerID = ::g_pTextures->getTextureIDFromName("SunnyDay");
+        // Make sure this is an unused texture unit
+        glActiveTexture(GL_TEXTURE0 + 40);
+        // *****************************************
+        // NOTE: This is a CUBE_MAP, not a 2D
+        glBindTexture(GL_TEXTURE_CUBE_MAP, cubeSamplerID);
+//        glBindTexture(GL_TEXTURE_2D, cubeSamplerID);
+        // *****************************************
+        GLint skyBoxTextureSampler_UL = glGetUniformLocation(program, "skyBoxTextureSampler");
+        glUniform1i(skyBoxTextureSampler_UL, 40);       // <-- Note we use the NUMBER, not the GL_TEXTURE3 here
+
+
+        DrawMesh(pSkySphere, program);
+
+        pSkySphere->bIsVisible = false;
+
+        glUniform1f(bIsSkyBoxObject_UL, (GLfloat)GL_FALSE);
+
+        glEnable(GL_CULL_FACE);
+        // Enable depth test and write to depth buffer (normal rendering)
+        glEnable(GL_DEPTH_TEST);
+        //        glDepthMask(GL_FALSE);
+        //        glDepthFunc(GL_LESS);
+                // **************************************************************
+
+
+
 
         //        // *******************************************************************
         //        // Place light #0 where the little yellow "light sphere" is
@@ -406,14 +515,26 @@ int main(void)
         for (unsigned int meshIndex = 0; meshIndex != ::g_vecMeshesToDraw.size(); meshIndex++)
         {
             //            sMesh* pCurMesh = ::g_myMeshes[meshIndex];
-            sMesh* pCurMesh = ::g_vecMeshesToDraw[meshIndex];
-
+           sMesh* pCurMesh = ::g_vecMeshesToDraw[meshIndex];
+//            pCurMesh->bDoNotLight = true;
             DrawMesh(pCurMesh, program);
 
         }//for (unsigned int meshIndex..
         // *******************************************************************
 
 
+
+
+
+
+        //// OH NO! 
+        //for (sMesh* pCurMesh : g_vecMeshesToDraw)
+        //{
+        //    pCurMesh->positionXYZ.z += 1000.0f;
+        //}
+        //glm::vec3 theEye = ::g_pFlyCamera->getEyeLocation();
+        //theEye.z += 1000.0f;
+        //g_pFlyCamera->setEyeLocation(theEye);
 
 
         // Draw the LASER beam
@@ -732,6 +853,7 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
         //    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Sphere_radius_1_xyz.ply",
         //::g_pMeshManager->LoadModelIntoVAO("assets/models/Sphere_radius_1_xyz_N.ply",
         ::g_pMeshManager->LoadModelIntoVAO("assets/models/Sphere_radius_1_xyz_N_uv.ply",
+
             sphereMesh, program);
         std::cout << sphereMesh.numberOfVertices << " vertices loaded" << std::endl;
     }
@@ -875,8 +997,20 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
         ::g_vecMeshesToDraw.push_back(pGalacticaWireframe);
     }
 
-
-
+   {
+       sMesh* pSkySphere = new sMesh();
+       pSkySphere->modelFileName = "assets/models/Sphere_radius_1_xyz_N_uv.ply";
+       pSkySphere->positionXYZ = glm::vec3(0.0f, 0.0f, 0.0f);
+       pSkySphere->objectColourRGBA = glm::vec4(0.6f, 0.6f, 0.6f, 1.0f);
+//       pSkySphere->bIsWireframe = true;
+       pSkySphere->bOverrideObjectColour = true;
+       pSkySphere->uniformScale = 25.0f;
+       pSkySphere->uniqueFriendlyName = "SkySphere";
+       pSkySphere->textures[0] = "bad_bunny_1920x1080.bmp";
+       pSkySphere->blendRatio[0] = 1.0f;
+       pSkySphere->bIsVisible = false;
+       ::g_vecMeshesToDraw.push_back(pSkySphere);
+   }
 
 
 
@@ -924,8 +1058,6 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
         pTerrain->textures[0] = "Grey_Brick_Wall_Texture.bmp";
         pTerrain->blendRatio[0] = 1.0f;
         //
-        pTerrain->textures[3] = "bad_bunny_1920x1080_24bit_black_and_white.bmp";
-        pTerrain->blendRatio[0] = 0.0f;
 
         ::g_vecMeshesToDraw.push_back(pTerrain);
     }

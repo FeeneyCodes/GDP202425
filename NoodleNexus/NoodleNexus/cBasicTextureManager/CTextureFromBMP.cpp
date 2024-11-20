@@ -225,11 +225,17 @@ bool CTextureFromBMP::CreateNewCubeTextureFromBMPFiles( std::string cubeMapName,
 	// Assume all the images are the same size. If not, then it will screw up
 	if ( this->LoadBMP2( posX_fileName ) )
 	{
+
 		glTexStorage2D( GL_TEXTURE_CUBE_MAP, 
-		            10, // Mipmap levels
+		            5, // Mipmap levels
 					GL_RGBA8,	// Internal format
 					this->m_numberOfColumns,	// width (pixels)
 					this->m_numberOfRows );		// height (pixels)
+		//glTextureStorage2D( GL_TEXTURE_CUBE_MAP,
+		//            5, // Mipmap levels
+		//			GL_RGBA8,	// Internal format
+		//			this->m_numberOfColumns,	// width (pixels)
+		//			this->m_numberOfRows );		// height (pixels)
 
 		if ( this->bWasThereAnOpenGLError(errorEnum, errorString,  errorDetails) ) { return false; }
 	}

@@ -145,142 +145,6 @@ int main(void)
     AABBOctTree();
 
 
-    //    ConsoleStuff();
-    //
-        // On the stack, at compile time.
-        // Limited by the size of the stack.
-        // Also: Can't change the size.
-    //    sVertex vertices[3] =
-    //    {
-    //        { { -0.6f, -0.4f }, { 1.0f, 0.0f, 0.0f } },
-    //        { {  0.6f, -0.4f }, { 0.0f, 1.0f, 0.0f } },
-    //       { {  0.0f,  0.6f }, { 0.0f, 0.0f, 1.0f } }
-    //  };
-    //
-    //    sizeof(sVertex) * 3;
-    ////    std::cout << "vertices: " << vertices << '\n';
-    //    std::cout << (*(vertices + 1)).
-    //
-        // On the HEAP, so dynamically allocated at run time
-    //    sVertex* pVertices = new sVertex[3];
-    //
-    //    pVertices[0] = { { -0.6f, -0.4f }, { 1.0f, 0.0f, 0.0f } };
-    //    pVertices[1] = { {  0.6f, -0.4f }, { 0.0f, 1.0f, 0.0f } };
-    //    pVertices[2] = { {  0.0f,  0.6f }, { 0.0f, 0.0f, 1.0f } };
-    //
-        //s3DFileData plyFileInfoBunny;
-        //plyFileInfoBunny.fileName = "assets/models/bun_zipper_res3.ply";
-        //ReadPlyModelFromFile_xyz_ci(plyFileInfoBunny);
-    //
-        //s3DFileData plyFileInfo;
-        //plyFileInfo.fileName = "assets/models/VintageRacingCar_xyz_only.ply";
-        //ReadPlyModelFromFile_xyz(plyFileInfo);
-    //
-        //s3DFileData plyFileInfo;
-        //plyFileInfo.fileName = "assets/models/Dragon 2.5Edited_xyz_only.ply";
-        //ReadPlyModelFromFile_xyz(plyFileInfo);
-    //
-    // ******************************************************
-    //
-    //    // This is the array we are giving the GPU 
-    ////    unsigned int numberOfVertices_TO_DRAW = numberOfTriangles * 3;
-    //    unsigned int numberOfVertices_TO_DRAW = plyFileInfo.numberOfTriangles * 3;
-    //    // Each triangle has 3 vertices
-    //
-    //    sVertex* pVertices = new sVertex[numberOfVertices_TO_DRAW];
-    //
-    //    // Copy the data form the "ply" (i.e. file) arrays
-    //    // to the format that the GPU expects
-    ////     struct sPlyVertex
-    ////    {
-    ////        float x, y, z, confidence, intensity;
-    ////    };
-    ////
-    ////    struct sTriangle
-    ////    {
-    ////        unsigned int vertIndex_0;
-    ////        unsigned int vertIndex_1;
-    ////        unsigned int vertIndex_2;
-    ////    };
-    ////
-    ////  to... 
-    //// 
-    ////    struct sVertex
-    ////    {
-    ////        glm::vec2 pos;      // position   or "float x, y"
-    ////        glm::vec3 col;      //
-    //
-    //    unsigned int vertexIndex = 0;
-    //
-    ////    for (unsigned int triIndex = 0; triIndex != numberOfTriangles; triIndex++)
-    //    for (unsigned int triIndex = 0; triIndex != plyFileInfo.numberOfTriangles; triIndex++)
-    //    {
-    ////        { { -0.6f, -0.4f }, { 1.0f, 0.0f, 0.0f } },
-    ////        { {  0.6f, -0.4f }, { 0.0f, 1.0f, 0.0f } },
-    ////        { {  0.0f,  0.6f }, { 0.0f, 0.0f, 1.0f } }
-    //
-    ////        pVertices[vertexIndex + 0].pos.x = pPlyVertices[ pPlyTriangles[triIndex].vertIndex_0 ].x;
-    //        pVertices[vertexIndex + 0].pos.x = plyFileInfo.pPlyVertices[plyFileInfo.pPlyTriangles[triIndex].vertIndex_0 ].x;
-    //        pVertices[vertexIndex + 0].pos.y = plyFileInfo.pPlyVertices[plyFileInfo.pPlyTriangles[triIndex].vertIndex_0 ].y;
-    //        pVertices[vertexIndex + 0].pos.z = plyFileInfo.pPlyVertices[plyFileInfo.pPlyTriangles[triIndex].vertIndex_0 ].z;
-    //        pVertices[vertexIndex + 0].col.r = 1.0f;
-    //        pVertices[vertexIndex + 0].col.g = 1.0f;
-    //        pVertices[vertexIndex + 0].col.b = 1.0f;
-    //
-    //        pVertices[vertexIndex + 1].pos.x = plyFileInfo.pPlyVertices[plyFileInfo.pPlyTriangles[triIndex].vertIndex_1 ].x;
-    //        pVertices[vertexIndex + 1].pos.y = plyFileInfo.pPlyVertices[plyFileInfo.pPlyTriangles[triIndex].vertIndex_1 ].y;
-    //        pVertices[vertexIndex + 1].pos.z = plyFileInfo.pPlyVertices[plyFileInfo.pPlyTriangles[triIndex].vertIndex_1 ].z;
-    //        pVertices[vertexIndex + 1].col.r = 1.0f;
-    //        pVertices[vertexIndex + 1].col.g = 1.0f;
-    //        pVertices[vertexIndex + 1].col.b = 1.0f;
-    //
-    //        pVertices[vertexIndex + 2].pos.x = plyFileInfo.pPlyVertices[plyFileInfo.pPlyTriangles[triIndex].vertIndex_2 ].x;
-    //        pVertices[vertexIndex + 2].pos.y = plyFileInfo.pPlyVertices[plyFileInfo.pPlyTriangles[triIndex].vertIndex_2 ].y;
-    //        pVertices[vertexIndex + 2].pos.z = plyFileInfo.pPlyVertices[plyFileInfo.pPlyTriangles[triIndex].vertIndex_2 ].z;
-    //        pVertices[vertexIndex + 2].col.r = 1.0f;
-    //        pVertices[vertexIndex + 2].col.g = 1.0f;
-    //        pVertices[vertexIndex + 2].col.b = 1.0f;
-    //
-    //        vertexIndex += 3;
-    //    }
-    //
-    //
-    //    // Scale the dragon
-    ////    for (unsigned int index = 0; index != numberOfVertices_TO_DRAW; index++)
-    ////    {
-    ////        pVertices[index].pos.x *= 0.01f;
-    ////        pVertices[index].pos.y *= 0.01f;
-    ////        pVertices[index].pos.z *= 0.01f;
-    ////    }
-    //
-    ////    for (unsigned int index = 0; index != numberOfVertices_TO_DRAW; index++)
-    ////    {
-    ////        pVertices[index].pos.x += 1.0f;
-    ////    }
-    //
-//
-//    cPhysics testPhys;
-//
-//    cPhysics::sLine theLine;
-//    // Line goes left to right on x axis
-//    theLine.startXYZ = glm::vec3(+5.0f, 0.0f, -20.0f);
-//    theLine.endXYZ = glm::vec3(+5.0f, 0.0f, -20.0f);
-//
-//    cPhysics::sTriangle theTriangle;
-//    // Triangle intersects x axis
-//    theTriangle.vertices[0] = glm::vec3(0.0f, 10.0f, 0.0f);
-//    theTriangle.vertices[1] = glm::vec3(0.0f, -10.0f, -10.0f);
-//    theTriangle.vertices[2] = glm::vec3(0.0f, -10.0f, 10.0f);
-//
-//    if (testPhys.bLineSegment_TriangleCollision(theLine, theTriangle))
-//    {
-//        std::cout << "itersected" << std::endl;
-//    }
-//    else
-//    {
-//        std::cout << "missed" << std::endl;
-//    }
-
     glfwSetErrorCallback(error_callback);
 
     if (!glfwInit())
@@ -313,21 +177,6 @@ int main(void)
     gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
     glfwSwapInterval(1);
 
-    // NOTE: OpenGL error checks have been omitted for brevity
-
-
-
-//    GLuint vertex_buffer;
-//    glGenBuffers(1, &vertex_buffer);
-//    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-//
-////    int size_in_bytes_of_vertex_array = sizeof(sVertex) * 3;
-//    int size_in_bytes_of_vertex_array = sizeof(sVertex) * numberOfVertices_TO_DRAW;
-//
-//    glBufferData(GL_ARRAY_BUFFER,
-//                 size_in_bytes_of_vertex_array,     // sizeof(vertices),
-//                 pVertices,                         // vertices,
-//                 GL_STATIC_DRAW);
 
     cShaderManager* pShaderManager = new cShaderManager();
 
@@ -351,61 +200,7 @@ int main(void)
 
     glUseProgram(program);
 
-//    const GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-//    glShaderSource(vertex_shader, 1, &vertex_shader_text, NULL);
-//    glCompileShader(vertex_shader);
-//
-//    const GLuint fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-//    glShaderSource(fragment_shader, 1, &fragment_shader_text, NULL);
-//    glCompileShader(fragment_shader);
-//
-//    const GLuint program = glCreateProgram();
-//    glAttachShader(program, vertex_shader);
-//    glAttachShader(program, fragment_shader);
-//    glLinkProgram(program);
-//
-//    const GLint mvp_location = glGetUniformLocation(program, "MVP");
-//
-//    const GLint vpos_location = glGetAttribLocation(program, "vPos");   
-//    const GLint vcol_location = glGetAttribLocation(program, "vCol");
-//
-//    GLuint vertex_array;
-//    glGenVertexArrays(1, &vertex_array);
-//    glBindVertexArray(vertex_array);
-//
-//
-//
-//    // Where the data specifically is.
-//    // Called the "vertex layout"
-//
-//    //glm::vec3 pos;       
-//    //glm::vec3 col;    
-////    { { -0.6f, -0.4f, 0.0f }, { 1.0f, 0.0f, 0.0f } },
-////    { {  0.6f, -0.4f, 0.0f }, { 0.0f, 1.0f, 0.0f } },
-////    { {  0.0f,  0.6f, 0.0f }, { 0.0f, 0.0f, 1.0f } }
-//
-//
-//    glEnableVertexAttribArray(vpos_location);
-//    glVertexAttribPointer(
-//        vpos_location, 
-//        3, 
-//        GL_FLOAT, 
-//        GL_FALSE,
-//        sizeof(sVertex),                        // 6 floats or 24 bytes
-//        (void*)offsetof(sVertex, pos));         // 0 bytes into the sVertex structure
-//
-//    glEnableVertexAttribArray(vcol_location);
-//    glVertexAttribPointer(
-//        vcol_location, 
-//        3, 
-//        GL_FLOAT, 
-//        GL_FALSE,
-//        sizeof(sVertex), 
-//        (void*)offsetof(sVertex, col));     // 3 floats or 12 bytes into the sVertex structure
 
-
-
-    // Loading the TYPES of models I can draw...
 
 //    cVAOManager* pMeshManager = new cVAOManager();
     ::g_pMeshManager = new cVAOManager();
@@ -420,11 +215,7 @@ int main(void)
     // This also adds physics objects to the phsyics system
     AddModelsToScene(::g_pMeshManager, program);
     
-    
-
-
-
-   
+     
     ::g_pFlyCamera = new cBasicFlyCamera();
     ::g_pFlyCamera->setEyeLocation(glm::vec3(0.0f, 5.0f, -50.0f));
     // To see the Galactica:
@@ -447,34 +238,6 @@ int main(void)
     double lastFrameTime = glfwGetTime();
 
 
-
-    // SET UP THE TANKS
-//    SetUpTankGame();
-
-//    const glm::vec3 WORLD_SIZE(1000.0f);
-//
-//    for (iTank* pCurrentTank : ::g_vecTheTanks)
-//    {
-//        pCurrentTank->setLocation(getRandom_vec3(-WORLD_SIZE, WORLD_SIZE));
-//    }
-//
-//
-//    while (true)
-//    {
-//        currentFrameTime = glfwGetTime();
-//        double deltaTime = lastFrameTime - currentFrameTime;
-//
-//        for (iTank* pCurrentTank : ::g_vecTheTanks)
-//        {
-//            pCurrentTank->UpdateTick(deltaTime);
-////            pCurrentTank->Attack();
-//        }
-//
-//        lastFrameTime = currentFrameTime;
-//
-//        Sleep(1000);
-//        std::cout << "--------------------------------------------" << std::endl;
-//    }
 
 
 
@@ -520,14 +283,10 @@ int main(void)
     ::g_pTextures->Create2DTextureFromBMPFile("shape-element-splattered-texture-stroke_1194-8223.bmp");
     ::g_pTextures->Create2DTextureFromBMPFile("Grey_Brick_Wall_Texture.bmp");
     ::g_pTextures->Create2DTextureFromBMPFile("dirty-metal-texture_1048-4784.bmp");
+    ::g_pTextures->Create2DTextureFromBMPFile("bad_bunny_1920x1080_24bit_black_and_white.bmp");
     //
     ::g_pTextures->Create2DTextureFromBMPFile("SurprisedChildFace.bmp");
 
-    // Set the texture sampler to one of the 3 textures we loaded
-    //GLuint badBunnyTexNum = ::g_pTextures->getTextureIDFromName("bad_bunny_1920x1080.bmp");
-    //GLuint badBunnyTexNum = ::g_pTextures->getTextureIDFromName("dua-lipa-promo.bmp");
-    //GLuint badBunnyTexNum = ::g_pTextures->getTextureIDFromName("Puzzle_parts.bmp");
-    //GLuint badBunnyTexNum = ::g_pTextures->getTextureIDFromName("Non-uniform concrete wall 0512-3-1024x1024.bmp");
 
     //glGet with argument GL_ACTIVE_TEXTURE, or GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS.
     // 
@@ -554,29 +313,6 @@ int main(void)
     glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_COMPONENTS, &iMaxFragmentUniformComponents);
     std::cout << "GL_MAX_FRAGMENT_UNIFORM_COMPONENTS = " << iMaxFragmentUniformComponents << std::endl;
         
-
-//    // Bund to texture unit #3 (just because. for no particular reason)
-//    glActiveTexture(GL_TEXTURE0 + 191);	
-//    glBindTexture(GL_TEXTURE_2D, badBunnyTexNum);
-//    // glBindTextureUnit( texture00Unit, texture00Number );	// OpenGL 4.5+ only
-//
-//    //uniform sampler2D texture01;
-//    GLint texture01_UL = glGetUniformLocation(program, "texture00");
-//    // Connects the sampler to the texture unit
-//    glUniform1i(texture01_UL, 191);       // <-- Note we use the NUMBER, not the GL_TEXTURE3 here
-
-
-
-    //GLuint badBunnyTextureID = ::g_pTextures->getTextureIDFromName("bad_bunny_1920x1080.bmp");
-    //// Texture binding...
-    //GLuint texture00Unit = 3;			// Texture unit go from 0 to 79
-    //glActiveTexture(GL_TEXTURE0 + texture00Unit);	// GL_TEXTURE0 = 33984
-    //glBindTexture(GL_TEXTURE_2D, badBunnyTextureID);
-    //// glBindTextureUnit( texture00Unit, texture00Number );	// OpenGL 4.5+ only
-    //// Set texture unit in the shader, too
-    //GLint texture01_UnLoc = glGetUniformLocation(program, "texture01");
-    //glUniform1i(texture01_UnLoc, texture00Unit);
-
 
     //  Turn on the blend operation
     glEnable(GL_BLEND);
@@ -677,34 +413,6 @@ int main(void)
         }//for (unsigned int meshIndex..
         // *******************************************************************
 
-//       sMesh* pTheGround = pFindMeshByFriendlyName("Ground");
-//       if (pTheGround)
-//       {
-//           pTheGround->blendRatio[0] += 0.001f;
-//           pTheGround->blendRatio[1] = 1.0f - pTheGround->blendRatio[0];
-//       }
-
-
-//        // Draw all the tanks
-//        for (iTank* pCurrentTank : ::g_vecTheTanks)
-//        {
-//            pCurrentTank->UpdateTick(deltaTime);
-//
-//            if (::g_pTankModel == NULL)
-//            {
-//                ::g_pTankModel = new sMesh();
-//                ::g_pTankModel->modelFileName = "assets/models/Low_Poly_Tank_Model_3D_model_xyz_n_uv.ply";
-//                ::g_pTankModel->bIsVisible = true;
-//                ::g_pTankModel->bOverrideObjectColour = true;
-//                ::g_pTankModel->objectColourRGBA = glm::vec4(2.0f / 256.0f, 480.0f / 256.0f, 32.0f / 256.0f, 1.0f);
-//                //::g_pTankModel->bDoNotLight = true;
-//                //::g_pTankModel->uniformScale = 10.0f;
-//            }
-//
-//            ::g_pTankModel->positionXYZ = pCurrentTank->getLocation();
-//
-//            DrawMesh(::g_pTankModel, program);
-//        }
 
 
 
@@ -832,19 +540,7 @@ int main(void)
         }
         // **********************************************************************************
 
-        //for (float x = -50.0f; x < 50.0f; x += 5.0f)
-        //{
-        //    for (float y = 0.0f; y < 50.0f; y += 5.0f)
-        //    {
-        //        for (float z = -50.0f; z < 50.0f; z += 5.0f)
-        //        {
-        //            DrawDebugSphere(glm::vec3(x, y, z),
-        //                glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
-        //                1.0f, program);
 
-        //        }
-        //    }
-        //}
 
 
 
@@ -947,7 +643,7 @@ int main(void)
         ssTitle << " deltaTime = " << deltaTime
             << " FPS: " << 1.0 / deltaTime;
 
-        std::cout << " deltaTime = " << deltaTime << " FPS: " << 1.0 / deltaTime << std::endl;
+ //       std::cout << " deltaTime = " << deltaTime << " FPS: " << 1.0 / deltaTime << std::endl;
 
 
 //        glfwSetWindowTitle(window, "Hey!");
@@ -1227,6 +923,10 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
         pTerrain->rotationEulerXYZ.y = 90.0f;
         pTerrain->textures[0] = "Grey_Brick_Wall_Texture.bmp";
         pTerrain->blendRatio[0] = 1.0f;
+        //
+        pTerrain->textures[3] = "bad_bunny_1920x1080_24bit_black_and_white.bmp";
+        pTerrain->blendRatio[0] = 0.0f;
+
         ::g_vecMeshesToDraw.push_back(pTerrain);
     }
         

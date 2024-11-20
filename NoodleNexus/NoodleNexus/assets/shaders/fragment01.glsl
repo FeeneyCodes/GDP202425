@@ -13,7 +13,8 @@ uniform bool bDoNotLight;			// if true, skips lighting
 // Controls the alpha channel
 uniform float wholeObjectTransparencyAlpha;
 
-out vec4 finalPixelColour;
+// Written to the framebuffer (backbuffer)
+out vec4 finalPixelColour;	// RGB_A
 
 const int POINT_LIGHT_TYPE = 0;
 const int SPOT_LIGHT_TYPE = 1;
@@ -54,6 +55,7 @@ uniform sampler2D texture03;
 uniform vec4 texRatio_0_to_3;	// x index 0, y index 1, etc/
 //uniform float texRatio[4];
 uniform bool bUseTextureAsColour;	// If true, then sample the texture
+//
 
 // For discard stencil example
 uniform sampler2D stencilTexture;
@@ -140,6 +142,10 @@ void main()
 	finalPixelColour = pixelColour;
 	// Set the alpha channel
 	finalPixelColour.a = wholeObjectTransparencyAlpha;	
+	
+	// Use the 4th value (alpha) as the transparency
+	finalPixelColour.a = 1.0f - texture( texture03, fUV.st ).r;
+
 //	finalPixelColour.a = 1.0f;		
 //	finalPixelColour.a = 0.9f;		
 

@@ -12,4 +12,4 @@ glm::vec3 g_rgb_from_HTML(unsigned int red, unsigned int green, unsigned int blu
 }
 
 // HACK: Show "targeting LASER"
-bool g_bShowLASERBeam = false;
+bool g_bShowLASERBeam = true;

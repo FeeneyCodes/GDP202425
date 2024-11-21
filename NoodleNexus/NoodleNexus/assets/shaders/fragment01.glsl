@@ -160,17 +160,17 @@ void main()
 	// Set the alpha channel
 	finalPixelColour.a = wholeObjectTransparencyAlpha;	
 	
-	// Reflection:
-	vec3 eyeToVertexRay = normalize(eyeLocation.xyz - fvertexWorldLocation.xyz);
-	
-	vec3 reflectRay = reflect(eyeToVertexRay, fvertexNormal.xyz);	
-	vec3 refractRay = refract(eyeToVertexRay, fvertexNormal.xyz, 1.2f);
-	
-	vec3 reflectColour = texture( skyBoxTextureSampler, reflectRay.xyz ).rgb;
-	vec3 refractColour = texture( skyBoxTextureSampler, refractRay.xyz ).rgb;
-	
-	finalPixelColour.rgb += reflectColour.rgb * 0.3f
-	                       + refractColour.rgb * 0.3f;
+//	// Reflection:
+//	vec3 eyeToVertexRay = normalize(eyeLocation.xyz - fvertexWorldLocation.xyz);
+//	
+//	vec3 reflectRay = reflect(eyeToVertexRay, fvertexNormal.xyz);	
+//	vec3 refractRay = refract(eyeToVertexRay, fvertexNormal.xyz, 1.2f);
+//	
+//	vec3 reflectColour = texture( skyBoxTextureSampler, reflectRay.xyz ).rgb;
+//	vec3 refractColour = texture( skyBoxTextureSampler, refractRay.xyz ).rgb;
+//	
+//	finalPixelColour.rgb += reflectColour.rgb * 0.3f
+//	                       + refractColour.rgb * 0.3f;
 						   
 	return;
 

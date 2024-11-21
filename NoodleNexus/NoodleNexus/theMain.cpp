@@ -464,8 +464,8 @@ int main(void)
         glUniform1f(bIsSkyBoxObject_UL, (GLfloat)GL_TRUE);
         
         // Set the cube map texture, just like we do with the 2D
-//        GLuint cubeSamplerID = ::g_pTextures->getTextureIDFromName("Space");
-        GLuint cubeSamplerID = ::g_pTextures->getTextureIDFromName("SunnyDay");
+        GLuint cubeSamplerID = ::g_pTextures->getTextureIDFromName("Space");
+//        GLuint cubeSamplerID = ::g_pTextures->getTextureIDFromName("SunnyDay");
         // Make sure this is an unused texture unit
         glActiveTexture(GL_TEXTURE0 + 40);
         // *****************************************

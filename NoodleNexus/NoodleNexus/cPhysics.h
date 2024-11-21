@@ -111,6 +111,14 @@ public:
 		glm::vec3 normal;
 		// Maybe other things?
 		glm::vec3 intersectionPoint;
+		// Side lengths
+		float sideLengths[3];
+		void calculateSideLengths(void)
+		{
+			sideLengths[0] = glm::distance(this->vertices[0], this->vertices[1]);
+			sideLengths[1] = glm::distance(this->vertices[1], this->vertices[2]);
+			sideLengths[2] = glm::distance(this->vertices[2], this->vertices[0]);
+		}
 	};
 	
 	struct sTriangleMesh

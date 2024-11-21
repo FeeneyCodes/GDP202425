@@ -163,6 +163,7 @@ bool cPhysics::generateBroadPhaseGrid(std::string meshModelName, float AABBCubeS
 		curTri.vertices[1] = curVAOTri.vertices[1];
 		curTri.vertices[2] = curVAOTri.vertices[2];
 		curTri.normal = curVAOTri.normal;
+		curTri.calculateSideLengths();
 
 		// transform this into world space...
 		// (just like we do to draw it)
@@ -209,8 +210,117 @@ bool cPhysics::generateBroadPhaseGrid(std::string meshModelName, float AABBCubeS
 
 		// Adding the OG triangle
 		vec_TessellatedTriangles.push_back(curTri);
+		// At this point, this vector has only the original triangle.
+		// ...which MIGHT be small enough, but we want to make sure 
+		//	ALL of the triangle in this vector are smalle enough
+		// 
+		// For each triangle, see how big it is.
+		// If any side is "too big", then split it into 3
+		//	(add three triangles to the vector)
+		// Remove the original "too big" triangle
+		//
+		// We want to compare with SMALLER than the side, not exactly
+		//	the same size as the AABB. 
+		// i.e. we don't want a triangle that matches exactlt with an 
+		//	edge of the AABB cube
+		// Picking 3.0 in that the triangles should be smaller than 
+		//	1/3 of the length of the AABB
+		// You might want to play with this value
+		float MinAABBSizeLengthToCompare = AABBCubeSize_or_Width / 3.0f;
 
-		for (cPhysics::sTriangle curTessTriangle : vec_TessellatedTriangles)
+		bool bStillHasLargeTriangles = true;
+		unsigned int numPasses = 0;
+		unsigned int maxNumOfTessellatedTris = 0;
+		do 
+		{
+			numPasses++;
+
+			// Assume all the triangles are "small enough"
+			bStillHasLargeTriangles = false;
+
+			// A new vector of potentially smaller triangles 
+			std::vector<cPhysics::sTriangle> vec_TEMP_TessellatedTriangles;
+
+			for (cPhysics::sTriangle curTessTriangle : vec_TessellatedTriangles)
+			{
+				curTessTriangle.calculateSideLengths();
+				if (curTessTriangle.sideLengths[0] > MinAABBSizeLengthToCompare || 
+					curTessTriangle.sideLengths[1] > MinAABBSizeLengthToCompare ||
+					curTessTriangle.sideLengths[2] > MinAABBSizeLengthToCompare)
+				{
+					// At least one side is "too long" compared to the AABB.
+					bStillHasLargeTriangles = true;
+
+					// Gererate FOUR triangles that are small enough
+					cPhysics::sTriangle smallerTriangles[4];
+					// 
+//					glm::vec3 centreOfOriginalTriangle =
+//						(curTessTriangle.vertices[0] +
+//						 curTessTriangle.vertices[1] +
+//						 curTessTriangle.vertices[2]) / 3.0f;
+
+					//	A = (V0 + V1) / 2.0f
+					//	B = (V1 + V2) / 2.0f
+					//	C = (V2 + V0) / 2.0f
+					//
+					glm::vec3 vA = (curTessTriangle.vertices[0] + curTessTriangle.vertices[1]) / 2.0f;
+					glm::vec3 vB = (curTessTriangle.vertices[1] + curTessTriangle.vertices[2]) / 2.0f;
+					glm::vec3 vC = (curTessTriangle.vertices[2] + curTessTriangle.vertices[0]) / 2.0f;
+
+					//	T0: V0, A, C
+					//	T1 : A, V1, B
+					//	T2 : B, V2, C
+					//	T3 : A, B, C
+
+					smallerTriangles[0].vertices[0] = curTessTriangle.vertices[0];
+					smallerTriangles[0].vertices[1] = vA;
+					smallerTriangles[0].vertices[2] = vC;
+					smallerTriangles[0].calculateSideLengths();
+
+					smallerTriangles[1].vertices[0] = vA;
+					smallerTriangles[1].vertices[1] = curTessTriangle.vertices[1];
+					smallerTriangles[1].vertices[2] = vB;
+					smallerTriangles[1].calculateSideLengths();
+
+					smallerTriangles[2].vertices[0] = vB;
+					smallerTriangles[2].vertices[1] = curTessTriangle.vertices[2];
+					smallerTriangles[2].vertices[2] = vC;
+					smallerTriangles[2].calculateSideLengths();
+
+					smallerTriangles[3].vertices[0] = vA;
+					smallerTriangles[3].vertices[1] = vB;
+					smallerTriangles[3].vertices[2] = vC;
+					smallerTriangles[3].calculateSideLengths();
+
+					// Add these three triangles to the new tesselated list
+					vec_TEMP_TessellatedTriangles.push_back(smallerTriangles[0]);
+					vec_TEMP_TessellatedTriangles.push_back(smallerTriangles[1]);
+					vec_TEMP_TessellatedTriangles.push_back(smallerTriangles[2]);
+					vec_TEMP_TessellatedTriangles.push_back(smallerTriangles[3]);
+				}
+				else
+				{
+					// It's smalle enough, so just add it.
+					vec_TEMP_TessellatedTriangles.push_back(curTessTriangle);
+				}
+			}//for (cPhysics::sTriangle curTessTriangle
+
+			// Copy the tesselated triangles back
+			// (Effectively removes any original "too large" triangles)
+			vec_TessellatedTriangles.clear();
+			vec_TessellatedTriangles = vec_TEMP_TessellatedTriangles;
+
+			if (vec_TessellatedTriangles.size() > maxNumOfTessellatedTris)
+			{
+				maxNumOfTessellatedTris = vec_TessellatedTriangles.size();
+			}
+
+		} while (bStillHasLargeTriangles);
+
+		// All triangles are "small enough"
+
+
+		for (const cPhysics::sTriangle &curTessTriangle : vec_TessellatedTriangles)
 		{
 
 			for (unsigned int vertIndex = 0; vertIndex < 3; vertIndex++)
@@ -259,7 +369,15 @@ bool cPhysics::generateBroadPhaseGrid(std::string meshModelName, float AABBCubeS
 					// Add it to the map
 					this->map_BP_CubeGrid[vert_AABB_Index_ID] = pCube;
 				}
+
 				// Add that triangle to the AABB 
+				// 
+				// TODO: We DON'T want to add the TESSELLATED triangles
+				//       We want to add the ORIGINAL triangle information
+				// 
+				// ALSO TODO: We want to make sure we don't add this triangle multiple times
+				// (like if the tessellated triangles hit the same box over and over again)
+				// 
 				this->map_BP_CubeGrid[vert_AABB_Index_ID]->vec_pTriangles.push_back(curTri);
 
 			}//for ( unsigned int vertIndex

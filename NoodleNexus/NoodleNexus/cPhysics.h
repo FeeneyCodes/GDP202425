@@ -161,7 +161,7 @@ public:
 //	void initBroadPhaseGrid(void);
 	//
 	// Using model space (i.e. model is at origin)
-	bool generateBroadPhaseGrid(std::string meshModelName, float AABBCubeSize_or_Width);
+//	bool generateBroadPhaseGrid(std::string meshModelName, float AABBCubeSize_or_Width);
 	// TODO: Model is NOT at the origin
 	bool generateBroadPhaseGrid(std::string meshModelName, float AABBCubeSize_or_Width,
 		glm::vec3 meshWorldPosition,

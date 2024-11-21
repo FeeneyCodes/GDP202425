@@ -1,5 +1,11 @@
 #include "cPhysics.h"
 
+#include <glm/glm.hpp>
+#include <glm/vec3.hpp> // glm::vec3
+#include <glm/vec4.hpp> // glm::vec4
+#include <glm/mat4x4.hpp> // glm::mat4
+#include <glm/gtc/matrix_transform.hpp> 
+
 cPhysics::cBroad_Cube::cBroad_Cube(
 	glm::vec3 minXYZ, glm::vec3 maxXYZ,
 	float sizeOrWidth,
@@ -119,7 +125,10 @@ unsigned long long cPhysics::calcBP_GridIndex(
 }
 
 
-bool cPhysics::generateBroadPhaseGrid(std::string meshModelName, float AABBCubeSize_or_Width)
+bool cPhysics::generateBroadPhaseGrid(std::string meshModelName, float AABBCubeSize_or_Width,
+	glm::vec3 meshWorldPositionXYZ,
+	glm::vec3 meshWorldOrientationEuler,
+	float uniformScale)
 {
 	// 1. Get the mesh (triangle) information
 	// 2. For each triangle, and each vertex, 
@@ -133,6 +142,8 @@ bool cPhysics::generateBroadPhaseGrid(std::string meshModelName, float AABBCubeS
 		return false;
 	}
 
+	// These is the triangle information from the origianl model
+	// i.e. it's in Model Space (like in the file)
 	std::vector<cVAOManager::sTriangle> vecVAOTriangles;
 	if (!this->m_pVAOManager->getTriangleMeshInfo(meshModelName, vecVAOTriangles))
 	{
@@ -146,44 +157,122 @@ bool cPhysics::generateBroadPhaseGrid(std::string meshModelName, float AABBCubeS
 	{
 		cVAOManager::sTriangle curVAOTri = *itVAOTri;
 
+		// This triangle is in MODEL space, not world space
 		sTriangle curTri;
 		curTri.vertices[0] = curVAOTri.vertices[0];
 		curTri.vertices[1] = curVAOTri.vertices[1];
 		curTri.vertices[2] = curVAOTri.vertices[2];
 		curTri.normal = curVAOTri.normal;
 
-		// For each vertex, calculate the AABB index it would be in
-		unsigned long long vert0_AABB_ID =
-			this->calcBP_GridIndex(curTri.vertices[0].x, curTri.vertices[0].y, curTri.vertices[0].z, AABBCubeSize_or_Width);
-		// Store the triangle this vertex is in inside the approprirate AABB
-		// Is there already an AABB there
-		std::map< unsigned long long /*index*/, cBroad_Cube* >::iterator itAAAB_V0 = this->map_BP_CubeGrid.find(vert0_AABB_ID);
-		// There?
-		if (itAAAB_V0 == this->map_BP_CubeGrid.end())
+		// transform this into world space...
+		// (just like we do to draw it)
+
+
+		// Translation (movement, position, placement...)
+		glm::mat4 matTranslate
+			= glm::translate(glm::mat4(1.0f), meshWorldPositionXYZ);
+
+		// Rotation...
+		// Caculate 3 Euler acix matrices...
+		glm::mat4 matRotateX =
+			glm::rotate(glm::mat4(1.0f),
+				glm::radians(meshWorldOrientationEuler.x), // Angle in radians
+				glm::vec3(1.0f, 0.0, 0.0f));
+
+		glm::mat4 matRotateY =
+			glm::rotate(glm::mat4(1.0f),
+				glm::radians(meshWorldOrientationEuler.y), // Angle in radians
+				glm::vec3(0.0f, 1.0, 0.0f));
+
+		glm::mat4 matRotateZ =
+			glm::rotate(glm::mat4(1.0f),
+				glm::radians(meshWorldOrientationEuler.z), // Angle in radians
+				glm::vec3(0.0f, 0.0, 1.0f));
+
+
+		// Scale
+		glm::mat4 matScale = glm::scale(glm::mat4(1.0f),
+			glm::vec3(uniformScale, uniformScale, uniformScale));
+
+		// Calculate the final model/world matrix
+		glm::mat4 matModel = glm::mat4(1.0f);
+		matModel *= matTranslate;     // matModel = matModel * matTranslate;
+		matModel *= matRotateX;
+		matModel *= matRotateY;
+		matModel *= matRotateZ;
+		matModel *= matScale;
+
+
+		// We aren't going to compare the actucal triangles from the model.
+		// Instead we will compare a bunch of possible tessellated ones.
+		std::vector<cPhysics::sTriangle> vec_TessellatedTriangles;
+
+		// Adding the OG triangle
+		vec_TessellatedTriangles.push_back(curTri);
+
+		for (cPhysics::sTriangle curTessTriangle : vec_TessellatedTriangles)
 		{
-			// Nope, so make one
 
-			glm::vec3 minXYZ = this->calcBP_MinXYZ_FromID(vert0_AABB_ID, AABBCubeSize_or_Width);
-			glm::vec3 maxXYZ = minXYZ + glm::vec3(AABBCubeSize_or_Width);
+			for (unsigned int vertIndex = 0; vertIndex < 3; vertIndex++)
+			{
 
-			cBroad_Cube* pCube = new cBroad_Cube(minXYZ, maxXYZ, AABBCubeSize_or_Width, vert0_AABB_ID);
+				// Use this model/world matrix to transform the vertices
+				// Just like we do it in the vertex shader:
+				// 
+				// 	fvertexWorldLocation = matModel * vec4(finalVert, 1.0);
 
-			// Add it to the map
-			this->map_BP_CubeGrid[vert0_AABB_ID] = pCube;
-		}
-		// Add that triangle to the AABB 
-		this->map_BP_CubeGrid[vert0_AABB_ID]->vec_pTriangles.push_back(curTri);
+				// Comparing to the tessellated...
+				glm::vec4 vertexWorldPosition = matModel * glm::vec4(curTessTriangle.vertices[vertIndex], 1.0f);
+				// glm::vec4 vertexWorldPosition = matModel * glm::vec4(curTri.vertices[vertIndex], 1.0f);
+				// glm::vec4 vertexWorldPosition = glm::vec4(curTri.vertices[vertIndex], 1.0f);
 
-//		unsigned long long vert1_AABB_ID =
-//			this->calcBP_GridIndex(curTri.vertices[1].x, curTri.vertices[1].y, curTri.vertices[1].z, AABBCubeSize_or_Width);
-//		unsigned long long vert2_AABB_ID =
-//			this->calcBP_GridIndex(curTri.vertices[1].x, curTri.vertices[2].y, curTri.vertices[2].z, AABBCubeSize_or_Width);
+							// HACK:
+				int huzzah = 1;
+				if (vertexWorldPosition.x > 0.0f &&
+					vertexWorldPosition.y > 0.0f &&
+					vertexWorldPosition.z > 0.0f)
+				{
+					huzzah = 2;
+				}
+
+				// For each vertex, calculate the AABB index it would be in
+				unsigned long long vert_AABB_Index_ID =
+					this->calcBP_GridIndex(vertexWorldPosition.x,
+						vertexWorldPosition.y,
+						vertexWorldPosition.z,
+						AABBCubeSize_or_Width);
+				// Store the triangle this vertex is in inside the approprirate AABB
+				// Is there already an AABB there
+				std::map< unsigned long long /*index*/, cBroad_Cube* >::iterator
+					itAAAB_V0 = this->map_BP_CubeGrid.find(vert_AABB_Index_ID);
+
+				// There?
+				if (itAAAB_V0 == this->map_BP_CubeGrid.end())
+				{
+					// Nope, so make one
+
+					glm::vec3 minXYZ = this->calcBP_MinXYZ_FromID(vert_AABB_Index_ID, AABBCubeSize_or_Width);
+					glm::vec3 maxXYZ = minXYZ + glm::vec3(AABBCubeSize_or_Width);
+
+					cBroad_Cube* pCube = new cBroad_Cube(minXYZ, maxXYZ, AABBCubeSize_or_Width, vert_AABB_Index_ID);
+
+					// Add it to the map
+					this->map_BP_CubeGrid[vert_AABB_Index_ID] = pCube;
+				}
+				// Add that triangle to the AABB 
+				this->map_BP_CubeGrid[vert_AABB_Index_ID]->vec_pTriangles.push_back(curTri);
+
+			}//for ( unsigned int vertIndex
+
+	//		unsigned long long vert1_AABB_ID =
+	//			this->calcBP_GridIndex(curTri.vertices[1].x, curTri.vertices[1].y, curTri.vertices[1].z, AABBCubeSize_or_Width);
+	//		unsigned long long vert2_AABB_ID =
+	//			this->calcBP_GridIndex(curTri.vertices[1].x, curTri.vertices[2].y, curTri.vertices[2].z, AABBCubeSize_or_Width);
 
 
+		}//for (...sTriangle>::iterator itVAOTri...
 
-
-
-	}//for (...sTriangle>::iterator itVAOTri...
+	}//for ( cPhysics::sTriangle pCurTessTriangle
 
 	return true;
 }

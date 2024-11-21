@@ -220,11 +220,11 @@ int main(void)
     
      
     ::g_pFlyCamera = new cBasicFlyCamera();
-    ::g_pFlyCamera->setEyeLocation(glm::vec3(0.0f, 5.0f, -50.0f));
+    //::g_pFlyCamera->setEyeLocation(glm::vec3(0.0f, 5.0f, -50.0f));
     // To see the Galactica:
-    //::g_pFlyCamera->setEyeLocation(glm::vec3(10'000.0f, 25'000.0f, 160'000.0f));
+    ::g_pFlyCamera->setEyeLocation(glm::vec3(10'000.0f, 25'000.0f, 160'000.0f));
     // Rotate the camera 180 degrees
-//    ::g_pFlyCamera->rotateLeftRight_Yaw_NoScaling(glm::radians(180.0f));
+    ::g_pFlyCamera->rotateLeftRight_Yaw_NoScaling(glm::radians(180.0f));
 
 
 
@@ -493,33 +493,53 @@ int main(void)
 
 
 
-        //        // *******************************************************************
-        //        // Place light #0 where the little yellow "light sphere" is
-        //        // Find the Light_Sphere
-        //        sMesh* pLightSphere = pFindMeshByFriendlyName("Light_Sphere");
-        //        // 
-        //        pLightSphere->positionXYZ = ::g_pLightManager->theLights[::g_selectedLightIndex].position;
-
-                // Update the light info in the shader
-                // (Called every frame)
         ::g_pLightManager->updateShaderWithLightInfo();
+
         // *******************************************************************
         //    ____                       _                      
         //   |  _ \ _ __ __ ___      __ | |    ___   ___  _ __  
         //   | | | | '__/ _` \ \ /\ / / | |   / _ \ / _ \| '_ \ 
         //   | |_| | | | (_| |\ V  V /  | |__| (_) | (_) | |_) |
         //   |____/|_|  \__,_| \_/\_/   |_____\___/ \___/| .__/ 
-        //                                               |_|    
-        // Draw all the objects
-        //for (unsigned int meshIndex = 0; meshIndex != ::g_NumberOfMeshesToDraw; meshIndex++)
+        //                                               |_|            
+        // // Will do two passes, one with "close" projection (clipping)
+        // and one with "far away"
+
+//        matProjection = glm::perspective(0.6f,           // FOV
+//            ratio,          // Aspect ratio of screen
+//            0.1f,           // Near plane (as far from the camera as possible)
+//            500.0f);       // Far plane (as near to the camera as possible)
+//        glUniformMatrix4fv(matProjection_UL, 1, GL_FALSE, (const GLfloat*)&matProjection);
+//
+//
+//        // Draw all the objects
+//        for (unsigned int meshIndex = 0; meshIndex != ::g_vecMeshesToDraw.size(); meshIndex++)
+//        {
+//            //            sMesh* pCurMesh = ::g_myMeshes[meshIndex];
+//           sMesh* pCurMesh = ::g_vecMeshesToDraw[meshIndex];
+////            pCurMesh->bDoNotLight = true;
+//            DrawMesh(pCurMesh, program);
+//
+//        }//for (unsigned int meshIndex..
+
+
+        //// For a "far" view of the large Galactica
+        matProjection = glm::perspective(0.6f,           // FOV
+            ratio,          // Aspect ratio of screen
+            1'000.0f,           // Near plane (as far from the camera as possible)
+            1'000'000.0f);       // Far plane (as near to the camera as possible)
+        glUniformMatrix4fv(matProjection_UL, 1, GL_FALSE, (const GLfloat*)&matProjection);
+
+        // Draw everything again, but this time far away things
         for (unsigned int meshIndex = 0; meshIndex != ::g_vecMeshesToDraw.size(); meshIndex++)
         {
             //            sMesh* pCurMesh = ::g_myMeshes[meshIndex];
-           sMesh* pCurMesh = ::g_vecMeshesToDraw[meshIndex];
-//            pCurMesh->bDoNotLight = true;
+            sMesh* pCurMesh = ::g_vecMeshesToDraw[meshIndex];
+            //            pCurMesh->bDoNotLight = true;
             DrawMesh(pCurMesh, program);
 
         }//for (unsigned int meshIndex..
+
         // *******************************************************************
 
 
@@ -662,6 +682,33 @@ int main(void)
         // **********************************************************************************
 
 
+        // For Debug, draw a cube where the smaller Cube/AABB/Regions on the broad phase 
+        //  structrue is, in world space
+        // 
+        // std::map< unsigned long long /*index*/, cBroad_Cube* > map_BP_CubeGrid;
+        //
+        sMesh* pDebugAABB = pFindMeshByFriendlyName("AABB_MinXYZ_At_Origin");
+        if (pDebugAABB)
+        {
+            pDebugAABB->bIsVisible = true;
+            pDebugAABB->uniformScale = 1'000.0f;
+
+            for (std::map< unsigned long long, cPhysics::cBroad_Cube* >::iterator
+                it_pCube = ::g_pPhysicEngine->map_BP_CubeGrid.begin();
+                it_pCube != ::g_pPhysicEngine->map_BP_CubeGrid.end();
+                it_pCube++)
+            {
+
+                // Draw a cube at that location
+                pDebugAABB->positionXYZ = it_pCube->second->getMinXYZ();
+                DrawMesh(pDebugAABB, program);
+
+            }
+
+            pDebugAABB->bIsVisible = false;
+        }//if (pDebugAABB)
+               
+
 
 
 
@@ -792,6 +839,13 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
         ::g_pMeshManager->LoadModelIntoVAO("assets/models/Battlestar_Galactica_Res_0_(444,087 faces)_xyz_n_uv (facing +z, up +y).ply",
             galacticaModel, program);
         std::cout << galacticaModel.meshName << ": " << galacticaModel.numberOfVertices << " vertices loaded" << std::endl;
+    }
+
+    {
+        sModelDrawInfo cubeMinXYZ_at_OriginInfo;
+        ::g_pMeshManager->LoadModelIntoVAO("assets/models/Cube_MinXYZ_at_Origin_xyz_n_uv.ply",
+            cubeMinXYZ_at_OriginInfo, program);
+        std::cout << cubeMinXYZ_at_OriginInfo.meshName << ": " << cubeMinXYZ_at_OriginInfo.numberOfVertices << " vertices loaded" << std::endl;
     }
 
     {
@@ -943,7 +997,8 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
         sMesh* pGalactica = new sMesh();
         pGalactica->modelFileName = "assets/models/Battlestar_Galactica_Res_0_(444,087 faces)_xyz_n_uv (facing +z, up +y).ply";
         pGalactica->positionXYZ = glm::vec3(-10000.0f, 0.0f, 0.0f);
-        //       pGalactica->rotationEulerXYZ.y = -90.0f;
+        pGalactica->rotationEulerXYZ.y = 17.0f;
+        pGalactica->rotationEulerXYZ.x = 23.0f;
         pGalactica->objectColourRGBA = glm::vec4(0.6f, 0.6f, 0.6f, 1.0f);
         //pGalactica->bIsWireframe = true;
         pGalactica->bOverrideObjectColour = true;
@@ -983,18 +1038,36 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
         //::g_pPhysicEngine->initBroadPhaseGrid();
         ::g_pPhysicEngine->generateBroadPhaseGrid(
             "assets/models/Battlestar_Galactica_Res_0_(444,087 faces)_xyz_n_uv (facing +z, up +y).ply",
-            1000.0f);
+            1000.0f,                            // AABB Cube region size
+            pGalactica->positionXYZ,
+            pGalactica->rotationEulerXYZ,
+            pGalactica->uniformScale);
 
 
         sMesh* pGalacticaWireframe = new sMesh();
         pGalacticaWireframe->modelFileName = "assets/models/Battlestar_Galactica_Res_0_(444,087 faces)_xyz_n_uv (facing +z, up +y).ply";
         pGalacticaWireframe->objectColourRGBA = glm::vec4(0.0f, 0.0f, 0.5f, 1.0f);
         pGalacticaWireframe->positionXYZ = pGalactica->positionXYZ;
+        pGalacticaWireframe->rotationEulerXYZ = pGalactica->rotationEulerXYZ;
+        pGalacticaWireframe->uniformScale = pGalactica->uniformScale;
         pGalacticaWireframe->bIsWireframe = true;
         pGalacticaWireframe->bOverrideObjectColour = true;
         pGalacticaWireframe->bDoNotLight = true;
 
         ::g_vecMeshesToDraw.push_back(pGalacticaWireframe);
+
+
+        // Debug AABB shape
+        sMesh* pAABBCube_MinAtOrigin = new sMesh();
+        pAABBCube_MinAtOrigin->modelFileName = "assets/models/Cube_MinXYZ_at_Origin_xyz_n_uv.ply";
+        pAABBCube_MinAtOrigin->bIsWireframe = true;
+        pAABBCube_MinAtOrigin->objectColourRGBA = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+        pAABBCube_MinAtOrigin->bOverrideObjectColour = true;
+        pAABBCube_MinAtOrigin->bDoNotLight = true;
+        pAABBCube_MinAtOrigin->bIsVisible = false;
+        pAABBCube_MinAtOrigin->uniqueFriendlyName = "AABB_MinXYZ_At_Origin";
+
+        ::g_vecMeshesToDraw.push_back(pAABBCube_MinAtOrigin);
     }
 
    {

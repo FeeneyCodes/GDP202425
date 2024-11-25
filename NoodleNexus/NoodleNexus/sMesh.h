@@ -28,7 +28,13 @@ struct sMesh
 	bool bIsVisible = true;
 	bool bDoNotLight = false;
 
-	unsigned int uniqueID = 0;
+	// unique ID is read only
+	unsigned int getUniqueID(void);
+private:
+	unsigned int m_uniqueID = 0;
+	// 
+	static unsigned int m_NextUniqueID;// = 100;
+public:
 
 //	std::string textureName;
 	static const unsigned int MAX_NUM_TEXTURES = 8;

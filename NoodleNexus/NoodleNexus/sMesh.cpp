@@ -1,5 +1,8 @@
 #include "sMesh.h"
 
+//static 
+unsigned int sMesh::m_NextUniqueID = 100;	// Start unique IDs at 100
+
 
 sMesh::sMesh()
 {
@@ -19,6 +22,15 @@ sMesh::sMesh()
 	this->positionXYZ = glm::vec3(0.0f);
 	this->rotationEulerXYZ = glm::vec3(0.0f);
 	this->objectColourRGBA = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Assign a unique ID for each mesh
+	this->m_uniqueID = sMesh::m_NextUniqueID;
+	sMesh::m_NextUniqueID++;
+}
+
+unsigned int sMesh::getUniqueID(void)
+{
+	return this->m_uniqueID;
 }
 
 std::string sMesh::getState(void)

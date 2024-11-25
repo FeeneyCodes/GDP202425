@@ -53,6 +53,8 @@ cVAOManager* g_pMeshManager = NULL;
 cBasicTextureManager* g_pTextures = NULL;
 
 cCommandGroup* g_pCommandDirector = NULL;
+cCommandFactory* g_pCommandFactory = NULL;
+
 
 
 //cLightManager* g_pLightManager = NULL;
@@ -214,17 +216,18 @@ int main(void)
 
 
     ::g_pCommandDirector = new cCommandGroup();
+    ::g_pCommandFactory = new cCommandFactory();
 
     // This also adds physics objects to the phsyics system
     AddModelsToScene(::g_pMeshManager, program);
     
      
     ::g_pFlyCamera = new cBasicFlyCamera();
-    //::g_pFlyCamera->setEyeLocation(glm::vec3(0.0f, 5.0f, -50.0f));
+    ::g_pFlyCamera->setEyeLocation(glm::vec3(0.0f, 5.0f, -50.0f));
     // To see the Galactica:
-    ::g_pFlyCamera->setEyeLocation(glm::vec3(10'000.0f, 25'000.0f, 160'000.0f));
+//    ::g_pFlyCamera->setEyeLocation(glm::vec3(10'000.0f, 25'000.0f, 160'000.0f));
     // Rotate the camera 180 degrees
-    ::g_pFlyCamera->rotateLeftRight_Yaw_NoScaling(glm::radians(180.0f));
+//    ::g_pFlyCamera->rotateLeftRight_Yaw_NoScaling(glm::radians(180.0f));
 
 
 
@@ -505,40 +508,40 @@ int main(void)
         // // Will do two passes, one with "close" projection (clipping)
         // and one with "far away"
 
-//        matProjection = glm::perspective(0.6f,           // FOV
-//            ratio,          // Aspect ratio of screen
-//            0.1f,           // Near plane (as far from the camera as possible)
-//            500.0f);       // Far plane (as near to the camera as possible)
-//        glUniformMatrix4fv(matProjection_UL, 1, GL_FALSE, (const GLfloat*)&matProjection);
-//
-//
-//        // Draw all the objects
-//        for (unsigned int meshIndex = 0; meshIndex != ::g_vecMeshesToDraw.size(); meshIndex++)
-//        {
-//            //            sMesh* pCurMesh = ::g_myMeshes[meshIndex];
-//           sMesh* pCurMesh = ::g_vecMeshesToDraw[meshIndex];
-////            pCurMesh->bDoNotLight = true;
-//            DrawMesh(pCurMesh, program);
-//
-//        }//for (unsigned int meshIndex..
-
-
-        //// For a "far" view of the large Galactica
         matProjection = glm::perspective(0.6f,           // FOV
             ratio,          // Aspect ratio of screen
-            1'000.0f,           // Near plane (as far from the camera as possible)
-            1'000'000.0f);       // Far plane (as near to the camera as possible)
+            0.1f,           // Near plane (as far from the camera as possible)
+            500.0f);       // Far plane (as near to the camera as possible)
         glUniformMatrix4fv(matProjection_UL, 1, GL_FALSE, (const GLfloat*)&matProjection);
 
-        // Draw everything again, but this time far away things
+
+        // Draw all the objects
         for (unsigned int meshIndex = 0; meshIndex != ::g_vecMeshesToDraw.size(); meshIndex++)
         {
             //            sMesh* pCurMesh = ::g_myMeshes[meshIndex];
-            sMesh* pCurMesh = ::g_vecMeshesToDraw[meshIndex];
-            //            pCurMesh->bDoNotLight = true;
+           sMesh* pCurMesh = ::g_vecMeshesToDraw[meshIndex];
+//            pCurMesh->bDoNotLight = true;
             DrawMesh(pCurMesh, program);
 
         }//for (unsigned int meshIndex..
+
+
+ //       //// For a "far" view of the large Galactica
+ //       matProjection = glm::perspective(0.6f,           // FOV
+ //           ratio,          // Aspect ratio of screen
+ //           1'000.0f,           // Near plane (as far from the camera as possible)
+ //           1'000'000.0f);       // Far plane (as near to the camera as possible)
+ //       glUniformMatrix4fv(matProjection_UL, 1, GL_FALSE, (const GLfloat*)&matProjection);
+ //
+ //       // Draw everything again, but this time far away things
+ //       for (unsigned int meshIndex = 0; meshIndex != ::g_vecMeshesToDraw.size(); meshIndex++)
+ //       {
+ //           //            sMesh* pCurMesh = ::g_myMeshes[meshIndex];
+ //           sMesh* pCurMesh = ::g_vecMeshesToDraw[meshIndex];
+ //           //            pCurMesh->bDoNotLight = true;
+ //           DrawMesh(pCurMesh, program);
+ //
+ //       }//for (unsigned int meshIndex..
 
         // *******************************************************************
 
@@ -929,8 +932,8 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
 
 
     // Add a bunch of bunny rabbits
-    float boxLimit = 100.0f;
-    float boxStep = 20.0f;
+    float boxLimit = 500.0f;
+    float boxStep = 50.0f;
     unsigned int ID_count = 0;
     for (float x = -boxLimit; x <= boxLimit; x += boxStep)
     {
@@ -940,8 +943,8 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
             //            pBunny->modelFileName = "assets/models/bun_zipper_res2_10x_size_xyz_only.ply";
             //            pBunny->modelFileName = "assets/models/bun_zipper_res2_10x_size_xyz_N_only.ply";
             pBunny->modelFileName = "assets/models/bun_zipper_res2_10x_size_xyz_N_uv.ply";
-            pBunny->positionXYZ = glm::vec3(x, 30.0f, z);
-            pBunny->uniformScale = 5.0f;
+            pBunny->positionXYZ = glm::vec3(x, -35.0f, z);
+            pBunny->uniformScale = 2.0f;
             pBunny->objectColourRGBA
                 = glm::vec4(getRandomFloat(0.0f, 1.0f),
                     getRandomFloat(0.0f, 1.0f),
@@ -987,9 +990,18 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
     sMesh* pBunny_15 = pFindMeshByFriendlyName("Bunny_15");
     if (pBunny_15)
     {
-        pBunny_15->positionXYZ = glm::vec3(-50.0f, -5.0f, 30.0f);
+        pBunny_15->positionXYZ = glm::vec3(-50.0f, 15.0f, 30.0f);
+        pBunny_15->rotationEulerXYZ.x = glm::radians(180.0f);
+        pBunny_15->uniformScale = 10.0f;
     }
-
+    // Place a bunny somewhere else in the scene
+    sMesh* pBunny_27 = pFindMeshByFriendlyName("Bunny_27");
+    if (pBunny_27)
+    {
+        pBunny_27->positionXYZ = glm::vec3(75.0f, 10.0f, -45.0f);
+        pBunny_27->rotationEulerXYZ.x = glm::radians(180.0f);
+        pBunny_27->uniformScale = 10.0f;
+    }
 
 
         
@@ -1004,7 +1016,8 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
         pGalactica->bOverrideObjectColour = true;
         pGalactica->uniqueFriendlyName = "Galactica";
         //pGalactica->bDoNotLight = true;
-        pGalactica->bIsVisible = true;
+//        pGalactica->bIsVisible = true;
+        pGalactica->bIsVisible = false;
         pGalactica->uniformScale = 1.0f;
         //
         pGalactica->textures[0] = "Non-uniform concrete wall 0512-3-1024x1024.bmp";
@@ -1036,12 +1049,12 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
 
         // 1000x1000x1000 aabbs
         //::g_pPhysicEngine->initBroadPhaseGrid();
-        ::g_pPhysicEngine->generateBroadPhaseGrid(
-            "assets/models/Battlestar_Galactica_Res_0_(444,087 faces)_xyz_n_uv (facing +z, up +y).ply",
-            1000.0f,                            // AABB Cube region size
-            pGalactica->positionXYZ,
-            pGalactica->rotationEulerXYZ,
-            pGalactica->uniformScale);
+//        ::g_pPhysicEngine->generateBroadPhaseGrid(
+//            "assets/models/Battlestar_Galactica_Res_0_(444,087 faces)_xyz_n_uv (facing +z, up +y).ply",
+//            1000.0f,                            // AABB Cube region size
+//            pGalactica->positionXYZ,
+//            pGalactica->rotationEulerXYZ,
+//            pGalactica->uniformScale);
 
 
         sMesh* pGalacticaWireframe = new sMesh();
@@ -1053,6 +1066,7 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
         pGalacticaWireframe->bIsWireframe = true;
         pGalacticaWireframe->bOverrideObjectColour = true;
         pGalacticaWireframe->bDoNotLight = true;
+        pGalacticaWireframe->bIsVisible = false;
 
         ::g_vecMeshesToDraw.push_back(pGalacticaWireframe);
 

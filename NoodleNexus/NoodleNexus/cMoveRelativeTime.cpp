@@ -3,6 +3,12 @@
 void cMoveRelativeTime::OnStart(void)
 {
 	// TODO: 
+	this->m_elapsedTime = 0.0;
+	// Calcuate the velocity required to get this object to that location
+	glm::vec3 totalDistance = this->m_endXYZ - this->m_pObject->position;
+	// What velocity will get us there?
+	this->m_pObject->velocity = totalDistance / (float)this->m_timeToMove;
+
 	return;
 }
 
@@ -28,24 +34,19 @@ bool cMoveRelativeTime::isFinished(void)
 
 void cMoveRelativeTime::OnFinished(void)
 {
-	// TODO: 
+	// We've arrived
+	this->m_pObject->velocity = glm::vec3(0.0f);
+	this->m_pObject->acceleration = glm::vec3(0.0f);
 	return;
 }
 
 
 void cMoveRelativeTime::Init(cPhysics::sPhysInfo* pObject, glm::vec3 endXYZ, double timeToMove)
 {
-	this->m_endXYZ = endXYZ;
 	this->m_timeToMove = timeToMove;
 	this->m_pObject = pObject;
+	this->m_endXYZ = endXYZ;
 	this->m_elapsedTime = 0.0;
-	// Calcuate the velocity required to get this object to that location
-	glm::vec3 totalDistance = endXYZ - pObject->position;
-	// What velocity will get us there?
-//	pObject->velocity.x = totalDistance.x / timeToMove;
-//	pObject->velocity.y = totalDistance.y / timeToMove;
-//	pObject->velocity.z = totalDistance.z / timeToMove;
-	pObject->velocity = totalDistance / (float)timeToMove;
 
 	return;
 }

@@ -6,6 +6,7 @@
 #include "cLightManager.h"
 #include "cPhysics.h"
 #include "cCommandGroup.h"
+#include "cCommandFactory.h"
 
 extern cBasicFlyCamera* g_pFlyCamera;
 extern cPhysics* g_pPhysicEngine;
@@ -16,6 +17,7 @@ extern unsigned int g_selectedLightIndex;
 
 // Place all the commands here
 extern cCommandGroup* g_pCommandDirector;
+extern cCommandFactory* g_pCommandFactory;
 
 
 // GLFW callback function signatures

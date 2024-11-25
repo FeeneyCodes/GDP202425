@@ -18,7 +18,7 @@ public:
 
 private:
 	std::vector< iCommand* > m_vecSerialCommands;
-	std::vector< iCommand* >::iterator itCurSerialCommand; // = begining 
+//	std::vector< iCommand* >::iterator itCurSerialCommand; // = begining 
 
 	std::vector< iCommand* > m_vecParallelCommands;
 };

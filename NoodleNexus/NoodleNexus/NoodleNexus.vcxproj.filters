@@ -48,8 +48,11 @@
     <Filter Include="TankGameFiles\Mediator">
       <UniqueIdentifier>{ae1ea03c-7722-4bbe-b4c6-8ea103529977}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Commands">
+    <Filter Include="Commands_Lua">
       <UniqueIdentifier>{af26309b-2955-4be9-a898-42165798e9bd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Commands_Lua\Lua_Brain">
+      <UniqueIdentifier>{6526b839-a309-4c96-9bee-ad15f01e8ec4}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -144,13 +147,19 @@
       <Filter>Phsyics_Stuff</Filter>
     </ClCompile>
     <ClCompile Include="cFollowObject_A.cpp">
-      <Filter>Commands</Filter>
+      <Filter>Commands_Lua</Filter>
     </ClCompile>
     <ClCompile Include="cMoveRelativeTime.cpp">
-      <Filter>Commands</Filter>
+      <Filter>Commands_Lua</Filter>
     </ClCompile>
     <ClCompile Include="cCommandGroup.cpp">
-      <Filter>Commands</Filter>
+      <Filter>Commands_Lua</Filter>
+    </ClCompile>
+    <ClCompile Include="cCommandFactory.cpp">
+      <Filter>Commands_Lua</Filter>
+    </ClCompile>
+    <ClCompile Include="cLuaBrain\cLuaBrain.cpp">
+      <Filter>Commands_Lua\Lua_Brain</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -236,16 +245,22 @@
       <Filter>Phsyics_Stuff</Filter>
     </ClInclude>
     <ClInclude Include="iCommand.h">
-      <Filter>Commands</Filter>
+      <Filter>Commands_Lua</Filter>
     </ClInclude>
     <ClInclude Include="cMoveRelativeTime.h">
-      <Filter>Commands</Filter>
+      <Filter>Commands_Lua</Filter>
     </ClInclude>
     <ClInclude Include="cFollowObject_A.h">
-      <Filter>Commands</Filter>
+      <Filter>Commands_Lua</Filter>
     </ClInclude>
     <ClInclude Include="cCommandGroup.h">
-      <Filter>Commands</Filter>
+      <Filter>Commands_Lua</Filter>
+    </ClInclude>
+    <ClInclude Include="cCommandFactory.h">
+      <Filter>Commands_Lua</Filter>
+    </ClInclude>
+    <ClInclude Include="cLuaBrain\cLuaBrain.h">
+      <Filter>Commands_Lua\Lua_Brain</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

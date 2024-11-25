@@ -97,8 +97,8 @@ void handleMouseAsync(GLFWwindow* window)
 
 void handleKeyboardAsync(GLFWwindow* window)
 {
-    const float CAMERA_MOVE_SPEED = 100.0f;
-    //const float CAMERA_MOVE_SPEED = 0.1f;
+//    const float CAMERA_MOVE_SPEED = 100.0f;
+    const float CAMERA_MOVE_SPEED = 0.1f;
     const float CAMERA_TURN_SPEED = 0.1f;
 
     if ( isShiftDown(window) )
@@ -261,39 +261,39 @@ void handleKeyboardAsync(GLFWwindow* window)
     // This will control the player's character
     if (areAllModifiersUp(window))
     {
-        cPhysics::sPhysInfo* pViperPhys = ::g_pPhysicEngine->pFindAssociateMeshByFriendlyName("New_Viper_Player");
-
-        // Exists? 
-        if (pViperPhys)         // or != NULL
-        {
-            // Go forward
-            if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-            {
-                // Accelerate
-                pViperPhys->velocity.z += 0.01f;
-            }
-
-            if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-            {
-                // Accelerate
-                pViperPhys->velocity.z -= 0.01f;
-            }
-
-            if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-            {
-            }
-            if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-            {
-            }
-            if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
-            {
-            }
-            if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
-            {
-            }
-
-
-        }// if (pViperPhys)
+//        cPhysics::sPhysInfo* pViperPhys = ::g_pPhysicEngine->pFindAssociateMeshByFriendlyName("New_Viper_Player");
+//
+//        // Exists? 
+//        if (pViperPhys)         // or != NULL
+//        {
+//            // Go forward
+//            if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+//            {
+//                // Accelerate
+//                pViperPhys->velocity.z += 0.01f;
+//            }
+//
+//            if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+//            {
+//                // Accelerate
+//                pViperPhys->velocity.z -= 0.01f;
+//            }
+//
+//            if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+//            {
+//            }
+//            if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+//            {
+//            }
+//            if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+//            {
+//            }
+//            if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+//            {
+//            }
+//
+//
+//        }// if (pViperPhys)
 
     }
         
@@ -470,14 +470,27 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
             // Find the bunny and viper
             // Create a move command passing this inforamtion
             // Add it to the command manager thing
-            sMesh* pBunny_15 = pFindMeshByFriendlyName("Bunny_15");
             cPhysics::sPhysInfo* pViperPhys = ::g_pPhysicEngine->pFindAssociateMeshByFriendlyName("New_Viper_Player");
+
+            sMesh* pBunny_15 = pFindMeshByFriendlyName("Bunny_15");
             if (pBunny_15 && pViperPhys)
             {
                 // both exist
                 cMoveRelativeTime* pMoveViper = new cMoveRelativeTime();
                 //moveViper.
                 pMoveViper->Init(pViperPhys, pBunny_15->positionXYZ, 5.0);
+
+                // 
+                ::g_pCommandDirector->addSerial(pMoveViper);
+            }
+
+            sMesh* pBunny_27 = pFindMeshByFriendlyName("Bunny_27");
+            if (pBunny_27 && pViperPhys)
+            {
+                // both exist
+                cMoveRelativeTime* pMoveViper = new cMoveRelativeTime();
+                //moveViper.
+                pMoveViper->Init(pViperPhys, pBunny_27->positionXYZ, 12.5);
 
                 // 
                 ::g_pCommandDirector->addSerial(pMoveViper);

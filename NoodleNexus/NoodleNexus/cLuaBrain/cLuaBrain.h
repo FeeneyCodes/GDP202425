@@ -16,6 +16,8 @@ extern "C" {
 //class cGameObject;
 struct sMesh;
 
+
+
 class cLuaBrain
 {
 public:

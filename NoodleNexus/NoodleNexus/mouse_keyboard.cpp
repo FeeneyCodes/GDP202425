@@ -11,7 +11,8 @@
 #include "cLightManager.h"
 
 // The commands
-#include "cMoveRelativeTime.h"
+//#include "cMoveRelativeTime.h"
+// Now we use the g_pCommandFactory to get all of our commands
 
 //#include <Windows.h>
 
@@ -467,30 +468,55 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         // Pressing F8 moves the viper to the bunny #15
         if (key == GLFW_KEY_F8 && action == GLFW_PRESS)
         {
+
+            ::g_pMyLuaMasterBrain->RunScriptImmediately(
+                "AddSerialCommand('New_Viper_Player', -50.0, 15.0, 30.0, 5.0)");
+            ::g_pMyLuaMasterBrain->RunScriptImmediately(
+                "AddSerialCommand('New_Viper_Player', 75.0, 10.0, -45.0, 12.5)");
+
+
             // Find the bunny and viper
             // Create a move command passing this inforamtion
             // Add it to the command manager thing
-            cPhysics::sPhysInfo* pViperPhys = ::g_pPhysicEngine->pFindAssociateMeshByFriendlyName("New_Viper_Player");
+ //           cPhysics::sPhysInfo* pViperPhys = ::g_pPhysicEngine->pFindAssociateMeshByFriendlyName("New_Viper_Player");
 
             sMesh* pBunny_15 = pFindMeshByFriendlyName("Bunny_15");
-            if (pBunny_15 && pViperPhys)
+            if (pBunny_15 /*&& pViperPhys*/)
             {
                 // both exist
-                cMoveRelativeTime* pMoveViper = new cMoveRelativeTime();
+//                cMoveRelativeTime* pMoveViper = new cMoveRelativeTime();
+                std::vector<std::string> vecCommandDetails;
+                vecCommandDetails.push_back("New_Viper_Player");    // Object command controls
+                vecCommandDetails.push_back(::g_floatToString(pBunny_15->positionXYZ.x));
+                vecCommandDetails.push_back(::g_floatToString(pBunny_15->positionXYZ.y));
+                vecCommandDetails.push_back(::g_floatToString(pBunny_15->positionXYZ.z));
+                vecCommandDetails.push_back(::g_floatToString(5.0f));
+
+                iCommand* pMoveViper = ::g_pCommandFactory->pCreateCommandObject(
+                    "Move Relative ConstVelocity+Time", vecCommandDetails);
                 //moveViper.
-                pMoveViper->Init(pViperPhys, pBunny_15->positionXYZ, 5.0);
+//                pMoveViper->Init(pViperPhys, pBunny_15->positionXYZ, 5.0);
 
                 // 
                 ::g_pCommandDirector->addSerial(pMoveViper);
             }
 
             sMesh* pBunny_27 = pFindMeshByFriendlyName("Bunny_27");
-            if (pBunny_27 && pViperPhys)
+            if (pBunny_27 /*&& pViperPhys*/)
             {
                 // both exist
-                cMoveRelativeTime* pMoveViper = new cMoveRelativeTime();
+//                cMoveRelativeTime* pMoveViper = new cMoveRelativeTime();
                 //moveViper.
-                pMoveViper->Init(pViperPhys, pBunny_27->positionXYZ, 12.5);
+//                pMoveViper->Init(pViperPhys, pBunny_27->positionXYZ, 12.5);
+                std::vector<std::string> vecCommandDetails;
+                vecCommandDetails.push_back("New_Viper_Player");    // Object command controls
+                vecCommandDetails.push_back(::g_floatToString(pBunny_27->positionXYZ.x));
+                vecCommandDetails.push_back(::g_floatToString(pBunny_27->positionXYZ.y));
+                vecCommandDetails.push_back(::g_floatToString(pBunny_27->positionXYZ.z));
+                vecCommandDetails.push_back(::g_floatToString(5.0f));
+
+                iCommand* pMoveViper = ::g_pCommandFactory->pCreateCommandObject(
+                    "Move Relative ConstVelocity+Time", vecCommandDetails);
 
                 // 
                 ::g_pCommandDirector->addSerial(pMoveViper);

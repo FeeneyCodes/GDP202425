@@ -34,7 +34,7 @@ void cCommandGroup::Update(double deltaTime)
 	// If the parallel commands are NOT done, call update
 	for (iCommand* pCurPC : this->m_vecParallelCommands)
 	{
-		if ( ! pCurPC->isFinished())
+		if ( ! pCurPC->isFinished() )
 		{
 			pCurPC->Update(deltaTime);
 		}

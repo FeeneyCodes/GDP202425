@@ -5,6 +5,9 @@
 #include "../sMesh.h"
 //#include "../cGameObject.h"
 
+// This is from sharedThings.h
+int g_Lua_AddSerialCommand(lua_State* L);
+
 cLuaBrain::cLuaBrain()
 {
 	this->m_p_vecMeshes = nullptr;
@@ -15,6 +18,11 @@ cLuaBrain::cLuaBrain()
 	this->m_pLuaState = luaL_newstate();
 
 	luaL_openlibs(this->m_pLuaState);					/* Lua 5.3.3 */
+
+
+	lua_pushcfunction( this->m_pLuaState, g_Lua_AddSerialCommand);
+	lua_setglobal( this->m_pLuaState, "AddSerialCommand" );
+
 
 
 	lua_pushcfunction( this->m_pLuaState, cLuaBrain::l_UpdateObject );

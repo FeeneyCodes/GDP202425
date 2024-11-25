@@ -8,6 +8,9 @@
 #include "cCommandGroup.h"
 #include "cCommandFactory.h"
 
+// 
+#include "cLuaBrain/cLuaBrain.h"
+
 extern cBasicFlyCamera* g_pFlyCamera;
 extern cPhysics* g_pPhysicEngine;
 
@@ -18,6 +21,13 @@ extern unsigned int g_selectedLightIndex;
 // Place all the commands here
 extern cCommandGroup* g_pCommandDirector;
 extern cCommandFactory* g_pCommandFactory;
+// 
+extern cLuaBrain* g_pMyLuaMasterBrain;
+// MUST be a function.
+// Or if it's part of the class, MUST be static
+// Because Lua only has C bindings
+int g_Lua_AddSerialCommand(lua_State* L);
+//void g_Lua_AddSerialCommand(std::string theCommandText);
 
 
 // GLFW callback function signatures
@@ -46,3 +56,7 @@ glm::vec3 g_rgb_from_HTML(unsigned int red, unsigned int green, unsigned int blu
 
 // HACK: Show "targeting LASER"
 extern bool g_bShowLASERBeam;
+
+std::string g_floatToString(float theFloat);
+//glm::vec3 g_3StringsToVec3(std::string sX, std::string sY, std::string sZ);
+

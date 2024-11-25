@@ -66,6 +66,22 @@ void DrawMesh(sMesh* pCurMesh, GLuint program);
 //glm::vec3 cameraEye = glm::vec3(0.0, 0.0, 4.0f);
 
 
+
+
+// This is the function that Lua will call when 
+//void g_Lua_AddSerialCommand(std::string theCommandText)
+int g_Lua_AddSerialCommand(lua_State* L)
+{
+
+
+
+    std::cout << "g_Lua_AddSerialCommand() called" << std::endl;
+    return 0;
+}
+
+
+
+
 static void error_callback(int error, const char* description)
 {
     fprintf(stderr, "Error: %s\n", description);
@@ -206,6 +222,8 @@ int main(void)
     glUseProgram(program);
 
 
+    ::g_pMyLuaMasterBrain = new cLuaBrain();
+
 
 //    cVAOManager* pMeshManager = new cVAOManager();
     ::g_pMeshManager = new cVAOManager();
@@ -217,6 +235,11 @@ int main(void)
 
     ::g_pCommandDirector = new cCommandGroup();
     ::g_pCommandFactory = new cCommandFactory();
+    // 
+    // Tell the command factory about the phsyics and mesh stuff
+    ::g_pCommandFactory->setPhysics(::g_pPhysicEngine);
+    // (We are passing the address of this...)
+    ::g_pCommandFactory->setVectorOfMeshes(&g_vecMeshesToDraw);
 
     // This also adds physics objects to the phsyics system
     AddModelsToScene(::g_pMeshManager, program);

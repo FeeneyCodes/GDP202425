@@ -7,6 +7,7 @@
 
 // This is from sharedThings.h
 int g_Lua_AddSerialCommand(lua_State* L);
+int g_Lua_AddMeshToScene(lua_State* L);
 
 cLuaBrain::cLuaBrain()
 {
@@ -19,10 +20,14 @@ cLuaBrain::cLuaBrain()
 
 	luaL_openlibs(this->m_pLuaState);					/* Lua 5.3.3 */
 
-
-	lua_pushcfunction( this->m_pLuaState, g_Lua_AddSerialCommand);
+	// This function is really theMain.cpp:
+	// int g_Lua_AddSerialCommand(lua_State* L)
+	lua_pushcfunction( this->m_pLuaState, ::g_Lua_AddSerialCommand);
 	lua_setglobal( this->m_pLuaState, "AddSerialCommand" );
 
+	// Add object to scene
+	lua_pushcfunction( this->m_pLuaState, ::g_Lua_AddMeshToScene);
+	lua_setglobal( this->m_pLuaState, "AddMeshToScene" );
 
 
 	lua_pushcfunction( this->m_pLuaState, cLuaBrain::l_UpdateObject );

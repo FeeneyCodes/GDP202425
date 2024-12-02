@@ -426,6 +426,9 @@ int main(void)
     glCullFace(GL_BACK);
     glEnable(GL_CULL_FACE);
 
+    // HACK:
+    unsigned int numberOfNarrowPhaseTrianglesInAABB_BroadPhaseThing = 0;
+
     while (!glfwWindowShouldClose(window))
     {
         float ratio;
@@ -440,11 +443,11 @@ int main(void)
 
         matProjection = glm::perspective(0.6f,           // FOV
             ratio,          // Aspect ratio of screen
-            0.1f,           // Near plane (as far from the camera as possible)
-            1'000.0f);       // Far plane (as near to the camera as possible)
+//            0.1f,           // Near plane (as far from the camera as possible)
+//            1'000.0f);       // Far plane (as near to the camera as possible)
 // For a "far" view of the large Galactica
-//            1'000.1f,           // Near plane (as far from the camera as possible)
-//            1'000'000.0f);       // Far plane (as near to the camera as possible)
+            100.1f,           // Near plane (as far from the camera as possible)
+            1'000'000.0f);       // Far plane (as near to the camera as possible)
 
         // View or "camera"
         glm::mat4 matView = glm::mat4(1.0f);
@@ -555,46 +558,158 @@ int main(void)
         // // Will do two passes, one with "close" projection (clipping)
         // and one with "far away"
 
+//        matProjection = glm::perspective(0.6f,           // FOV
+//            ratio,          // Aspect ratio of screen
+//            0.1f,           // Near plane (as far from the camera as possible)
+//            500.0f);       // Far plane (as near to the camera as possible)
+//        glUniformMatrix4fv(matProjection_UL, 1, GL_FALSE, (const GLfloat*)&matProjection);
+//
+//
+//        // Draw all the objects
+//        for (unsigned int meshIndex = 0; meshIndex != ::g_vecMeshesToDraw.size(); meshIndex++)
+//        {
+//            //            sMesh* pCurMesh = ::g_myMeshes[meshIndex];
+//           sMesh* pCurMesh = ::g_vecMeshesToDraw[meshIndex];
+////            pCurMesh->bDoNotLight = true;
+//            DrawMesh(pCurMesh, program);
+//
+//        }//for (unsigned int meshIndex..
+
+
+        //// For a "far" view of the large Galactica
         matProjection = glm::perspective(0.6f,           // FOV
             ratio,          // Aspect ratio of screen
-            0.1f,           // Near plane (as far from the camera as possible)
-            500.0f);       // Far plane (as near to the camera as possible)
+            10.0f,           // Near plane (as far from the camera as possible)
+            100'000.0f);       // Far plane (as near to the camera as possible)
         glUniformMatrix4fv(matProjection_UL, 1, GL_FALSE, (const GLfloat*)&matProjection);
-
-
-        // Draw all the objects
+ 
+        // Draw everything again, but this time far away things
         for (unsigned int meshIndex = 0; meshIndex != ::g_vecMeshesToDraw.size(); meshIndex++)
         {
             //            sMesh* pCurMesh = ::g_myMeshes[meshIndex];
-           sMesh* pCurMesh = ::g_vecMeshesToDraw[meshIndex];
-//            pCurMesh->bDoNotLight = true;
+            sMesh* pCurMesh = ::g_vecMeshesToDraw[meshIndex];
+            //            pCurMesh->bDoNotLight = true;
             DrawMesh(pCurMesh, program);
-
+ 
         }//for (unsigned int meshIndex..
-
-
- //       //// For a "far" view of the large Galactica
- //       matProjection = glm::perspective(0.6f,           // FOV
- //           ratio,          // Aspect ratio of screen
- //           1'000.0f,           // Near plane (as far from the camera as possible)
- //           1'000'000.0f);       // Far plane (as near to the camera as possible)
- //       glUniformMatrix4fv(matProjection_UL, 1, GL_FALSE, (const GLfloat*)&matProjection);
- //
- //       // Draw everything again, but this time far away things
- //       for (unsigned int meshIndex = 0; meshIndex != ::g_vecMeshesToDraw.size(); meshIndex++)
- //       {
- //           //            sMesh* pCurMesh = ::g_myMeshes[meshIndex];
- //           sMesh* pCurMesh = ::g_vecMeshesToDraw[meshIndex];
- //           //            pCurMesh->bDoNotLight = true;
- //           DrawMesh(pCurMesh, program);
- //
- //       }//for (unsigned int meshIndex..
 
         // *******************************************************************
 
 
 
+        // This should be inside the phsyics thing, I guess...
+        // Which AABB bounding box of the broad phase is the viper now? 
+        {
+            cPhysics::sPhysInfo* pViperPhys = ::g_pPhysicEngine->pFindAssociateMeshByFriendlyName("New_Viper_Player");
+            if (pViperPhys)
+            {
+                // The size of the AABBs that we sliced up the Galactical model in the broad phase
+                const float AABBSIZE = 1000.0f;
 
+                // Using the same XYZ location in space we used for the triangle vertices,
+                //  we are going to pass the location of the viper to get an ID
+                //  of an AABB/Cube that WOULD BE at that location (if there was one...)
+                unsigned long long hypotheticalAABB_ID 
+                    = ::g_pPhysicEngine->calcBP_GridIndex(
+                                                 pViperPhys->position.x,
+                                                 pViperPhys->position.y,
+                                                 pViperPhys->position.z, AABBSIZE);
+
+                // Where would that hypothetical AABB be in space
+                glm::vec3 minXYZofHypotheticalCube = ::g_pPhysicEngine->calcBP_MinXYZ_FromID(hypotheticalAABB_ID, AABBSIZE);
+
+                // Draw a cube at that location
+                sMesh* pDebugAABB = pFindMeshByFriendlyName("AABB_MinXYZ_At_Origin");
+                pDebugAABB->positionXYZ = minXYZofHypotheticalCube;
+                pDebugAABB->bIsVisible = true;
+                pDebugAABB->uniformScale = 1'000.0f;
+
+                // Is this an AABB that's already part of the broad phase? 
+                // i.e. is it already in the map?
+                std::map< unsigned long long, cPhysics::cBroad_Cube* >::iterator
+                    it_pCube = ::g_pPhysicEngine->map_BP_CubeGrid.find(hypotheticalAABB_ID);
+                //
+                if (it_pCube == ::g_pPhysicEngine->map_BP_CubeGrid.end())
+                {
+                    // NO, there is no cube there
+                    pDebugAABB->objectColourRGBA = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+                    numberOfNarrowPhaseTrianglesInAABB_BroadPhaseThing = 0;
+                }
+                // NOT equal to the end
+                if (it_pCube != ::g_pPhysicEngine->map_BP_CubeGrid.end())
+                {
+                    // YES, there is an AABB (full of triangles) there!
+                    pDebugAABB->objectColourRGBA = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
+                    // 
+                    // 
+                    cPhysics::cBroad_Cube* pTheAABB_Cube = it_pCube->second;
+                    std::cout << pTheAABB_Cube->vec_pTriangles.size() << std::endl;
+                    // Pass THIS smaller list of triangles to the narrow phase
+                    numberOfNarrowPhaseTrianglesInAABB_BroadPhaseThing = pTheAABB_Cube->vec_pTriangles.size();
+                }
+
+                DrawMesh(pDebugAABB, program);
+                pDebugAABB->bIsVisible = false;
+
+            }
+        }
+
+
+        // For Debug, draw a cube where the smaller Cube/AABB/Regions on the broad phase 
+        //  structrue is, in world space
+        // 
+        //        std::map< unsigned long long /*index*/, cBroad_Cube* > map_BP_CubeGrid;
+
+        sMesh* pDebugAABB = pFindMeshByFriendlyName("AABB_MinXYZ_At_Origin");
+        if (pDebugAABB)
+        {
+            pDebugAABB->bIsVisible = true;
+            pDebugAABB->uniformScale = 1'000.0f;
+
+            for (std::map< unsigned long long, cPhysics::cBroad_Cube* >::iterator
+                it_pCube = ::g_pPhysicEngine->map_BP_CubeGrid.begin();
+                it_pCube != ::g_pPhysicEngine->map_BP_CubeGrid.end();
+                it_pCube++)
+            {
+
+                // Draw a cube at that location
+                pDebugAABB->positionXYZ = it_pCube->second->getMinXYZ();
+                pDebugAABB->objectColourRGBA = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+                DrawMesh(pDebugAABB, program);
+
+            }
+
+            pDebugAABB->bIsVisible = false;
+        }//if (pDebugAABB)
+
+
+
+
+        // *******************************************************************
+        // Have camera follow the viper at a set distance
+//        {
+//            cPhysics::sPhysInfo* pViperPhys = ::g_pPhysicEngine->pFindAssociateMeshByFriendlyName("New_Viper_Player");
+//            if (pViperPhys)
+//            {
+//                const float MAX_DISTANCE_FROM_VIPER = 500.0f;
+//                const float MAX_CAMERA_SPEED = 5.0f;
+//                // How far away are we?
+//                if (glm::distance(pViperPhys->position, ::g_pFlyCamera->getEyeLocation()) > MAX_DISTANCE_FROM_VIPER)
+//                {
+//                    // Too far from viper.
+//                    glm::vec3 vecCameraToViper = pViperPhys->position - ::g_pFlyCamera->getEyeLocation();
+//
+//                    glm::vec3 cameraDirection = glm::normalize(vecCameraToViper);
+//
+//                    glm::vec3 cameraSpeed = cameraDirection * MAX_CAMERA_SPEED;
+//
+//                    ::g_pFlyCamera->moveForward(cameraSpeed.z);
+//                    ::g_pFlyCamera->moveLeftRight(cameraSpeed.x);
+//                    ::g_pFlyCamera->moveUpDown(cameraSpeed.y);
+//                }
+//            }//if (pViperPhys)
+//        }
+//        // *******************************************************************
 
 
         //// OH NO! 
@@ -625,6 +740,9 @@ int main(void)
             // Move the LASER below the camera
             LASERbeam.startXYZ += LASERbeam_Offset;
             glm::vec3 LASER_ball_location = LASERbeam.startXYZ;
+
+            glm::mat4 matOrientation = glm::mat4(glm::quatLookAt(glm::normalize(LASERbeam.endXYZ - LASERbeam.startXYZ),
+                                                                 glm::vec3(0.0f, 1.0f, 0.0f)));
 
             // Is the LASER less than 500 units long?
             // (is the last LAZER ball we drew beyond 500 units form the camera?)
@@ -732,31 +850,7 @@ int main(void)
         // **********************************************************************************
 
 
-        // For Debug, draw a cube where the smaller Cube/AABB/Regions on the broad phase 
-        //  structrue is, in world space
-        // 
-        // std::map< unsigned long long /*index*/, cBroad_Cube* > map_BP_CubeGrid;
-        //
-        sMesh* pDebugAABB = pFindMeshByFriendlyName("AABB_MinXYZ_At_Origin");
-        if (pDebugAABB)
-        {
-            pDebugAABB->bIsVisible = true;
-            pDebugAABB->uniformScale = 1'000.0f;
 
-            for (std::map< unsigned long long, cPhysics::cBroad_Cube* >::iterator
-                it_pCube = ::g_pPhysicEngine->map_BP_CubeGrid.begin();
-                it_pCube != ::g_pPhysicEngine->map_BP_CubeGrid.end();
-                it_pCube++)
-            {
-
-                // Draw a cube at that location
-                pDebugAABB->positionXYZ = it_pCube->second->getMinXYZ();
-                DrawMesh(pDebugAABB, program);
-
-            }
-
-            pDebugAABB->bIsVisible = false;
-        }//if (pDebugAABB)
                
 
 
@@ -845,6 +939,8 @@ int main(void)
             << "linear: " << ::g_pLightManager->theLights[0].atten.y
             << "   "
             << "quad: " << ::g_pLightManager->theLights[0].atten.z;
+
+        ssTitle << " BP tris: " << numberOfNarrowPhaseTrianglesInAABB_BroadPhaseThing;
 
         // Add the viper info, too
         cPhysics::sPhysInfo* pViperPhys = ::g_pPhysicEngine->pFindAssociateMeshByFriendlyName("New_Viper_Player");
@@ -1025,6 +1121,7 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
         pNewViper->bOverrideObjectColour = true;
         pNewViper->uniqueFriendlyName = "New_Viper_Player";
         pNewViper->bIsVisible = true;
+        pNewViper->uniformScale = 5.0f;
         pNewViper->textures[0] = "dirty-metal-texture_1048-4784.bmp";
         pNewViper->blendRatio[0] = 1.0f;
 
@@ -1061,7 +1158,7 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
    {
         sMesh* pGalactica = new sMesh();
         pGalactica->modelFileName = "assets/models/Battlestar_Galactica_Res_0_(444,087 faces)_xyz_n_uv (facing +z, up +y).ply";
-        pGalactica->positionXYZ = glm::vec3(-10000.0f, 0.0f, 0.0f);
+        pGalactica->positionXYZ = glm::vec3(-25'000.0f, 0.0f, 0.0f);
         pGalactica->rotationEulerXYZ.y = 17.0f;
         pGalactica->rotationEulerXYZ.x = 23.0f;
         pGalactica->objectColourRGBA = glm::vec4(0.6f, 0.6f, 0.6f, 1.0f);
@@ -1069,8 +1166,7 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
         pGalactica->bOverrideObjectColour = true;
         pGalactica->uniqueFriendlyName = "Galactica";
         //pGalactica->bDoNotLight = true;
-//        pGalactica->bIsVisible = true;
-        pGalactica->bIsVisible = false;
+        pGalactica->bIsVisible = true;
         pGalactica->uniformScale = 1.0f;
         //
         pGalactica->textures[0] = "Non-uniform concrete wall 0512-3-1024x1024.bmp";
@@ -1102,12 +1198,12 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
 
         // 1000x1000x1000 aabbs
         //::g_pPhysicEngine->initBroadPhaseGrid();
-//        ::g_pPhysicEngine->generateBroadPhaseGrid(
-//            "assets/models/Battlestar_Galactica_Res_0_(444,087 faces)_xyz_n_uv (facing +z, up +y).ply",
-//            1000.0f,                            // AABB Cube region size
-//            pGalactica->positionXYZ,
-//            pGalactica->rotationEulerXYZ,
-//            pGalactica->uniformScale);
+        ::g_pPhysicEngine->generateBroadPhaseGrid(
+            "assets/models/Battlestar_Galactica_Res_0_(444,087 faces)_xyz_n_uv (facing +z, up +y).ply",
+            1000.0f,                            // AABB Cube region size
+            pGalactica->positionXYZ,
+            pGalactica->rotationEulerXYZ,
+            pGalactica->uniformScale);
 
 
         sMesh* pGalacticaWireframe = new sMesh();
@@ -1119,7 +1215,7 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
         pGalacticaWireframe->bIsWireframe = true;
         pGalacticaWireframe->bOverrideObjectColour = true;
         pGalacticaWireframe->bDoNotLight = true;
-        pGalacticaWireframe->bIsVisible = false;
+        pGalacticaWireframe->bIsVisible = true;
 
         ::g_vecMeshesToDraw.push_back(pGalacticaWireframe);
 

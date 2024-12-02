@@ -159,9 +159,15 @@ public:
 		std::vector< sTriangle > vec_pTriangles;
 	};
 
+	// These thing together make up a broad phase accel structure
+	// 
+	// This is the ID of the AABB/Cube based on a location in space
 	unsigned long long calcBP_GridIndex(float x, float y, float z, float sizeOrWidth);
 	glm::vec3 calcBP_MinXYZ_FromID(unsigned long long BP_CubeID, float sizeOrWidth);
+	//
+	// This holds all the AABB/cubes that hold the triangle information
 	std::map< unsigned long long /*index*/, cBroad_Cube* > map_BP_CubeGrid;
+	//
 
 	// Is this too big for the stack?
 	// sBroad_Cube BP_CubeArray[1000][1000][1000];

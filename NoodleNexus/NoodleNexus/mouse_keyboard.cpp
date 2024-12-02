@@ -102,7 +102,8 @@ void handleMouseAsync(GLFWwindow* window)
 void handleKeyboardAsync(GLFWwindow* window)
 {
 //    const float CAMERA_MOVE_SPEED = 100.0f;
-    const float CAMERA_MOVE_SPEED = 0.1f;
+    const float CAMERA_MOVE_SPEED = 10.0f;
+//    const float CAMERA_MOVE_SPEED = 0.1f;
     const float CAMERA_TURN_SPEED = 0.1f;
 
     if ( isShiftDown(window) )
@@ -265,39 +266,50 @@ void handleKeyboardAsync(GLFWwindow* window)
     // This will control the player's character
     if (areAllModifiersUp(window))
     {
-//        cPhysics::sPhysInfo* pViperPhys = ::g_pPhysicEngine->pFindAssociateMeshByFriendlyName("New_Viper_Player");
-//
-//        // Exists? 
-//        if (pViperPhys)         // or != NULL
-//        {
-//            // Go forward
-//            if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-//            {
-//                // Accelerate
-//                pViperPhys->velocity.z += 0.01f;
-//            }
-//
-//            if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-//            {
-//                // Accelerate
-//                pViperPhys->velocity.z -= 0.01f;
-//            }
-//
-//            if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-//            {
-//            }
-//            if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-//            {
-//            }
-//            if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
-//            {
-//            }
-//            if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
-//            {
-//            }
-//
-//
-//        }// if (pViperPhys)
+        cPhysics::sPhysInfo* pViperPhys = ::g_pPhysicEngine->pFindAssociateMeshByFriendlyName("New_Viper_Player");
+
+        const float VIPER_SPEED_CHANGE = 1.0f;
+        // Exists? 
+        if (pViperPhys)         // or != NULL
+        {
+            // CUT THE ENGINES!!!
+            if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+            {
+                pViperPhys->velocity = glm::vec3(0.0f);
+            }
+            // Go forward
+            if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+            {
+                // Accelerate
+                pViperPhys->velocity.z += VIPER_SPEED_CHANGE;
+            }
+
+            if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+            {
+                // Accelerate
+                pViperPhys->velocity.z -= VIPER_SPEED_CHANGE;
+            }
+
+            if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+            {
+                // Accelerate
+                pViperPhys->velocity.x += VIPER_SPEED_CHANGE;
+            }
+            if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+            {
+                pViperPhys->velocity.x -= VIPER_SPEED_CHANGE;
+            }
+            if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+            {
+                pViperPhys->velocity.y += VIPER_SPEED_CHANGE;
+            }
+            if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+            {
+                pViperPhys->velocity.y -= VIPER_SPEED_CHANGE;
+            }
+
+
+        }// if (pViperPhys)
 
     }
         

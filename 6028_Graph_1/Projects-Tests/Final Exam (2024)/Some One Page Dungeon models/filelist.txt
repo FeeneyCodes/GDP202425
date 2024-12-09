@@ -1,0 +1,30 @@
+ Volume in drive C is OS
+ Volume Serial Number is 8C62-3D9B
+
+ Directory of C:\z_FS\00_GDP\2024-2025\GDP202425\6028_Graph_1\Projects-Tests\Final Exam (2024)\Some One Page Dungeon models
+
+2024-12-08  10:59 PM    <DIR>          .
+2024-12-08  10:51 PM    <DIR>          ..
+2024-12-08  08:48 PM           151,903 Basilica of the Iron Snail.jpg
+2024-12-08  08:48 PM           147,666 Bloodstar Castle.jpg
+2024-12-08  08:48 PM           127,032 Den of Tyrash-Azarhun.jpg
+2024-12-08  08:48 PM           141,346 Eternal Keep of Bones.jpg
+2024-12-08  10:59 PM                 0 filelist.txt
+2024-12-08  08:48 PM           143,924 Forgotten Tomb of Twilight.jpg
+2024-12-08  08:48 PM           177,844 Frozen Tomb of the Ice God.jpg
+2024-12-08  08:48 PM           120,464 Hall of the Dark One.jpg
+2024-12-08  08:48 PM           154,583 Labyrinth of the Amber Dragon - LARGE.jpg
+2024-12-08  08:48 PM           144,383 Lair of Skavilasar.jpg
+2024-12-08  08:48 PM           156,022 Mountain Sanctum of Makkaz-Leucis.jpg
+2024-12-08  08:48 PM           185,208 Palace of the Void Emperor.jpg
+2024-12-08  08:48 PM           173,717 Pyramid of Perin.jpg
+2024-12-08  08:48 PM           144,502 Ragefire Dungeon.jpg
+2024-12-08  08:48 PM           165,446 Ruined Basilica of the Vampire Beast.jpg
+2024-12-08  08:48 PM           144,502 Ruined Fort of the Viper Queen.jpg
+2024-12-08  08:48 PM           177,844 Sunken Dungeon of the Iron Priest.jpg
+2024-12-08  08:48 PM           136,823 Swamp Castle of the Cursed Titan.jpg
+2024-12-08  08:48 PM           193,106 Undersun Asylum.jpg
+2024-12-08  08:48 PM           110,163 Underwater Basilica of Secrets.jpg
+2024-12-08  08:48 PM           177,844 Vault of Ahrash.jpg
+              21 File(s)      3,074,322 bytes
+               2 Dir(s)  76,897,300,480 bytes free

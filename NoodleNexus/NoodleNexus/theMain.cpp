@@ -339,6 +339,9 @@ int main(void)
     ::g_pTextures->Create2DTextureFromBMPFile("bad_bunny_1920x1080_24bit_black_and_white.bmp");
     //
     ::g_pTextures->Create2DTextureFromBMPFile("SurprisedChildFace.bmp");
+    // 
+    ::g_pTextures->Create2DTextureFromBMPFile("Canadian_Flag_Texture.bmp");
+    ::g_pTextures->Create2DTextureFromBMPFile("Chinese_Flag_Texture.bmp");
 
     // Load the space skybox
     std::string errorString;
@@ -594,65 +597,70 @@ int main(void)
         }//for (unsigned int meshIndex..
 
         // *******************************************************************
+        
+        // HACK
+        sModelDrawInfo flagMesh;
+        ::g_pMeshManager->FindDrawInfoByModelName("Canadian_Flag_Mesh", flagMesh);
+        ::g_pMeshManager->UpdateDynamicMesh("Canadian_Flag_Mesh", flagMesh, program);
 
 
 
         // This should be inside the phsyics thing, I guess...
         // Which AABB bounding box of the broad phase is the viper now? 
-        {
-            cPhysics::sPhysInfo* pViperPhys = ::g_pPhysicEngine->pFindAssociateMeshByFriendlyName("New_Viper_Player");
-            if (pViperPhys)
-            {
-                // The size of the AABBs that we sliced up the Galactical model in the broad phase
-                const float AABBSIZE = 1000.0f;
-
-                // Using the same XYZ location in space we used for the triangle vertices,
-                //  we are going to pass the location of the viper to get an ID
-                //  of an AABB/Cube that WOULD BE at that location (if there was one...)
-                unsigned long long hypotheticalAABB_ID 
-                    = ::g_pPhysicEngine->calcBP_GridIndex(
-                                                 pViperPhys->position.x,
-                                                 pViperPhys->position.y,
-                                                 pViperPhys->position.z, AABBSIZE);
-
-                // Where would that hypothetical AABB be in space
-                glm::vec3 minXYZofHypotheticalCube = ::g_pPhysicEngine->calcBP_MinXYZ_FromID(hypotheticalAABB_ID, AABBSIZE);
-
-                // Draw a cube at that location
-                sMesh* pDebugAABB = pFindMeshByFriendlyName("AABB_MinXYZ_At_Origin");
-                pDebugAABB->positionXYZ = minXYZofHypotheticalCube;
-                pDebugAABB->bIsVisible = true;
-                pDebugAABB->uniformScale = 1'000.0f;
-
-                // Is this an AABB that's already part of the broad phase? 
-                // i.e. is it already in the map?
-                std::map< unsigned long long, cPhysics::cBroad_Cube* >::iterator
-                    it_pCube = ::g_pPhysicEngine->map_BP_CubeGrid.find(hypotheticalAABB_ID);
-                //
-                if (it_pCube == ::g_pPhysicEngine->map_BP_CubeGrid.end())
-                {
-                    // NO, there is no cube there
-                    pDebugAABB->objectColourRGBA = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
-                    numberOfNarrowPhaseTrianglesInAABB_BroadPhaseThing = 0;
-                }
-                // NOT equal to the end
-                if (it_pCube != ::g_pPhysicEngine->map_BP_CubeGrid.end())
-                {
-                    // YES, there is an AABB (full of triangles) there!
-                    pDebugAABB->objectColourRGBA = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
-                    // 
-                    // 
-                    cPhysics::cBroad_Cube* pTheAABB_Cube = it_pCube->second;
-                    std::cout << pTheAABB_Cube->vec_pTriangles.size() << std::endl;
-                    // Pass THIS smaller list of triangles to the narrow phase
-                    numberOfNarrowPhaseTrianglesInAABB_BroadPhaseThing = pTheAABB_Cube->vec_pTriangles.size();
-                }
-
-                DrawMesh(pDebugAABB, program);
-                pDebugAABB->bIsVisible = false;
-
-            }
-        }
+//        {
+//            cPhysics::sPhysInfo* pViperPhys = ::g_pPhysicEngine->pFindAssociateMeshByFriendlyName("New_Viper_Player");
+//            if (pViperPhys)
+//            {
+//                // The size of the AABBs that we sliced up the Galactical model in the broad phase
+//                const float AABBSIZE = 1000.0f;
+//
+//                // Using the same XYZ location in space we used for the triangle vertices,
+//                //  we are going to pass the location of the viper to get an ID
+//                //  of an AABB/Cube that WOULD BE at that location (if there was one...)
+//                unsigned long long hypotheticalAABB_ID 
+//                    = ::g_pPhysicEngine->calcBP_GridIndex(
+//                                                 pViperPhys->position.x,
+//                                                 pViperPhys->position.y,
+//                                                 pViperPhys->position.z, AABBSIZE);
+//
+//                // Where would that hypothetical AABB be in space
+//                glm::vec3 minXYZofHypotheticalCube = ::g_pPhysicEngine->calcBP_MinXYZ_FromID(hypotheticalAABB_ID, AABBSIZE);
+//
+//                // Draw a cube at that location
+//                sMesh* pDebugAABB = pFindMeshByFriendlyName("AABB_MinXYZ_At_Origin");
+//                pDebugAABB->positionXYZ = minXYZofHypotheticalCube;
+//                pDebugAABB->bIsVisible = true;
+//                pDebugAABB->uniformScale = 1'000.0f;
+//
+//                // Is this an AABB that's already part of the broad phase? 
+//                // i.e. is it already in the map?
+//                std::map< unsigned long long, cPhysics::cBroad_Cube* >::iterator
+//                    it_pCube = ::g_pPhysicEngine->map_BP_CubeGrid.find(hypotheticalAABB_ID);
+//                //
+//                if (it_pCube == ::g_pPhysicEngine->map_BP_CubeGrid.end())
+//                {
+//                    // NO, there is no cube there
+//                    pDebugAABB->objectColourRGBA = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+//                    numberOfNarrowPhaseTrianglesInAABB_BroadPhaseThing = 0;
+//                }
+//                // NOT equal to the end
+//                if (it_pCube != ::g_pPhysicEngine->map_BP_CubeGrid.end())
+//                {
+//                    // YES, there is an AABB (full of triangles) there!
+//                    pDebugAABB->objectColourRGBA = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
+//                    // 
+//                    // 
+//                    cPhysics::cBroad_Cube* pTheAABB_Cube = it_pCube->second;
+//                    std::cout << pTheAABB_Cube->vec_pTriangles.size() << std::endl;
+//                    // Pass THIS smaller list of triangles to the narrow phase
+//                    numberOfNarrowPhaseTrianglesInAABB_BroadPhaseThing = pTheAABB_Cube->vec_pTriangles.size();
+//                }
+//
+//                DrawMesh(pDebugAABB, program);
+//                pDebugAABB->bIsVisible = false;
+//
+//            }
+//        }
 
 
         // For Debug, draw a cube where the smaller Cube/AABB/Regions on the broad phase 
@@ -660,27 +668,27 @@ int main(void)
         // 
         //        std::map< unsigned long long /*index*/, cBroad_Cube* > map_BP_CubeGrid;
 
-        sMesh* pDebugAABB = pFindMeshByFriendlyName("AABB_MinXYZ_At_Origin");
-        if (pDebugAABB)
-        {
-            pDebugAABB->bIsVisible = true;
-            pDebugAABB->uniformScale = 1'000.0f;
-
-            for (std::map< unsigned long long, cPhysics::cBroad_Cube* >::iterator
-                it_pCube = ::g_pPhysicEngine->map_BP_CubeGrid.begin();
-                it_pCube != ::g_pPhysicEngine->map_BP_CubeGrid.end();
-                it_pCube++)
-            {
-
-                // Draw a cube at that location
-                pDebugAABB->positionXYZ = it_pCube->second->getMinXYZ();
-                pDebugAABB->objectColourRGBA = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-                DrawMesh(pDebugAABB, program);
-
-            }
-
-            pDebugAABB->bIsVisible = false;
-        }//if (pDebugAABB)
+//        sMesh* pDebugAABB = pFindMeshByFriendlyName("AABB_MinXYZ_At_Origin");
+//        if (pDebugAABB)
+//        {
+//            pDebugAABB->bIsVisible = true;
+//            pDebugAABB->uniformScale = 1'000.0f;
+//
+//            for (std::map< unsigned long long, cPhysics::cBroad_Cube* >::iterator
+//                it_pCube = ::g_pPhysicEngine->map_BP_CubeGrid.begin();
+//                it_pCube != ::g_pPhysicEngine->map_BP_CubeGrid.end();
+//                it_pCube++)
+//            {
+//
+//                // Draw a cube at that location
+//                pDebugAABB->positionXYZ = it_pCube->second->getMinXYZ();
+//                pDebugAABB->objectColourRGBA = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+//                DrawMesh(pDebugAABB, program);
+//
+//            }
+//
+//            pDebugAABB->bIsVisible = false;
+//        }//if (pDebugAABB)
 
 
 
@@ -980,6 +988,62 @@ int main(void)
 
 void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
 {
+
+    // Load a soft body "flag" thing
+    {
+        sModelDrawInfo softBodyFlagMesh;
+        ::g_pMeshManager->LoadModelIntoVAO("assets/models/10x10_FlatPlane_for_VerletSoftBodyFlag_xyz_n_uv.ply",
+            softBodyFlagMesh, program);
+        std::cout << softBodyFlagMesh.numberOfVertices << " vertices loaded" << std::endl;
+
+
+        ::g_pPhysicEngine->createSoftBodyFromMesh("Flag_Canada", &softBodyFlagMesh);
+        ::g_pPhysicEngine->createSoftBodyFromMesh("Flag_China", &softBodyFlagMesh);
+
+
+        // Make a copy of the mesh in the VAO:
+        sModelDrawInfo flagMesh;
+        ::g_pMeshManager->FindDrawInfoByModelName("assets/models/10x10_FlatPlane_for_VerletSoftBodyFlag_xyz_n_uv.ply", flagMesh);
+        ::g_pMeshManager->CopyMeshToDynamicVAO("Canadian_Flag_Mesh", flagMesh, program);
+        ::g_pMeshManager->CopyMeshToDynamicVAO("Chinese_Flag_Mesh", flagMesh, program);
+
+        // DEBUG
+        {
+            sMesh* pCanadianFlag = new sMesh();
+//            pCanadianFlag->modelFileName = "Canadian_Flag_Mesh";
+            pCanadianFlag->modelFileName = "Canadian_Flag_Mesh";
+            pCanadianFlag->positionXYZ = glm::vec3(-50.0f, 0.0f, 200.0f);
+            pCanadianFlag->objectColourRGBA = glm::vec4(0.6f, 0.6f, 0.6f, 1.0f);
+//            pCanadianFlag->bOverrideObjectColour = true;
+ //           pCanadianFlag->bIsWireframe = true;
+            pCanadianFlag->rotationEulerXYZ = glm::vec3(0.0f);
+            pCanadianFlag->rotationEulerXYZ.y = 180.0f;
+            pCanadianFlag->textures[0] = "Canadian_Flag_Texture.bmp";
+            pCanadianFlag->blendRatio[0] = 1.0f;
+            pCanadianFlag->uniformScale = 5.0f;
+            ::g_vecMeshesToDraw.push_back(pCanadianFlag);
+
+            sMesh* pChineseFlag = new sMesh();
+//            pChineseFlag->modelFileName = "Canadian_Flag_Mesh";
+            pChineseFlag->modelFileName = "Chinese_Flag_Mesh";
+            pChineseFlag->positionXYZ = glm::vec3(50.0f, 0.0f, 200.0f);
+//            pChineseFlag->objectColourRGBA = glm::vec4(0.6f, 0.6f, 0.6f, 1.0f);
+//            pChineseFlag->bOverrideObjectColour = true;
+            pChineseFlag->rotationEulerXYZ = glm::vec3(0.0f);
+            pChineseFlag->rotationEulerXYZ.y = 180.0f;
+            pChineseFlag->textures[0] = "Chinese_Flag_Texture.bmp";
+            pChineseFlag->blendRatio[0] = 1.0f;
+            pChineseFlag->uniformScale = 5.0f;
+            ::g_vecMeshesToDraw.push_back(pChineseFlag);
+        }
+    }
+
+
+
+
+
+
+
     {
         sModelDrawInfo galacticaModel;
         ::g_pMeshManager->LoadModelIntoVAO("assets/models/Battlestar_Galactica_Res_0_(444,087 faces)_xyz_n_uv (facing +z, up +y).ply",
@@ -1198,12 +1262,12 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
 
         // 1000x1000x1000 aabbs
         //::g_pPhysicEngine->initBroadPhaseGrid();
-        ::g_pPhysicEngine->generateBroadPhaseGrid(
-            "assets/models/Battlestar_Galactica_Res_0_(444,087 faces)_xyz_n_uv (facing +z, up +y).ply",
-            1000.0f,                            // AABB Cube region size
-            pGalactica->positionXYZ,
-            pGalactica->rotationEulerXYZ,
-            pGalactica->uniformScale);
+//        ::g_pPhysicEngine->generateBroadPhaseGrid(
+//            "assets/models/Battlestar_Galactica_Res_0_(444,087 faces)_xyz_n_uv (facing +z, up +y).ply",
+//            1000.0f,                            // AABB Cube region size
+//            pGalactica->positionXYZ,
+//            pGalactica->rotationEulerXYZ,
+//            pGalactica->uniformScale);
 
 
         sMesh* pGalacticaWireframe = new sMesh();
@@ -1485,6 +1549,11 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
     }//for ( unsigned int ballCount
 
 
+
+
+
+
+    
 
 
     return;

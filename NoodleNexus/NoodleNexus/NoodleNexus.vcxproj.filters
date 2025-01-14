@@ -161,6 +161,12 @@
     <ClCompile Include="cLuaBrain\cLuaBrain.cpp">
       <Filter>Commands_Lua\Lua_Brain</Filter>
     </ClCompile>
+    <ClCompile Include="cPhysics_cSoftBody_Verlet.cpp">
+      <Filter>Phsyics_Stuff</Filter>
+    </ClCompile>
+    <ClCompile Include="cVAOManager\cVAOManager_DynamicMesh.cpp">
+      <Filter>Meshes, etc.</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PlyFileLoaders.h">

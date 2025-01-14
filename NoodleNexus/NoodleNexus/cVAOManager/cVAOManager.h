@@ -71,6 +71,16 @@ public:
 						  sModelDrawInfo &drawInfo, 
 						  unsigned int shaderProgramID);
 
+	// This is used for the soft body (or anything else, like water)
+	// Takes a mesh and copies it to another VAO, but the vertex array is DYNAMIC
+	bool CopyMeshToDynamicVAO( std::string newMeshName, 
+	                           sModelDrawInfo &drawInfo, 
+	                           unsigned int shaderProgramID);
+	bool UpdateDynamicMesh( std::string friendlyName, 
+							// Will only look at the vertex info!
+	                        sModelDrawInfo &updatedDrawInfo, 
+	                        unsigned int shaderProgramID);
+
 	// We don't want to return an int, likely
 	bool FindDrawInfoByModelName(std::string filename,
 								 sModelDrawInfo &drawInfo);

@@ -13,6 +13,35 @@ class cPhysics
 {
 public:
 
+
+
+	class cSoftBody_Verlet
+	{
+	public:
+		struct sPoint
+		{
+			glm::vec3 position;
+		};
+		struct sEdge
+		{						// These are for debugging, really
+			sPoint* pointA;		unsigned int vertAindex;
+			sPoint* pointB;		unsigned int vertBindex;
+			float restLength;
+		};
+
+		std::vector< sPoint > vecPoints;
+		std::vector< sEdge > vecEdges;
+	};
+
+	// Make a softbody object from a loaded mesh
+	// It will save the body in a map so we can use it later (and have multiple soft bodies)
+	// We are using the sModelDrawInfo because it has the edge information, too
+	bool createSoftBodyFromMesh(std::string friendlyName, sModelDrawInfo* pTheMesh);
+	cSoftBody_Verlet* get_pSoftBodyByName(std::string friendlyName);
+
+	// 
+	std::map< std::string /*freindly name*/, cSoftBody_Verlet* > m_MapSoftBodiesByName;
+
 	// Info for the physics movement, etc.
 	struct sPhysInfo
 	{

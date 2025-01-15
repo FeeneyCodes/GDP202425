@@ -25,7 +25,7 @@ private:
 	unsigned int m_capacity = STARTING_CAPACITY;
 
 //	std::string m_theData[9'000];
-	std::string* m_pTheData = NULL;	// = new std::string[STARTING_CAPACITY];
+	std::string* m_pTheData = NULL;	// = new std::string[9'000];
 
 	void m_resizeArray(unsigned int newCapacity);
 };

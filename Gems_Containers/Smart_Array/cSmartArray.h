@@ -20,6 +20,6 @@ public:
 
 private:
 
-	std::string m_theData[9'000];
+	std::string m_theData[9'000];		// STACK
 	unsigned int m_currentEndIndex = 0;
 };

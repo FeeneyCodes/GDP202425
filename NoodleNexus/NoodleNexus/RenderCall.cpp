@@ -95,7 +95,7 @@ void SetUpTextures(sMesh* pCurMesh, GLuint program)
 
 
 
-void DrawMesh(sMesh* pCurMesh, GLuint program)
+void DrawMesh(sMesh* pCurMesh, GLuint program, bool SetTexturesFromMeshInfo = true)
 {
     // Is it visible? 
     if (!pCurMesh->bIsVisible)
@@ -150,7 +150,10 @@ void DrawMesh(sMesh* pCurMesh, GLuint program)
     GLint bUseTextureAsColour_UL = glGetUniformLocation(program, "bUseTextureAsColour");
     glUniform1f(bUseTextureAsColour_UL, (GLfloat)GL_TRUE);
 
-    SetUpTextures(pCurMesh, program);
+    if (SetTexturesFromMeshInfo)
+    {
+        SetUpTextures(pCurMesh, program);
+    }
 
     // Could be called the "model" or "world" matrix
     glm::mat4 matModel = glm::mat4(1.0f);
@@ -249,10 +252,13 @@ void DrawMesh(sMesh* pCurMesh, GLuint program)
     if (pCurMesh->bIsWireframe)
     {
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        // Also render body sides
+        glDisable(GL_CULL_FACE);
     }
     else
     {
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        glEnable(GL_CULL_FACE);
     }
 
     //        glDrawArrays(GL_TRIANGLES, 0, 3);

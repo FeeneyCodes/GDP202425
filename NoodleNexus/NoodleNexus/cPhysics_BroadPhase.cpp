@@ -310,9 +310,9 @@ bool cPhysics::generateBroadPhaseGrid(std::string meshModelName, float AABBCubeS
 			vec_TessellatedTriangles.clear();
 			vec_TessellatedTriangles = vec_TEMP_TessellatedTriangles;
 
-			if (vec_TessellatedTriangles.size() > maxNumOfTessellatedTris)
+			if ((unsigned int)vec_TessellatedTriangles.size() > maxNumOfTessellatedTris)
 			{
-				maxNumOfTessellatedTris = vec_TessellatedTriangles.size();
+				maxNumOfTessellatedTris = (unsigned int)vec_TessellatedTriangles.size();
 			}
 
 		} while (bStillHasLargeTriangles);

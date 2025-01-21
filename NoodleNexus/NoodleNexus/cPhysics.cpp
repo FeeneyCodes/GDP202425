@@ -20,6 +20,14 @@ glm::vec3 cPhysics::sAABB::getExtentsXYZ(void)
 
 void cPhysics::StepTick(double deltaTime)
 {
+	if (deltaTime > this->maxTimeStep)
+	{
+		deltaTime = this->maxTimeStep;
+	}
+
+
+
+
 	// Clear all the collision from the last frame
 	this->vec_SphereAABB_Collisions.clear();
 	this->vec_SphereSphere_Collisions.clear();

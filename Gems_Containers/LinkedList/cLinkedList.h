@@ -8,18 +8,25 @@ public:
 	cLinkedList();
 	~cLinkedList();
 
+	// This inserts BEFORE the current node
+	void insertAtCurrent(std::string value);
+	std::string getAtCurrent(void);
+	bool deleteAtCurrent(void);
+
 	void insertAtStart(std::string value);
 	void insertAtEnd(std::string value);
 
-	void insertAtCurrent(std::string value);
-	std::string getAtCurrent(void);
-	void deleteAtCurrent(void);
+	// What would this be? 
+	// Is a bubble sort OK? 
+	// Is it worth doing something fancy? 
+	// How much memory does it take, etc. 
+	void SortAscending(void);
 
 	void moveToStart(void);	// HEAD
 	void moveToEnd(void);	// TAIL
 
-	void moveNext(void);
-	void movePrior(void);
+	bool moveNext(void);
+	bool movePrior(void);
 
 private:
 
@@ -35,8 +42,12 @@ private:
 		sNode* pNext;
 	};
 
-	sNode* pHeadNode = NULL;
 	sNode* pCurrentNode = NULL; // *****
+
+	// Optional things:
+	sNode* pHeadNode = NULL;
+	sNode* pTailNode = NULL;
+
 
 	// TODO:
 	unsigned int m_numberOfNodes = 0;

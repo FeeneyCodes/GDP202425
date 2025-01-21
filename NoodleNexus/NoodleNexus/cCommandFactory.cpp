@@ -53,7 +53,7 @@ iCommand* cCommandFactory::pCreateCommandObject(
 		               atof(vecDetails[2].c_str()),
 		               atof(vecDetails[3].c_str()) );
 		//		
-		float timeToMove = atof(vecDetails[4].c_str());
+		double timeToMove = atof(vecDetails[4].c_str());
 
 		// Finally call the Init
 		pMoveCommand->Init(pMeshToControl, destinationXYZ, timeToMove);

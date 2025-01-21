@@ -54,6 +54,9 @@
     <Filter Include="Commands_Lua\Lua_Brain">
       <UniqueIdentifier>{6526b839-a309-4c96-9bee-ad15f01e8ec4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="FBO">
+      <UniqueIdentifier>{6c221408-e8d3-455b-895a-e051c54c9323}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="theMain.cpp">
@@ -167,6 +170,15 @@
     <ClCompile Include="cVAOManager\cVAOManager_DynamicMesh.cpp">
       <Filter>Meshes, etc.</Filter>
     </ClCompile>
+    <ClCompile Include="cFBO\cFBO_RGB_depth.cpp">
+      <Filter>FBO</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderScene.cpp">
+      <Filter>RenderStuff</Filter>
+    </ClCompile>
+    <ClCompile Include="AddModelsToScene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PlyFileLoaders.h">
@@ -267,6 +279,9 @@
     </ClInclude>
     <ClInclude Include="cLuaBrain\cLuaBrain.h">
       <Filter>Commands_Lua\Lua_Brain</Filter>
+    </ClInclude>
+    <ClInclude Include="cFBO\cFBO_RGB_depth.h">
+      <Filter>FBO</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

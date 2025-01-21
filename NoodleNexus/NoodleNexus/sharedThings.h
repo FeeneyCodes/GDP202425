@@ -60,3 +60,9 @@ extern bool g_bShowLASERBeam;
 std::string g_floatToString(float theFloat);
 //glm::vec3 g_3StringsToVec3(std::string sX, std::string sY, std::string sZ);
 
+float g_getRandomFloat(float a, float b);
+glm::vec3 g_getRandom_vec3(glm::vec3 min, glm::vec3 max);
+std::string g_getStringVec3(glm::vec3 theVec3);
+// Returns NULL if NOT found
+sMesh* g_pFindMeshByFriendlyName(std::string theNameToFind);
+

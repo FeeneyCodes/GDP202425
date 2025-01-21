@@ -18,26 +18,52 @@ public:
 	class cSoftBody_Verlet
 	{
 	public:
+		std::string friendlyName;
 		struct sPoint
 		{
-			glm::vec3 position;
+			glm::vec3 position = glm::vec3(0.0f);
+			glm::vec3 velocity = glm::vec3(0.0f);
+			glm::vec3 acceleration = glm::vec3(0.0f);
+			// Needed for the Verlet integration step
+			glm::vec3 oldPosition = glm::vec3(0.0f);
+			// Is fixed in place
+			bool bDontUpdate = false;
 		};
-		struct sEdge
+		struct sEdgeConstraint
 		{						// These are for debugging, really
 			sPoint* pointA;		unsigned int vertAindex;
 			sPoint* pointB;		unsigned int vertBindex;
 			float restLength;
+			// 
+			bool bIsActive = true;
 		};
 
+		// TODO: Update these to pointers to make sure they are being updated in the constraint
 		std::vector< sPoint > vecPoints;
-		std::vector< sEdge > vecEdges;
+		std::vector< sEdgeConstraint > vecEdgeConstraints;
+
+		void integrationStep(double deltaTime);
+		// The more steps, the "stiffer" the soft body will be.
+		// (i.e. the more accurate the position of the points compared to the rest lengths)
+		unsigned int numberOfConstraintIterationSteps = 1;
+		void satisfyConstraints(void);
+		void cleanZeros(glm::vec3& value);
+		double maxTimeStep = 0.1;		// 10 ms
 	};
 
 	// Make a softbody object from a loaded mesh
 	// It will save the body in a map so we can use it later (and have multiple soft bodies)
 	// We are using the sModelDrawInfo because it has the edge information, too
 	bool createSoftBodyFromMesh(std::string friendlyName, sModelDrawInfo* pTheMesh);
-	cSoftBody_Verlet* get_pSoftBodyByName(std::string friendlyName);
+	// This is to set gravity or a wind or something
+	// i.e. gravity could be vec3(0, -1, 0) to pull "down"
+	//      a wind could be vec3(-1, 0, 0) to "blow it to the left"
+	bool setSoftBodyAcceleration(std::string friendlyName, glm::vec3 acceleration);
+	// Returns NULL if soft body is NOT found
+	cSoftBody_Verlet* pFindSoftBodyByFriendlyName(std::string friendlyName);
+
+	// This will call integrationStep() and satisfyConstraints() on all the soft bodies
+	void updateSoftBodies(double deltaTime);
 
 	// 
 	std::map< std::string /*freindly name*/, cSoftBody_Verlet* > m_MapSoftBodiesByName;
@@ -253,6 +279,8 @@ public:
 
 	// Called every time we want a collision detection step
 	void StepTick(double deltaTime);
+
+	double maxTimeStep = 0.1;	// 100 ms
 
 
 ////	bool DoesRayCollide(glm::vec3 rayStart, glm::vec3 rayEnd);

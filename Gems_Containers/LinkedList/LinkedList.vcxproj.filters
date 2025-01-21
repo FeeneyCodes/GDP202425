@@ -21,6 +21,9 @@
     <ClCompile Include="cLinkedList.cpp">
       <Filter>Header Files</Filter>
     </ClCompile>
+    <ClCompile Include="theMain_LL_1.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cLinkedList.h">

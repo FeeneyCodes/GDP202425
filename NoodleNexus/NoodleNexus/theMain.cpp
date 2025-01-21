@@ -39,6 +39,9 @@
 
 #include "cLowPassFilter.h"
 
+// Frame Buffer Object (FBO)
+#include "cFBO/cFBO_RGB_depth.h"
+
 //
 //const unsigned int MAX_NUMBER_OF_MESHES = 1000;
 //unsigned int g_NumberOfMeshesToDraw;
@@ -61,12 +64,17 @@ cCommandFactory* g_pCommandFactory = NULL;
 
 void AddModelsToScene(cVAOManager* pMeshManager, GLuint shaderProgram);
 
-void DrawMesh(sMesh* pCurMesh, GLuint program);
+void DrawMesh(sMesh* pCurMesh, GLuint program, bool SetTexturesFromMeshInfo = true);
 
 //glm::vec3 cameraEye = glm::vec3(0.0, 0.0, 4.0f);
 
 
-
+void RenderScene(
+    GLuint program,
+    glm::mat4 matProjection,
+    glm::mat4 matView,
+    float ratio,
+    glm::vec3 eyeLocation);
 
 // This is the function that Lua will call when 
 //void g_Lua_AddSerialCommand(std::string theCommandText)
@@ -143,22 +151,22 @@ sMesh* g_pTankModel = NULL;
 void ConsoleStuff(void);
 
 // https://stackoverflow.com/questions/5289613/generate-random-float-between-two-floats
-float getRandomFloat(float a, float b) {
+float g_getRandomFloat(float a, float b) {
     float random = ((float)rand()) / (float)RAND_MAX;
     float diff = b - a;
     float r = random * diff;
     return a + r;
 }
 
-glm::vec3 getRandom_vec3(glm::vec3 min, glm::vec3 max)
+glm::vec3 g_getRandom_vec3(glm::vec3 min, glm::vec3 max)
 {
     return glm::vec3(
-        getRandomFloat(min.x, max.x),
-        getRandomFloat(min.y, max.y),
-        getRandomFloat(min.z, max.z));
+        ::g_getRandomFloat(min.x, max.x),
+        ::g_getRandomFloat(min.y, max.y),
+        ::g_getRandomFloat(min.z, max.z));
 }
 
-std::string getStringVec3(glm::vec3 theVec3)
+std::string g_getStringVec3(glm::vec3 theVec3)
 {
     std::stringstream ssVec;
     ssVec << "(" << theVec3.x << ", " << theVec3.y << ", " << theVec3.z << ")";
@@ -166,7 +174,7 @@ std::string getStringVec3(glm::vec3 theVec3)
 }
 
 // Returns NULL if NOT found
-sMesh* pFindMeshByFriendlyName(std::string theNameToFind)
+sMesh* g_pFindMeshByFriendlyName(std::string theNameToFind)
 {
     for (unsigned int index = 0; index != ::g_vecMeshesToDraw.size(); index++)
     {
@@ -241,7 +249,7 @@ int main(void)
         std::cout << "Shader built OK" << std::endl;
     }
 
-    const GLuint program = pShaderManager->getIDFromFriendlyName("shader01");
+    GLuint program = pShaderManager->getIDFromFriendlyName("shader01");
 
     glUseProgram(program);
 
@@ -270,7 +278,7 @@ int main(void)
     
      
     ::g_pFlyCamera = new cBasicFlyCamera();
-    ::g_pFlyCamera->setEyeLocation(glm::vec3(0.0f, 5.0f, -50.0f));
+    ::g_pFlyCamera->setEyeLocation(glm::vec3(0.0f, -25.0f, -75.0f));
     // To see the Galactica:
 //    ::g_pFlyCamera->setEyeLocation(glm::vec3(10'000.0f, 25'000.0f, 160'000.0f));
     // Rotate the camera 180 degrees
@@ -423,8 +431,6 @@ int main(void)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 
-    cLightHelper TheLightHelper;
-
     // Is the default (cull back facing polygons)
     glCullFace(GL_BACK);
     glEnable(GL_CULL_FACE);
@@ -432,46 +438,32 @@ int main(void)
     // HACK:
     unsigned int numberOfNarrowPhaseTrianglesInAABB_BroadPhaseThing = 0;
 
+
+    // Camera view from withing the warehouse
+    cFBO_RGB_depth FBO_WarehouseView;
+    std::string FBOError;
+    if (!FBO_WarehouseView.init(1920, 1080, FBOError))
+//    if (!FBO_WarehouseView.init(128, 64, FBOError))
+//    if (!FBO_WarehouseView.init(3840 * 2, 2180 * 2, FBOError))
+    {
+        std::cout << "Error: FBO.init(): " << FBOError << std::endl;
+    }
+    else
+    {
+        std::cout << "FBO created OK" << std::endl;
+    }
+
+
+ 
+
     while (!glfwWindowShouldClose(window))
     {
         float ratio;
         int width, height;
         glfwGetFramebufferSize(window, &width, &height);
+
         ratio = width / (float)height;
-        glViewport(0, 0, width, height);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        //        glm::mat4 m, p, v, mvp;
-        glm::mat4 matProjection = glm::mat4(1.0f);
-
-        matProjection = glm::perspective(0.6f,           // FOV
-            ratio,          // Aspect ratio of screen
-//            0.1f,           // Near plane (as far from the camera as possible)
-//            1'000.0f);       // Far plane (as near to the camera as possible)
-// For a "far" view of the large Galactica
-            100.1f,           // Near plane (as far from the camera as possible)
-            1'000'000.0f);       // Far plane (as near to the camera as possible)
-
-        // View or "camera"
-        glm::mat4 matView = glm::mat4(1.0f);
-
-        //        glm::vec3 cameraEye = glm::vec3(0.0, 0.0, 4.0f);
-        glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
-        glm::vec3 upVector = glm::vec3(0.0f, 1.0f, 0.0f);
-
-        matView = glm::lookAt(::g_pFlyCamera->getEyeLocation(),
-            ::g_pFlyCamera->getTargetLocation(),
-            upVector);
-        //        matView = glm::lookAt( cameraEye,
-        //                               cameraTarget,
-        //                               upVector);
-
-
-        const GLint matView_UL = glGetUniformLocation(program, "matView");
-        glUniformMatrix4fv(matView_UL, 1, GL_FALSE, (const GLfloat*)&matView);
-
-        const GLint matProjection_UL = glGetUniformLocation(program, "matProjection");
-        glUniformMatrix4fv(matProjection_UL, 1, GL_FALSE, (const GLfloat*)&matProjection);
 
 
         // Calculate elapsed time
@@ -493,394 +485,13 @@ int main(void)
         double deltaTime = frameTimeFilter.getAverage();
 
 
-        // **************************************************************
-// Sky box
-// Move the sky sphere with the camera
-        sMesh* pSkySphere = pFindMeshByFriendlyName("SkySphere");
-        pSkySphere->positionXYZ = ::g_pFlyCamera->getEyeLocation();
-
-        // Disable backface culling (so BOTH sides are drawn)
-        glDisable(GL_CULL_FACE);
-        // Don't perform depth buffer testing
-        glDisable(GL_DEPTH_TEST);
-        // Don't write to the depth buffer when drawing to colour (back) buffer
-//        glDepthMask(GL_FALSE);
-//        glDepthFunc(GL_ALWAYS);// or GL_LESS (default)
-        // GL_DEPTH_TEST : do or not do the test against what's already on the depth buffer
-
-        pSkySphere->bIsVisible = true;
-        //        pSkySphere->bDoNotLight = true;
-
-        pSkySphere->uniformScale = 1.0f;
-
-        // Tell the shader this is the skybox, so use the cube map
-        // uniform samplerCube skyBoxTexture;
-        // uniform bool bIsSkyBoxObject;
-        GLuint bIsSkyBoxObject_UL = glGetUniformLocation(program, "bIsSkyBoxObject");
-        glUniform1f(bIsSkyBoxObject_UL, (GLfloat)GL_TRUE);
-        
-        // Set the cube map texture, just like we do with the 2D
-        GLuint cubeSamplerID = ::g_pTextures->getTextureIDFromName("Space");
-//        GLuint cubeSamplerID = ::g_pTextures->getTextureIDFromName("SunnyDay");
-        // Make sure this is an unused texture unit
-        glActiveTexture(GL_TEXTURE0 + 40);
-        // *****************************************
-        // NOTE: This is a CUBE_MAP, not a 2D
-        glBindTexture(GL_TEXTURE_CUBE_MAP, cubeSamplerID);
-//        glBindTexture(GL_TEXTURE_2D, cubeSamplerID);
-        // *****************************************
-        GLint skyBoxTextureSampler_UL = glGetUniformLocation(program, "skyBoxTextureSampler");
-        glUniform1i(skyBoxTextureSampler_UL, 40);       // <-- Note we use the NUMBER, not the GL_TEXTURE3 here
-
-
-        DrawMesh(pSkySphere, program);
-
-        pSkySphere->bIsVisible = false;
-
-        glUniform1f(bIsSkyBoxObject_UL, (GLfloat)GL_FALSE);
-
-        glEnable(GL_CULL_FACE);
-        // Enable depth test and write to depth buffer (normal rendering)
-        glEnable(GL_DEPTH_TEST);
-        //        glDepthMask(GL_FALSE);
-        //        glDepthFunc(GL_LESS);
-                // **************************************************************
-
-
-
-
-        ::g_pLightManager->updateShaderWithLightInfo();
-
-        // *******************************************************************
-        //    ____                       _                      
-        //   |  _ \ _ __ __ ___      __ | |    ___   ___  _ __  
-        //   | | | | '__/ _` \ \ /\ / / | |   / _ \ / _ \| '_ \ 
-        //   | |_| | | | (_| |\ V  V /  | |__| (_) | (_) | |_) |
-        //   |____/|_|  \__,_| \_/\_/   |_____\___/ \___/| .__/ 
-        //                                               |_|            
-        // // Will do two passes, one with "close" projection (clipping)
-        // and one with "far away"
-
-//        matProjection = glm::perspective(0.6f,           // FOV
-//            ratio,          // Aspect ratio of screen
-//            0.1f,           // Near plane (as far from the camera as possible)
-//            500.0f);       // Far plane (as near to the camera as possible)
-//        glUniformMatrix4fv(matProjection_UL, 1, GL_FALSE, (const GLfloat*)&matProjection);
-//
-//
-//        // Draw all the objects
-//        for (unsigned int meshIndex = 0; meshIndex != ::g_vecMeshesToDraw.size(); meshIndex++)
-//        {
-//            //            sMesh* pCurMesh = ::g_myMeshes[meshIndex];
-//           sMesh* pCurMesh = ::g_vecMeshesToDraw[meshIndex];
-////            pCurMesh->bDoNotLight = true;
-//            DrawMesh(pCurMesh, program);
-//
-//        }//for (unsigned int meshIndex..
-
-
-        //// For a "far" view of the large Galactica
-        matProjection = glm::perspective(0.6f,           // FOV
-            ratio,          // Aspect ratio of screen
-            10.0f,           // Near plane (as far from the camera as possible)
-            100'000.0f);       // Far plane (as near to the camera as possible)
-        glUniformMatrix4fv(matProjection_UL, 1, GL_FALSE, (const GLfloat*)&matProjection);
- 
-        // Draw everything again, but this time far away things
-        for (unsigned int meshIndex = 0; meshIndex != ::g_vecMeshesToDraw.size(); meshIndex++)
-        {
-            //            sMesh* pCurMesh = ::g_myMeshes[meshIndex];
-            sMesh* pCurMesh = ::g_vecMeshesToDraw[meshIndex];
-            //            pCurMesh->bDoNotLight = true;
-            DrawMesh(pCurMesh, program);
- 
-        }//for (unsigned int meshIndex..
-
-        // *******************************************************************
-        
-        // HACK
-        sModelDrawInfo flagMesh;
-        ::g_pMeshManager->FindDrawInfoByModelName("Canadian_Flag_Mesh", flagMesh);
-        ::g_pMeshManager->UpdateDynamicMesh("Canadian_Flag_Mesh", flagMesh, program);
-
-
-
-        // This should be inside the phsyics thing, I guess...
-        // Which AABB bounding box of the broad phase is the viper now? 
-//        {
-//            cPhysics::sPhysInfo* pViperPhys = ::g_pPhysicEngine->pFindAssociateMeshByFriendlyName("New_Viper_Player");
-//            if (pViperPhys)
-//            {
-//                // The size of the AABBs that we sliced up the Galactical model in the broad phase
-//                const float AABBSIZE = 1000.0f;
-//
-//                // Using the same XYZ location in space we used for the triangle vertices,
-//                //  we are going to pass the location of the viper to get an ID
-//                //  of an AABB/Cube that WOULD BE at that location (if there was one...)
-//                unsigned long long hypotheticalAABB_ID 
-//                    = ::g_pPhysicEngine->calcBP_GridIndex(
-//                                                 pViperPhys->position.x,
-//                                                 pViperPhys->position.y,
-//                                                 pViperPhys->position.z, AABBSIZE);
-//
-//                // Where would that hypothetical AABB be in space
-//                glm::vec3 minXYZofHypotheticalCube = ::g_pPhysicEngine->calcBP_MinXYZ_FromID(hypotheticalAABB_ID, AABBSIZE);
-//
-//                // Draw a cube at that location
-//                sMesh* pDebugAABB = pFindMeshByFriendlyName("AABB_MinXYZ_At_Origin");
-//                pDebugAABB->positionXYZ = minXYZofHypotheticalCube;
-//                pDebugAABB->bIsVisible = true;
-//                pDebugAABB->uniformScale = 1'000.0f;
-//
-//                // Is this an AABB that's already part of the broad phase? 
-//                // i.e. is it already in the map?
-//                std::map< unsigned long long, cPhysics::cBroad_Cube* >::iterator
-//                    it_pCube = ::g_pPhysicEngine->map_BP_CubeGrid.find(hypotheticalAABB_ID);
-//                //
-//                if (it_pCube == ::g_pPhysicEngine->map_BP_CubeGrid.end())
-//                {
-//                    // NO, there is no cube there
-//                    pDebugAABB->objectColourRGBA = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
-//                    numberOfNarrowPhaseTrianglesInAABB_BroadPhaseThing = 0;
-//                }
-//                // NOT equal to the end
-//                if (it_pCube != ::g_pPhysicEngine->map_BP_CubeGrid.end())
-//                {
-//                    // YES, there is an AABB (full of triangles) there!
-//                    pDebugAABB->objectColourRGBA = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
-//                    // 
-//                    // 
-//                    cPhysics::cBroad_Cube* pTheAABB_Cube = it_pCube->second;
-//                    std::cout << pTheAABB_Cube->vec_pTriangles.size() << std::endl;
-//                    // Pass THIS smaller list of triangles to the narrow phase
-//                    numberOfNarrowPhaseTrianglesInAABB_BroadPhaseThing = pTheAABB_Cube->vec_pTriangles.size();
-//                }
-//
-//                DrawMesh(pDebugAABB, program);
-//                pDebugAABB->bIsVisible = false;
-//
-//            }
-//        }
-
-
-        // For Debug, draw a cube where the smaller Cube/AABB/Regions on the broad phase 
-        //  structrue is, in world space
-        // 
-        //        std::map< unsigned long long /*index*/, cBroad_Cube* > map_BP_CubeGrid;
-
-//        sMesh* pDebugAABB = pFindMeshByFriendlyName("AABB_MinXYZ_At_Origin");
-//        if (pDebugAABB)
-//        {
-//            pDebugAABB->bIsVisible = true;
-//            pDebugAABB->uniformScale = 1'000.0f;
-//
-//            for (std::map< unsigned long long, cPhysics::cBroad_Cube* >::iterator
-//                it_pCube = ::g_pPhysicEngine->map_BP_CubeGrid.begin();
-//                it_pCube != ::g_pPhysicEngine->map_BP_CubeGrid.end();
-//                it_pCube++)
-//            {
-//
-//                // Draw a cube at that location
-//                pDebugAABB->positionXYZ = it_pCube->second->getMinXYZ();
-//                pDebugAABB->objectColourRGBA = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-//                DrawMesh(pDebugAABB, program);
-//
-//            }
-//
-//            pDebugAABB->bIsVisible = false;
-//        }//if (pDebugAABB)
-
-
-
-
-        // *******************************************************************
-        // Have camera follow the viper at a set distance
-//        {
-//            cPhysics::sPhysInfo* pViperPhys = ::g_pPhysicEngine->pFindAssociateMeshByFriendlyName("New_Viper_Player");
-//            if (pViperPhys)
-//            {
-//                const float MAX_DISTANCE_FROM_VIPER = 500.0f;
-//                const float MAX_CAMERA_SPEED = 5.0f;
-//                // How far away are we?
-//                if (glm::distance(pViperPhys->position, ::g_pFlyCamera->getEyeLocation()) > MAX_DISTANCE_FROM_VIPER)
-//                {
-//                    // Too far from viper.
-//                    glm::vec3 vecCameraToViper = pViperPhys->position - ::g_pFlyCamera->getEyeLocation();
-//
-//                    glm::vec3 cameraDirection = glm::normalize(vecCameraToViper);
-//
-//                    glm::vec3 cameraSpeed = cameraDirection * MAX_CAMERA_SPEED;
-//
-//                    ::g_pFlyCamera->moveForward(cameraSpeed.z);
-//                    ::g_pFlyCamera->moveLeftRight(cameraSpeed.x);
-//                    ::g_pFlyCamera->moveUpDown(cameraSpeed.y);
-//                }
-//            }//if (pViperPhys)
-//        }
-//        // *******************************************************************
-
-
-        //// OH NO! 
-        //for (sMesh* pCurMesh : g_vecMeshesToDraw)
-        //{
-        //    pCurMesh->positionXYZ.z += 1000.0f;
-        //}
-        //glm::vec3 theEye = ::g_pFlyCamera->getEyeLocation();
-        //theEye.z += 1000.0f;
-        //g_pFlyCamera->setEyeLocation(theEye);
-
-
-        // Draw the LASER beam
-        cPhysics::sLine LASERbeam;
-        glm::vec3 LASERbeam_Offset = glm::vec3(0.0f, -2.0f, 0.0f);
-
-        if (::g_bShowLASERBeam)
-        {
-            // Draw a bunch of little balls along a line from the camera
-            //  to some place in the distance
-
-            // The fly camera is always "looking at" something 1.0 unit away
-            glm::vec3 cameraDirection = ::g_pFlyCamera->getTargetRelativeToCamera();     //0,0.1,0.9
-
-
-            LASERbeam.startXYZ = ::g_pFlyCamera->getEyeLocation();
-
-            // Move the LASER below the camera
-            LASERbeam.startXYZ += LASERbeam_Offset;
-            glm::vec3 LASER_ball_location = LASERbeam.startXYZ;
-
-            glm::mat4 matOrientation = glm::mat4(glm::quatLookAt(glm::normalize(LASERbeam.endXYZ - LASERbeam.startXYZ),
-                                                                 glm::vec3(0.0f, 1.0f, 0.0f)));
-
-            // Is the LASER less than 500 units long?
-            // (is the last LAZER ball we drew beyond 500 units form the camera?)
-            while ( glm::distance(::g_pFlyCamera->getEyeLocation(), LASER_ball_location) < 150.0f )
-            {
-                // Move the next ball 0.1 times the normalized camera direction
-                LASER_ball_location += (cameraDirection * 0.10f);  
-                DrawDebugSphere(LASER_ball_location, glm::vec4(0.0f, 0.0f, 1.0f, 1.0f), 0.05f, program);
-            }
-
-            // Set the end of the LASER to the last location of the beam
-            LASERbeam.endXYZ = LASER_ball_location;
-
-        }//if (::g_bShowLASERBeam)
-
-        // Draw the end of this LASER beam
-        DrawDebugSphere(LASERbeam.endXYZ, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), 0.1f, program);
-
-        // Now draw a different coloured ball wherever we get a collision with a triangle
-        std::vector<cPhysics::sCollision_RayTriangleInMesh> vec_RayTriangle_Collisions;
-        ::g_pPhysicEngine->rayCast(LASERbeam.startXYZ, LASERbeam.endXYZ, vec_RayTriangle_Collisions, false);
-
-        glm::vec4 triColour = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
-        float triangleSize = 0.25f;
-
-        for (std::vector<cPhysics::sCollision_RayTriangleInMesh>::iterator itTriList = vec_RayTriangle_Collisions.begin();
-            itTriList != vec_RayTriangle_Collisions.end(); itTriList++)
-        {
-            for (std::vector<cPhysics::sTriangle>::iterator itTri = itTriList->vecTriangles.begin();
-                itTri != itTriList->vecTriangles.end(); itTri++)
-            {
-                // Draw a sphere at the centre of the triangle
-//                glm::vec3 triCentre = (itTri->vertices[0] + itTri->vertices[1] + itTri->vertices[2]) / 3.0f;
-//                DrawDebugSphere(triCentre, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), 0.5f, program);
-
-//                DrawDebugSphere(itTri->intersectionPoint, glm::vec4(1.0f, 1.0f, 0.0f, 1.0f), 0.25f, program);
-                DrawDebugSphere(itTri->intersectionPoint, triColour, triangleSize, program);
-                triColour.r -= 0.1f;
-                triColour.g -= 0.1f;
-                triColour.b += 0.2f;
-                triangleSize *= 1.25f;
-
-
-            }//for (std::vector<cPhysics::sTriangle>::iterator itTri = itTriList->vecTriangles
-
-        }//for (std::vector<cPhysics::sCollision_RayTriangleInMesh>::iterator itTriList = vec_RayTriangle_Collisions
-
-
-        // **********************************************************************************
-        if (::g_bShowDebugSpheres)
-        {
-
-            DrawDebugSphere(::g_pLightManager->theLights[::g_selectedLightIndex].position,
-                glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), 0.1f, program);
-
-            const float DEBUG_LIGHT_BRIGHTNESS = 0.3f;
-
-            const float ACCURACY = 0.1f;       // How many units distance
-            float distance_75_percent =
-                TheLightHelper.calcApproxDistFromAtten(0.75f, ACCURACY, FLT_MAX,
-                    ::g_pLightManager->theLights[::g_selectedLightIndex].atten.x,   // Const attent
-                    ::g_pLightManager->theLights[::g_selectedLightIndex].atten.y,   // Linear attenuation
-                    ::g_pLightManager->theLights[::g_selectedLightIndex].atten.z);  // Quadratic attenuation
-
-            DrawDebugSphere(::g_pLightManager->theLights[::g_selectedLightIndex].position,
-                glm::vec4(DEBUG_LIGHT_BRIGHTNESS, 0.0f, 0.0f, 1.0f),
-                distance_75_percent,
-                program);
-
-
-            float distance_50_percent =
-                TheLightHelper.calcApproxDistFromAtten(0.5f, ACCURACY, FLT_MAX,
-                    ::g_pLightManager->theLights[::g_selectedLightIndex].atten.x,   // Const attent
-                    ::g_pLightManager->theLights[::g_selectedLightIndex].atten.y,   // Linear attenuation
-                    ::g_pLightManager->theLights[::g_selectedLightIndex].atten.z);  // Quadratic attenuation
-
-            DrawDebugSphere(::g_pLightManager->theLights[::g_selectedLightIndex].position,
-                glm::vec4(0.0f, DEBUG_LIGHT_BRIGHTNESS, 0.0f, 1.0f),
-                distance_50_percent,
-                program);
-
-            float distance_25_percent =
-                TheLightHelper.calcApproxDistFromAtten(0.25f, ACCURACY, FLT_MAX,
-                    ::g_pLightManager->theLights[::g_selectedLightIndex].atten.x,   // Const attent
-                    ::g_pLightManager->theLights[::g_selectedLightIndex].atten.y,   // Linear attenuation
-                    ::g_pLightManager->theLights[::g_selectedLightIndex].atten.z);  // Quadratic attenuation
-
-            DrawDebugSphere(::g_pLightManager->theLights[::g_selectedLightIndex].position,
-                glm::vec4(0.0f, 0.0f, DEBUG_LIGHT_BRIGHTNESS, 1.0f),
-                distance_25_percent,
-                program);
-
-            float distance_05_percent =
-                TheLightHelper.calcApproxDistFromAtten(0.05f, ACCURACY, FLT_MAX,
-                    ::g_pLightManager->theLights[::g_selectedLightIndex].atten.x,   // Const attent
-                    ::g_pLightManager->theLights[::g_selectedLightIndex].atten.y,   // Linear attenuation
-                    ::g_pLightManager->theLights[::g_selectedLightIndex].atten.z);  // Quadratic attenuation
-
-            DrawDebugSphere(::g_pLightManager->theLights[::g_selectedLightIndex].position,
-                glm::vec4(DEBUG_LIGHT_BRIGHTNESS, DEBUG_LIGHT_BRIGHTNESS, 0.0f, 1.0f),
-                distance_05_percent,
-                program);
-
-        }
-        // **********************************************************************************
-
-
-
-               
-
-
-
-
-
-        //sMesh* pBall = pFindMeshByFriendlyName("Ball");
-        //if (pBall)
-        //{
-        //    pBall->positionXYZ.y -= 1.0f * deltaTime;
-        //}
-
-        // HACK: Update "shadow" of ball to be where the ball hits the large block ground
-        sMesh* pBallShadow = pFindMeshByFriendlyName("Ball_Shadow");
-        sMesh* pBall = pFindMeshByFriendlyName("Ball");
-        pBallShadow->positionXYZ.x = pBall->positionXYZ.x;
-        pBallShadow->positionXYZ.z = pBall->positionXYZ.z;
-        // Don't update the y - keep the shadow near the plane
-
-
         // Physic update and test 
         ::g_pPhysicEngine->StepTick(deltaTime);
+
+        // This might be better inside the StepTick(),
+        //  but I'm leaving it here for clarification
+        //  or if you DON'T want any soft bodies
+        ::g_pPhysicEngine->updateSoftBodies(deltaTime);
 
 
         // Update the commands, too
@@ -888,7 +499,7 @@ int main(void)
 
 
         // Handle any collisions
-        if (::g_pPhysicEngine->vec_SphereAABB_Collisions.size() > 0 )
+        if (::g_pPhysicEngine->vec_SphereAABB_Collisions.size() > 0)
         {
             // Yes, there were collisions
 
@@ -896,7 +507,7 @@ int main(void)
             {
                 cPhysics::sCollision_SphereAABB thisCollisionEvent = ::g_pPhysicEngine->vec_SphereAABB_Collisions[index];
 
-                if (thisCollisionEvent.pTheSphere->pPhysicInfo->velocity.y  < 0.0f)
+                if (thisCollisionEvent.pTheSphere->pPhysicInfo->velocity.y < 0.0f)
                 {
                     // Yes, it's heading down
                     // So reverse the direction of velocity
@@ -904,24 +515,114 @@ int main(void)
                 }
 
             }//for (unsigned int index
- 
+
         }//if (::g_pPhysicEngine->vec_SphereAABB_Collisions
 
 
-        // Point the spot light to the ball
-        sMesh* pBouncy_5_Ball = pFindMeshByFriendlyName("Bouncy_5");
-        if (pBouncy_5_Ball)
-        {
-            glm::vec3 directionToBal
-                = pBouncy_5_Ball->positionXYZ - glm::vec3(::g_pLightManager->theLights[1].position);
-    
-            // Normalize to get the direction only
-            directionToBal = glm::normalize(directionToBal);
+        glm::mat4 matProjection = glm::mat4(1.0f);
+        glm::mat4 matView = glm::mat4(1.0f);
+        glm::vec3 upVector = glm::vec3(0.0f, 1.0f, 0.0f);
 
-            // Point the spot light at the bouncy ball
-            ::g_pLightManager->theLights[1].direction = glm::vec4(directionToBal, 1.0f);
+        // **************************************************
+        // 
+        // RENDER from the inside of the warehouse
+
+
+        // Point output to the off-screen FBO
+        glBindFramebuffer(GL_FRAMEBUFFER, FBO_WarehouseView.ID);
+
+        // These will ONLY work on the default framebuffer
+//        glViewport(0, 0, width, height);
+//       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+//        FBO_WarehouseView.clearColourBuffer(0);
+        FBO_WarehouseView.clearBuffers(true, true);
+
+
+        matProjection = glm::perspective(0.6f,
+            ratio,
+            10.0f,
+            100'000.0f);
+
+        glm::vec3 eyeInsideWarehouse = glm::vec3(-197.0f, 14.0f, -72.0f);
+        float xOffset = 10.0f * glm::sin((float)glfwGetTime() / 2.0f);
+        glm::vec3 atInsideWareHouse =
+            eyeInsideWarehouse + glm::vec3(xOffset, 0.0f, 10.0f);
+        
+        matView = glm::lookAt(eyeInsideWarehouse, atInsideWareHouse, glm::vec3(0.0f, 1.0f, 0.0f));
+
+        RenderScene(program, matProjection, matView, ratio, eyeInsideWarehouse);
+        // 
+        // **************************************************
+
+
+
+        // **************************************************
+        // 
+        // RENDER normally
+
+        // Point the output to the regular framebuffer (the screen)
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        // These will ONLY work on the default framebuffer
+        glViewport(0, 0, width, height);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        matView = glm::lookAt(
+            ::g_pFlyCamera->getEyeLocation(),
+            ::g_pFlyCamera->getTargetLocation(),
+            upVector);
+
+        matProjection = glm::perspective(0.6f,
+            ratio,
+            10.0f,
+            100'000.0f);
+
+        // Render the offscreen FBO texture onto where Dua Lipa was...
+        sMesh* pFBOTextureMesh = ::g_pFindMeshByFriendlyName("WareHouseView");
+
+        if (pFBOTextureMesh)
+        {
+            pFBOTextureMesh->bIsVisible = true;
+
+            GLint matProjection_UL = glGetUniformLocation(program, "matProjection");
+            glUniformMatrix4fv(matProjection_UL, 1, GL_FALSE, (const GLfloat*)&matProjection);
+
+            GLint matView_UL = glGetUniformLocation(program, "matView");
+            glUniformMatrix4fv(matView_UL, 1, GL_FALSE, (const GLfloat*)&matView);
+
+
+
+            // Connect texture unit #0 to the offscreen FBO
+            glActiveTexture(GL_TEXTURE0);
+
+            // The colour texture inside the FBO is just a regular colour texture.
+            // There's nothing special about it.
+            glBindTexture(GL_TEXTURE_2D, FBO_WarehouseView.colourTexture_0_ID);
+//            glBindTexture(GL_TEXTURE_2D, ::g_pTextures->getTextureIDFromName("dua-lipa-promo.bmp"));
+
+            GLint texture01_UL = glGetUniformLocation(program, "texture00");
+            glUniform1i(texture01_UL, 0);       // <-- Note we use the NUMBER, not the GL_TEXTURE3 here
+
+            GLint texRatio_0_to_3_UL = glGetUniformLocation(program, "texRatio_0_to_3");
+            glUniform4f(texRatio_0_to_3_UL,
+                1.0f,
+                0.0f,
+                0.0f,
+                0.0f);
+
+            DrawMesh(pFBOTextureMesh, program, false);
+
+            pFBOTextureMesh->bIsVisible = false;
         }
 
+
+        RenderScene(program, matProjection, matView, ratio, ::g_pFlyCamera->getEyeLocation());
+        // 
+        // **************************************************
+
+
+        // **************************************************
 
 
         // Handle async IO stuff
@@ -955,9 +656,9 @@ int main(void)
         if (pViperPhys)
         {
             ssTitle
-                << " Viper XYZ:" << getStringVec3(pViperPhys->position)
-                << " vel:" << getStringVec3(pViperPhys->velocity)
-                << " acc:" << getStringVec3(pViperPhys->acceleration);
+                << " Viper XYZ:" << ::g_getStringVec3(pViperPhys->position)
+                << " vel:" << ::g_getStringVec3(pViperPhys->velocity)
+                << " acc:" << ::g_getStringVec3(pViperPhys->acceleration);
 
         }//if (pViperPhys)
 
@@ -986,578 +687,12 @@ int main(void)
 }
 
 
-void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
-{
 
-    // Load a soft body "flag" thing
-    {
-        sModelDrawInfo softBodyFlagMesh;
-        ::g_pMeshManager->LoadModelIntoVAO("assets/models/10x10_FlatPlane_for_VerletSoftBodyFlag_xyz_n_uv.ply",
-            softBodyFlagMesh, program);
-        std::cout << softBodyFlagMesh.numberOfVertices << " vertices loaded" << std::endl;
 
 
-        ::g_pPhysicEngine->createSoftBodyFromMesh("Flag_Canada", &softBodyFlagMesh);
-        ::g_pPhysicEngine->createSoftBodyFromMesh("Flag_China", &softBodyFlagMesh);
 
 
-        // Make a copy of the mesh in the VAO:
-        sModelDrawInfo flagMesh;
-        ::g_pMeshManager->FindDrawInfoByModelName("assets/models/10x10_FlatPlane_for_VerletSoftBodyFlag_xyz_n_uv.ply", flagMesh);
-        ::g_pMeshManager->CopyMeshToDynamicVAO("Canadian_Flag_Mesh", flagMesh, program);
-        ::g_pMeshManager->CopyMeshToDynamicVAO("Chinese_Flag_Mesh", flagMesh, program);
 
-        // DEBUG
-        {
-            sMesh* pCanadianFlag = new sMesh();
-//            pCanadianFlag->modelFileName = "Canadian_Flag_Mesh";
-            pCanadianFlag->modelFileName = "Canadian_Flag_Mesh";
-            pCanadianFlag->positionXYZ = glm::vec3(-50.0f, 0.0f, 200.0f);
-            pCanadianFlag->objectColourRGBA = glm::vec4(0.6f, 0.6f, 0.6f, 1.0f);
-//            pCanadianFlag->bOverrideObjectColour = true;
- //           pCanadianFlag->bIsWireframe = true;
-            pCanadianFlag->rotationEulerXYZ = glm::vec3(0.0f);
-            pCanadianFlag->rotationEulerXYZ.y = 180.0f;
-            pCanadianFlag->textures[0] = "Canadian_Flag_Texture.bmp";
-            pCanadianFlag->blendRatio[0] = 1.0f;
-            pCanadianFlag->uniformScale = 5.0f;
-            ::g_vecMeshesToDraw.push_back(pCanadianFlag);
-
-            sMesh* pChineseFlag = new sMesh();
-//            pChineseFlag->modelFileName = "Canadian_Flag_Mesh";
-            pChineseFlag->modelFileName = "Chinese_Flag_Mesh";
-            pChineseFlag->positionXYZ = glm::vec3(50.0f, 0.0f, 200.0f);
-//            pChineseFlag->objectColourRGBA = glm::vec4(0.6f, 0.6f, 0.6f, 1.0f);
-//            pChineseFlag->bOverrideObjectColour = true;
-            pChineseFlag->rotationEulerXYZ = glm::vec3(0.0f);
-            pChineseFlag->rotationEulerXYZ.y = 180.0f;
-            pChineseFlag->textures[0] = "Chinese_Flag_Texture.bmp";
-            pChineseFlag->blendRatio[0] = 1.0f;
-            pChineseFlag->uniformScale = 5.0f;
-            ::g_vecMeshesToDraw.push_back(pChineseFlag);
-        }
-    }
-
-
-
-
-
-
-
-    {
-        sModelDrawInfo galacticaModel;
-        ::g_pMeshManager->LoadModelIntoVAO("assets/models/Battlestar_Galactica_Res_0_(444,087 faces)_xyz_n_uv (facing +z, up +y).ply",
-            galacticaModel, program);
-        std::cout << galacticaModel.meshName << ": " << galacticaModel.numberOfVertices << " vertices loaded" << std::endl;
-    }
-
-    {
-        sModelDrawInfo cubeMinXYZ_at_OriginInfo;
-        ::g_pMeshManager->LoadModelIntoVAO("assets/models/Cube_MinXYZ_at_Origin_xyz_n_uv.ply",
-            cubeMinXYZ_at_OriginInfo, program);
-        std::cout << cubeMinXYZ_at_OriginInfo.meshName << ": " << cubeMinXYZ_at_OriginInfo.numberOfVertices << " vertices loaded" << std::endl;
-    }
-
-    {
-        sModelDrawInfo warehouseModel;
-        //    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Warehouse_xyz_n.ply",
-        ::g_pMeshManager->LoadModelIntoVAO("assets/models/Warehouse_xyz_n_uv.ply",
-            warehouseModel, program);
-        std::cout << warehouseModel.numberOfVertices << " vertices loaded" << std::endl;
-    }
-
-    {
-        sModelDrawInfo tankModel;
-        //    pMeshManager->LoadModelIntoVAO("assets/models/Low_Poly_Tank_Model_3D_model.ply", 
-        pMeshManager->LoadModelIntoVAO("assets/models/Low_Poly_Tank_Model_3D_model_xyz_n_uv.ply",
-            tankModel, program);
-        std::cout << tankModel.meshName << " : " << tankModel.numberOfVertices << " vertices loaded" << std::endl;
-    }
-
-    //sModelDrawInfo carModelInfo;
-    //pMeshManager->LoadModelIntoVAO("assets/models/VintageRacingCar_xyz_only.ply", 
-    //                               carModelInfo, program);
-    //std::cout << carModelInfo.numberOfVertices << " vertices loaded" << std::endl;
-
-    //sModelDrawInfo dragonModel;
-    //pMeshManager->LoadModelIntoVAO("assets/models/Dragon 2.5Edited_xyz_only.ply", 
-    //    dragonModel, program);
-    //std::cout << dragonModel.numberOfVertices << " vertices loaded" << std::endl;
-
-    {
-        sModelDrawInfo terrainModel;
-        //    pMeshManager->LoadModelIntoVAO("assets/models/Simple_MeshLab_terrain_xyz_only.ply", 
-    //    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Simple_MeshLab_terrain_xyz_N.ply",
-    //    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Simple_MeshLab_terrain_xyz_N_uv.ply",
-        ::g_pMeshManager->LoadModelIntoVAO("assets/models/Simple_MeshLab_terrain_x5_xyz_N_uv.ply",
-            terrainModel, program);
-        std::cout << terrainModel.numberOfVertices << " vertices loaded" << std::endl;
-    }
-
-    {
-        sModelDrawInfo bunnyModel;
-        //    ::g_pMeshManager->LoadModelIntoVAO("assets/models/bun_zipper_res2_10x_size_xyz_only.ply",
-    //    ::g_pMeshManager->LoadModelIntoVAO("assets/models/bun_zipper_res2_10x_size_xyz_N_only.ply",
-        ::g_pMeshManager->LoadModelIntoVAO("assets/models/bun_zipper_res2_10x_size_xyz_N_uv.ply",
-            bunnyModel, program);
-        std::cout << bunnyModel.numberOfVertices << " vertices loaded" << std::endl;
-    }
-
-    {
-        sModelDrawInfo platPlaneDrawInfo;
-        //    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Flat_Plane_xyz.ply", 
-    //    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Flat_Plane_xyz_N.ply",
-        ::g_pMeshManager->LoadModelIntoVAO("assets/models/Flat_Plane_xyz_N_uv.ply",
-            platPlaneDrawInfo, program);
-        std::cout << platPlaneDrawInfo.numberOfVertices << " vertices loaded" << std::endl;
-    }
-
-    {
-        sModelDrawInfo sphereMesh;
-        //    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Sphere_radius_1_xyz.ply",
-        //::g_pMeshManager->LoadModelIntoVAO("assets/models/Sphere_radius_1_xyz_N.ply",
-        ::g_pMeshManager->LoadModelIntoVAO("assets/models/Sphere_radius_1_xyz_N_uv.ply",
-
-            sphereMesh, program);
-        std::cout << sphereMesh.numberOfVertices << " vertices loaded" << std::endl;
-    }
-
-    {
-        sModelDrawInfo sphereShadowMesh;
-        //    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Sphere_radius_1_Flat_Shadow_xyz_N.ply",
-        ::g_pMeshManager->LoadModelIntoVAO("assets/models/Sphere_radius_1_Flat_Shadow_xyz_N_uv.ply",
-            sphereShadowMesh, program);
-        std::cout << sphereShadowMesh.numberOfVertices << " vertices loaded" << std::endl;
-    }
-
-    {
-        sModelDrawInfo newViperModelInfo;
-        ::g_pMeshManager->LoadModelIntoVAO("assets/models/Viper_MkVII_xyz_n_uv.ply",
-            newViperModelInfo, program);
-        std::cout << newViperModelInfo.numberOfVertices << " vertices loaded" << std::endl;
-    }
-
-    {
-        sModelDrawInfo cheeseMesh;
-        ::g_pMeshManager->LoadModelIntoVAO("assets/models/Cheese_xyz_n_uv.ply",
-            cheeseMesh, program);
-        std::cout << cheeseMesh.numberOfVertices << " vertices loaded" << std::endl;
-    }
-
-    // Add a bunch of bunny rabbits
-    float boxLimit = 500.0f;
-    float boxStep = 50.0f;
-    unsigned int ID_count = 0;
-    for (float x = -boxLimit; x <= boxLimit; x += boxStep)
-    {
-        for (float z = -(2.0f * boxLimit); z <= boxLimit; z += boxStep)
-        {
-            sMesh* pBunny = new sMesh();
-            //            pBunny->modelFileName = "assets/models/bun_zipper_res2_10x_size_xyz_only.ply";
-            //            pBunny->modelFileName = "assets/models/bun_zipper_res2_10x_size_xyz_N_only.ply";
-            pBunny->modelFileName = "assets/models/bun_zipper_res2_10x_size_xyz_N_uv.ply";
-            pBunny->positionXYZ = glm::vec3(x, -35.0f, z);
-            pBunny->uniformScale = 2.0f;
-            pBunny->objectColourRGBA
-                = glm::vec4(getRandomFloat(0.0f, 1.0f),
-                    getRandomFloat(0.0f, 1.0f),
-                    getRandomFloat(0.0f, 1.0f),
-                    1.0f);
-            // Set some transparency
-            pBunny->alphaTransparency = getRandomFloat(0.25f, 1.0f);
-            //            pBunny->alphaTransparency = 0.0f;
-            std::stringstream ssName;
-            ssName << "Bunny_" << ID_count;
-            pBunny->uniqueFriendlyName = ssName.str();
-            ID_count++;
-
-            ::g_vecMeshesToDraw.push_back(pBunny);
-        }
-    }//for (float x = -boxLimit...
-
-
-    // this is the object that the Lua script, etc. is going to handle
-    {
-        sMesh* pNewViper = new sMesh();
-        pNewViper->modelFileName = "assets/models/Viper_MkVII_xyz_n_uv.ply";
-        pNewViper->positionXYZ = glm::vec3(0.0f, 0.0f, 0.0f);
-        pNewViper->objectColourRGBA = glm::vec4(0.6f, 0.6f, 0.6f, 1.0f);
-        pNewViper->bOverrideObjectColour = true;
-        pNewViper->uniqueFriendlyName = "New_Viper_Player";
-        pNewViper->bIsVisible = true;
-        pNewViper->uniformScale = 5.0f;
-        pNewViper->textures[0] = "dirty-metal-texture_1048-4784.bmp";
-        pNewViper->blendRatio[0] = 1.0f;
-
-        ::g_vecMeshesToDraw.push_back(pNewViper);
-
-        // Add a associated physics object to have the phsyics "move" this
-        cPhysics::sPhysInfo* pViperPhysObject = new  cPhysics::sPhysInfo();
-        pViperPhysObject->bDoesntMove = false;
-        pViperPhysObject->position = pNewViper->positionXYZ;
-        pViperPhysObject->velocity = glm::vec3(0.0f);
-        pViperPhysObject->pAssociatedDrawingMeshInstance = pNewViper;
-        g_pPhysicEngine->vecGeneralPhysicsObjects.push_back(pViperPhysObject);
-    }
-
-    // Place a bunny somewhere else in the scene
-    sMesh* pBunny_15 = pFindMeshByFriendlyName("Bunny_15");
-    if (pBunny_15)
-    {
-        pBunny_15->positionXYZ = glm::vec3(-50.0f, 15.0f, 30.0f);
-        pBunny_15->rotationEulerXYZ.x = glm::radians(180.0f);
-        pBunny_15->uniformScale = 10.0f;
-    }
-    // Place a bunny somewhere else in the scene
-    sMesh* pBunny_27 = pFindMeshByFriendlyName("Bunny_27");
-    if (pBunny_27)
-    {
-        pBunny_27->positionXYZ = glm::vec3(75.0f, 10.0f, -45.0f);
-        pBunny_27->rotationEulerXYZ.x = glm::radians(180.0f);
-        pBunny_27->uniformScale = 10.0f;
-    }
-
-
-        
-   {
-        sMesh* pGalactica = new sMesh();
-        pGalactica->modelFileName = "assets/models/Battlestar_Galactica_Res_0_(444,087 faces)_xyz_n_uv (facing +z, up +y).ply";
-        pGalactica->positionXYZ = glm::vec3(-25'000.0f, 0.0f, 0.0f);
-        pGalactica->rotationEulerXYZ.y = 17.0f;
-        pGalactica->rotationEulerXYZ.x = 23.0f;
-        pGalactica->objectColourRGBA = glm::vec4(0.6f, 0.6f, 0.6f, 1.0f);
-        //pGalactica->bIsWireframe = true;
-        pGalactica->bOverrideObjectColour = true;
-        pGalactica->uniqueFriendlyName = "Galactica";
-        //pGalactica->bDoNotLight = true;
-        pGalactica->bIsVisible = true;
-        pGalactica->uniformScale = 1.0f;
-        //
-        pGalactica->textures[0] = "Non-uniform concrete wall 0512-3-1024x1024.bmp";
-        pGalactica->blendRatio[0] = 1.0f;
-
-        ::g_vecMeshesToDraw.push_back(pGalactica);
-
-        // This is just for testing to see if the xyz locations correctly map to a gridID and the other way around
-        unsigned long long gridIndex = ::g_pPhysicEngine->calcBP_GridIndex(0.0f, 0.0f, 0.0f, 1000.0f); // 0, 0, 0
-        glm::vec3 minXYZ = ::g_pPhysicEngine->calcBP_MinXYZ_FromID(gridIndex, 1000.0f);
-        gridIndex = ::g_pPhysicEngine->calcBP_GridIndex(500.0f, 500.0f, 500.0f, 1000.0f);              // 0, 0, 0
-        minXYZ = ::g_pPhysicEngine->calcBP_MinXYZ_FromID(gridIndex, 1000.0f);
-        gridIndex = ::g_pPhysicEngine->calcBP_GridIndex(-500.0f, -500.0f, -500.0f, 1000.0f);           // 
-        minXYZ = ::g_pPhysicEngine->calcBP_MinXYZ_FromID(gridIndex, 1000.0f);
-        gridIndex = ::g_pPhysicEngine->calcBP_GridIndex(10.0f, 2500.0f, 10.0f, 1000.0f);               // 0, 2, 0
-        minXYZ = ::g_pPhysicEngine->calcBP_MinXYZ_FromID(gridIndex, 1000.0f);
-        gridIndex = ::g_pPhysicEngine->calcBP_GridIndex(2500.0f, 10.0f, 10.0f, 1000.0f);               // 2, 0, 0
-        minXYZ = ::g_pPhysicEngine->calcBP_MinXYZ_FromID(gridIndex, 1000.0f);
-        gridIndex = ::g_pPhysicEngine->calcBP_GridIndex(10.0f, 10.0f, 2500.0f, 1000.0f);               // 0, 0, 2
-        minXYZ = ::g_pPhysicEngine->calcBP_MinXYZ_FromID(gridIndex, 1000.0f);
-        gridIndex = ::g_pPhysicEngine->calcBP_GridIndex(8745.0f, 3723.0f, 2500.0f, 1000.0f);           // 8, 3, 2
-        minXYZ = ::g_pPhysicEngine->calcBP_MinXYZ_FromID(gridIndex, 1000.0f);
-        gridIndex = ::g_pPhysicEngine->calcBP_GridIndex(-8745.0f, -3723.0f, -2500.0f, 1000.0f);           // 8, 3, 2
-        minXYZ = ::g_pPhysicEngine->calcBP_MinXYZ_FromID(gridIndex, 1000.0f);
-        gridIndex = ::g_pPhysicEngine->calcBP_GridIndex(-999.0f, -999.0f, -999.0f, 1000.0f);           // -1, -1, -1
-        minXYZ = ::g_pPhysicEngine->calcBP_MinXYZ_FromID(gridIndex, 1000.0f);
-
-
-
-        // 1000x1000x1000 aabbs
-        //::g_pPhysicEngine->initBroadPhaseGrid();
-//        ::g_pPhysicEngine->generateBroadPhaseGrid(
-//            "assets/models/Battlestar_Galactica_Res_0_(444,087 faces)_xyz_n_uv (facing +z, up +y).ply",
-//            1000.0f,                            // AABB Cube region size
-//            pGalactica->positionXYZ,
-//            pGalactica->rotationEulerXYZ,
-//            pGalactica->uniformScale);
-
-
-        sMesh* pGalacticaWireframe = new sMesh();
-        pGalacticaWireframe->modelFileName = "assets/models/Battlestar_Galactica_Res_0_(444,087 faces)_xyz_n_uv (facing +z, up +y).ply";
-        pGalacticaWireframe->objectColourRGBA = glm::vec4(0.0f, 0.0f, 0.5f, 1.0f);
-        pGalacticaWireframe->positionXYZ = pGalactica->positionXYZ;
-        pGalacticaWireframe->rotationEulerXYZ = pGalactica->rotationEulerXYZ;
-        pGalacticaWireframe->uniformScale = pGalactica->uniformScale;
-        pGalacticaWireframe->bIsWireframe = true;
-        pGalacticaWireframe->bOverrideObjectColour = true;
-        pGalacticaWireframe->bDoNotLight = true;
-        pGalacticaWireframe->bIsVisible = true;
-
-        ::g_vecMeshesToDraw.push_back(pGalacticaWireframe);
-
-
-        // Debug AABB shape
-        sMesh* pAABBCube_MinAtOrigin = new sMesh();
-        pAABBCube_MinAtOrigin->modelFileName = "assets/models/Cube_MinXYZ_at_Origin_xyz_n_uv.ply";
-        pAABBCube_MinAtOrigin->bIsWireframe = true;
-        pAABBCube_MinAtOrigin->objectColourRGBA = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-        pAABBCube_MinAtOrigin->bOverrideObjectColour = true;
-        pAABBCube_MinAtOrigin->bDoNotLight = true;
-        pAABBCube_MinAtOrigin->bIsVisible = false;
-        pAABBCube_MinAtOrigin->uniqueFriendlyName = "AABB_MinXYZ_At_Origin";
-
-        ::g_vecMeshesToDraw.push_back(pAABBCube_MinAtOrigin);
-    }
-
-   {
-       sMesh* pSkySphere = new sMesh();
-       pSkySphere->modelFileName = "assets/models/Sphere_radius_1_xyz_N_uv.ply";
-       pSkySphere->positionXYZ = glm::vec3(0.0f, 0.0f, 0.0f);
-       pSkySphere->objectColourRGBA = glm::vec4(0.6f, 0.6f, 0.6f, 1.0f);
-//       pSkySphere->bIsWireframe = true;
-       pSkySphere->bOverrideObjectColour = true;
-       pSkySphere->uniformScale = 25.0f;
-       pSkySphere->uniqueFriendlyName = "SkySphere";
-       pSkySphere->textures[0] = "bad_bunny_1920x1080.bmp";
-       pSkySphere->blendRatio[0] = 1.0f;
-       pSkySphere->bIsVisible = false;
-       ::g_vecMeshesToDraw.push_back(pSkySphere);
-   }
-
-
-
-    {
-        //    ____                _            __                   _     
-        //   |  _ \ ___ _ __   __| | ___ _ __ / / __ ___   ___  ___| |__  
-        //   | |_) / _ \ '_ \ / _` |/ _ \ '__/ / '_ ` _ \ / _ \/ __| '_ \ 
-        //   |  _ <  __/ | | | (_| |  __/ | / /| | | | | |  __/\__ \ | | |
-        //   |_| \_\___|_| |_|\__,_|\___|_|/_/ |_| |_| |_|\___||___/_| |_|
-        //                                                                
-        sMesh* pWarehouse = new sMesh();
-        //        pWarehouse->modelFileName = "assets/models/Warehouse_xyz_n.ply";
-        pWarehouse->modelFileName = "assets/models/Warehouse_xyz_n_uv.ply";
-        pWarehouse->positionXYZ = glm::vec3(-200.0f, 5.0f, 0.0f);
-        pWarehouse->rotationEulerXYZ.y = -90.0f;
-        pWarehouse->objectColourRGBA = glm::vec4(0.6f, 0.6f, 0.6f, 1.0f);
-        //pWarehouse->bIsWireframe = true;
-        pWarehouse->bOverrideObjectColour = true;
-        pWarehouse->uniqueFriendlyName = "Warehouse";
-        //
-        pWarehouse->textures[0] = "bad_bunny_1920x1080.bmp";
-
-        ::g_vecMeshesToDraw.push_back(pWarehouse);
-
-        //    ____  _               _                  _     _           _   
-        //   |  _ \| |__  _   _ ___(_) ___ ___    ___ | |__ (_) ___  ___| |_ 
-        //   | |_) | '_ \| | | / __| |/ __/ __|  / _ \| '_ \| |/ _ \/ __| __|
-        //   |  __/| | | | |_| \__ \ | (__\__ \ | (_) | |_) | |  __/ (__| |_ 
-        //   |_|   |_| |_|\__, |___/_|\___|___/  \___/|_.__// |\___|\___|\__|
-        //                |___/                           |__/               
-        ::g_pPhysicEngine->addTriangleMesh(
-            "assets/models/Warehouse_xyz_n_uv.ply",
-            pWarehouse->positionXYZ,
-            pWarehouse->rotationEulerXYZ,
-            pWarehouse->uniformScale);
-
-    }
-
-    {
-        sMesh* pTerrain = new sMesh();
-        pTerrain->modelFileName = "assets/models/Simple_MeshLab_terrain_x5_xyz_N_uv.ply";
-        pTerrain->positionXYZ = glm::vec3(0.0f, -150.0f, 0.0f);
-        pTerrain->uniqueFriendlyName = "Terrain";
-        pTerrain->rotationEulerXYZ.y = 90.0f;
-        pTerrain->textures[0] = "Grey_Brick_Wall_Texture.bmp";
-        pTerrain->blendRatio[0] = 1.0f;
-        //
-
-        ::g_vecMeshesToDraw.push_back(pTerrain);
-    }
-        
-    {
-
-
-        sMesh* pFlatPlane = new sMesh();
-        pFlatPlane->modelFileName = "assets/models/Flat_Plane_xyz_N_uv.ply";
-        pFlatPlane->positionXYZ = glm::vec3(0.0f, -5.5f, 0.0f);
-        pFlatPlane->rotationEulerXYZ.y = 90.0f;
-        pFlatPlane->objectColourRGBA = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-        pFlatPlane->uniqueFriendlyName = "Ground";
-        //
-        pFlatPlane->textures[0] = "dua-lipa-promo.bmp";     // 1.0
-        pFlatPlane->textures[1] = "Puzzle_parts.bmp";       // 0.0
-        pFlatPlane->textures[2] = "shape-element-splattered-texture-stroke_1194-8223.bmp";
-        pFlatPlane->textures[3] = "Grey_Brick_Wall_Texture.bmp";
-
-//        pFlatPlane->alphaTransparency = 0.5f;
-
-        pFlatPlane->blendRatio[0] = 0.0f;
-        pFlatPlane->blendRatio[1] = 1.0f;
-
-        pFlatPlane->bIsVisible = false;
-
-        //
-        //        pFlatPlane->bIsWireframe = true;
-        //        ::g_myMeshes[::g_NumberOfMeshesToDraw] = pFlatPlane;
-        //        ::g_NumberOfMeshesToDraw++;
-        ::g_vecMeshesToDraw.push_back(pFlatPlane);
-
-
-        // Add the "ground" to the physcs
-        cPhysics::sAABB* pAABBGround = new cPhysics::sAABB();
-        pAABBGround->centreXYZ = pFlatPlane->positionXYZ;
-        sModelDrawInfo planeMeshInfo;
-        ::g_pMeshManager->FindDrawInfoByModelName(pFlatPlane->modelFileName, planeMeshInfo);
-
-       // Manually enter the AABB info:
-        pAABBGround->centreXYZ = glm::vec3(0.0f, 0.0f, 0.0f);   
-        // How far from the centre the XYZ min and max are
-        // This information is from the mesh we loaded
-        // WARNING: We need to be careful about the scale
-        pAABBGround->minXYZ.x = -100.0f;
-        pAABBGround->maxXYZ.x = 100.0f;
-
-        pAABBGround->minXYZ.z = -100.0f;
-        pAABBGround->maxXYZ.z = 100.0f;
-
-        pAABBGround->minXYZ.y = -1.0f;
-        pAABBGround->maxXYZ.y = 1.0f;
-
-        // Copy the physics object position from the initial mesh position
-        pAABBGround->pPhysicInfo->position = pFlatPlane->positionXYZ;
-
-        // Don't move this ground (skip integration step)
-        pAABBGround->pPhysicInfo->bDoesntMove = true;
-
-        pAABBGround->pPhysicInfo->pAssociatedDrawingMeshInstance = pFlatPlane;
-
-        ::g_pPhysicEngine->vecAABBs.push_back(pAABBGround);
-    }
-//    {
-//        sMesh* pFlatPlane = new sMesh();
-////        pFlatPlane->modelFileName = "assets/models/Flat_Plane_xyz.ply";
-////        pFlatPlane->modelFileName = "assets/models/Flat_Plane_xyz_N.ply";
-//        pFlatPlane->modelFileName = "assets/models/Flat_Plane_xyz_N_uv.ply";
-//        pFlatPlane->positionXYZ = glm::vec3(0.0f, -5.0f, 0.0f);
-//        pFlatPlane->bIsWireframe = true;
-//        pFlatPlane->uniformScale = 1.01f;
-//        pFlatPlane->objectColourRGBA = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-//
-//        ::g_vecMeshesToDraw.push_back(pFlatPlane);
-//    }
-
-
-
-    {
-
-        //    ____                _            __                   _     
-        //   |  _ \ ___ _ __   __| | ___ _ __ / / __ ___   ___  ___| |__  
-        //   | |_) / _ \ '_ \ / _` |/ _ \ '__/ / '_ ` _ \ / _ \/ __| '_ \ 
-        //   |  _ <  __/ | | | (_| |  __/ | / /| | | | | |  __/\__ \ | | |
-        //   |_| \_\___|_| |_|\__,_|\___|_|/_/ |_| |_| |_|\___||___/_| |_|
-        //                                                                
-        sMesh* pSphereMesh = new sMesh();
-//        pSphereMesh->modelFileName = "assets/models/Sphere_radius_1_xyz.ply";
-//        pSphereMesh->modelFileName = "assets/models/Sphere_radius_1_xyz_N.ply";
-        pSphereMesh->modelFileName = "assets/models/Sphere_radius_1_xyz_N_uv.ply";
-        pSphereMesh->positionXYZ = glm::vec3(-15.0f, -3.0f, -20.0f);
-        //pSphereMesh->bIsWireframe = true;
-        pSphereMesh->objectColourRGBA = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
-        pSphereMesh->uniqueFriendlyName = "Ball";
-
-        //::g_myMeshes[::g_NumberOfMeshesToDraw] = pSphere;
-        //::g_NumberOfMeshesToDraw++;
-        ::g_vecMeshesToDraw.push_back(pSphereMesh);
-
-        {
-            sMesh* pSphereShadowMesh = new sMesh();
-//            pSphereShadowMesh->modelFileName = "assets/models/Sphere_radius_1_Flat_Shadow_xyz_N.ply";
-            pSphereShadowMesh->modelFileName = "assets/models/Sphere_radius_1_Flat_Shadow_xyz_N_uv.ply";
-            pSphereShadowMesh->positionXYZ = pSphereMesh->positionXYZ;
-            pSphereShadowMesh->positionXYZ.y = -3.95f;  // JUST above the ground
-            pSphereShadowMesh->objectColourRGBA = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-            pSphereShadowMesh->uniqueFriendlyName = "Ball_Shadow";
-            ::g_vecMeshesToDraw.push_back(pSphereShadowMesh);
-        }
-
-
-        //    ____  _               _                  _     _           _   
-        //   |  _ \| |__  _   _ ___(_) ___ ___    ___ | |__ (_) ___  ___| |_ 
-        //   | |_) | '_ \| | | / __| |/ __/ __|  / _ \| '_ \| |/ _ \/ __| __|
-        //   |  __/| | | | |_| \__ \ | (__\__ \ | (_) | |_) | |  __/ (__| |_ 
-        //   |_|   |_| |_|\__, |___/_|\___|___/  \___/|_.__// |\___|\___|\__|
-        //                |___/                           |__/               
-        // Add sphere
-        cPhysics::sSphere* pSphereInfo = new cPhysics::sSphere();
-
-        pSphereInfo->centre = glm::vec3(0.0f);  // Sphere's centre (i.e. an offset from the position)
-
-        pSphereInfo->pPhysicInfo->position = pSphereMesh->positionXYZ;
-        // HACK: We know this is 1.0 because...?
-        // We could also have pulled that information from the mesh info
-        pSphereInfo->radius = 1.0f;
-
-        pSphereInfo->pPhysicInfo->velocity.y = 7.5f;
-        
-        // Set some x velocity
-        pSphereInfo->pPhysicInfo->velocity.x = 1.0f;
-
-
-        pSphereInfo->pPhysicInfo->acceleration.y = -3.0f;
-        
-        // Associate this drawing mesh to this physics object
-        pSphereInfo->pPhysicInfo->pAssociatedDrawingMeshInstance = pSphereMesh;
-
-        ::g_pPhysicEngine->vecSpheres.push_back(pSphereInfo);
-    }
-
-
-    for ( unsigned int ballCount = 0; ballCount != 10; ballCount++ )
-    {
-        //    ____                _            __                   _     
-        //   |  _ \ ___ _ __   __| | ___ _ __ / / __ ___   ___  ___| |__  
-        //   | |_) / _ \ '_ \ / _` |/ _ \ '__/ / '_ ` _ \ / _ \/ __| '_ \ 
-        //   |  _ <  __/ | | | (_| |  __/ | / /| | | | | |  __/\__ \ | | |
-        //   |_| \_\___|_| |_|\__,_|\___|_|/_/ |_| |_| |_|\___||___/_| |_|
-        //                                                                
-        sMesh* pSphereMesh = new sMesh();
-        //        pSphereMesh->modelFileName = "assets/models/Sphere_radius_1_xyz.ply";
-//        pSphereMesh->modelFileName = "assets/models/Sphere_radius_1_xyz_N.ply";
-        pSphereMesh->modelFileName = "assets/models/Sphere_radius_1_xyz_N_uv.ply";
-        pSphereMesh->positionXYZ.x = getRandomFloat(-30.0f, 30.0f);
-        pSphereMesh->positionXYZ.z = getRandomFloat(-30.0f, 30.0f);
-        pSphereMesh->positionXYZ.y = getRandomFloat(0.0f, 40.0f);
-        //pSphereMesh->bIsWireframe = true;
-        pSphereMesh->objectColourRGBA = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-        pSphereMesh->objectColourRGBA.r = getRandomFloat(0.0f, 1.0f);
-        pSphereMesh->objectColourRGBA.g = getRandomFloat(0.0f, 1.0f);
-        pSphereMesh->objectColourRGBA.b = getRandomFloat(0.0f, 1.0f);
-        std::stringstream ssBallName;
-        ssBallName << "Bouncy_" << ballCount;
-        pSphereMesh->uniqueFriendlyName = ssBallName.str();
-
-        //
-        pSphereMesh->textures[0] = "Non-uniform concrete wall 0512-3-1024x1024.bmp";
-
-        ::g_vecMeshesToDraw.push_back(pSphereMesh);
-
-        //    ____  _               _                  _     _           _   
-        //   |  _ \| |__  _   _ ___(_) ___ ___    ___ | |__ (_) ___  ___| |_ 
-        //   | |_) | '_ \| | | / __| |/ __/ __|  / _ \| '_ \| |/ _ \/ __| __|
-        //   |  __/| | | | |_| \__ \ | (__\__ \ | (_) | |_) | |  __/ (__| |_ 
-        //   |_|   |_| |_|\__, |___/_|\___|___/  \___/|_.__// |\___|\___|\__|
-        //                |___/                           |__/               
-        // Add sphere
-        cPhysics::sSphere* pSphereInfo = new cPhysics::sSphere();
-        pSphereInfo->centre = glm::vec3(0.0f);  // Sphere's centre (i.e. an offset from the position)
-        pSphereInfo->pPhysicInfo->position = pSphereMesh->positionXYZ;
-        pSphereInfo->radius = 1.0f;
-        pSphereInfo->pPhysicInfo->velocity.y = getRandomFloat(2.0f, 10.0f);
-        pSphereInfo->pPhysicInfo->velocity.x = getRandomFloat(-5.0f, 5.0f);
-        pSphereInfo->pPhysicInfo->velocity.z = getRandomFloat(-5.0f, 5.0f);
-        pSphereInfo->pPhysicInfo->acceleration.y = -3.0f;
-        pSphereInfo->pPhysicInfo->pAssociatedDrawingMeshInstance = pSphereMesh;
-        ::g_pPhysicEngine->vecSpheres.push_back(pSphereInfo);
-    }//for ( unsigned int ballCount
-
-
-
-
-
-
-    
-
-
-    return;
-}
 
 
 // Add object to scene through Lua
@@ -1749,9 +884,9 @@ void SetUpTankGame(void)
     for (iTank* pCurrentTank : ::g_vecTheTanks)
     {
         glm::vec3 tankLocXYZ;
-        tankLocXYZ.x = getRandomFloat(-WORLD_SIZE, WORLD_SIZE);
+        tankLocXYZ.x = ::g_getRandomFloat(-WORLD_SIZE, WORLD_SIZE);
         tankLocXYZ.y = -5.0f;
-        tankLocXYZ.z = getRandomFloat(-WORLD_SIZE, WORLD_SIZE);
+        tankLocXYZ.z = ::g_getRandomFloat(-WORLD_SIZE, WORLD_SIZE);
 
         pCurrentTank->setLocation(tankLocXYZ);
     }

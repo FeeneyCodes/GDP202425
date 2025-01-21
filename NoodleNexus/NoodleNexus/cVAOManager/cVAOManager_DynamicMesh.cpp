@@ -107,8 +107,6 @@ bool cVAOManager::CopyMeshToDynamicVAO(
 	return true;
 }
 
-// HACK
-float HACK_Y_OFFSET = 0.0f;
 
 bool cVAOManager::UpdateDynamicMesh(
 	std::string friendlyName,
@@ -121,28 +119,31 @@ bool cVAOManager::UpdateDynamicMesh(
 
 	glBindBuffer(GL_ARRAY_BUFFER, updatedDrawInfo.VertexBufferID);
 
+// ************************************************
+// 
+// 	   We ALLOCATED the buffer with this call:
+// 
+// 	   But we AREN'T doing that here. 
+// 	   NOTE-DANGER: You CAN do this, but it will allocate a NEW buffer
+// 	                EVERY FRAME. So it'll "work", but you'll run out of memory on the GPU
+// 
 //	glBufferData(GL_ARRAY_BUFFER,
 //		sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV) * updatedDrawInfo.numberOfVertices,
 //		(GLvoid*)updatedDrawInfo.pVertices,
 //		// ************************************************
 //		GL_DYNAMIC_DRAW);			// <-- KEY CHANGE
-//	// ************************************************
+// ************************************************
 	
 	// This will copy whatever is currently in the pVertices array
 	//	back to the vertex buffer on the GPU
 	// (overwriting whatever is there)
 
-	// HACK
-	for (unsigned int index = 0; index != updatedDrawInfo.numberOfVertices; index++)
-	{
-		updatedDrawInfo.pVertices[index].y += HACK_Y_OFFSET;
-	}
-	HACK_Y_OFFSET += 0.001f;
 
 	glBufferSubData(GL_ARRAY_BUFFER,		// GLenum target --> vertex buffer
 		0,									// GLintptr offset
-		updatedDrawInfo.numberOfVertices,	// GLsizeiptr size
-		updatedDrawInfo.pVertices);			// const void* data);
+		// GLsizeiptr size: number of BYTES
+		sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV) * updatedDrawInfo.numberOfVertices,	
+		(GLvoid*)updatedDrawInfo.pVertices);			// const void* data);
 
 	return true;
 }

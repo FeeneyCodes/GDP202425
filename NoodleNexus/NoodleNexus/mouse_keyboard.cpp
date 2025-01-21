@@ -12,6 +12,7 @@
 
 #include <fstream>
 #include <sstream>
+#include "../sharedThings.h"
 
 // The commands
 //#include "cMoveRelativeTime.h"
@@ -20,9 +21,6 @@
 //#include <Windows.h>
 
 //extern cLightManager* g_pLightManager;
-
-// Defined in theMain.cpp
-sMesh* pFindMeshByFriendlyName(std::string theNameToFind);
 
 struct sMouseState
 {

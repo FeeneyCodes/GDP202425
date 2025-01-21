@@ -135,13 +135,7 @@ void main()
 					   
 	} 
 	
-	// Use lighting?
-	if ( bDoNotLight )
-	{
-		finalPixelColour.rgb = objectColour.rgb;
-		finalPixelColour.a = 1.0f;
-		return;
-	}
+
 	
 	
 //	finalPixelColour = vec4(finalColour, 1.0);
@@ -149,6 +143,15 @@ void main()
 //	vec3 fvertexNormal = vec3(0.0f, 1.0f, 0.0f);
 	vec4 vertexSpecular = vec4(1.0f, 1.0f, 1.0f, 1.0f);	
 
+
+	// Use lighting?
+	if ( bDoNotLight )
+	{
+		finalPixelColour.rgb = vertexColour.rgb;
+		finalPixelColour.a = wholeObjectTransparencyAlpha;
+		return;
+	}
+	
 
 	vec4 pixelColour = calculateLightContrib( vertexColour.rgb, 
 	                                          fvertexNormal.xyz, 

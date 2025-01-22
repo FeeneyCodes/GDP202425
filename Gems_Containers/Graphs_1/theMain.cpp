@@ -41,7 +41,7 @@ int main_MAZE()
 //	X   X   X
 //	X XXX X X
 //	X     X
-//	X XXXXXXX
+//	X XX XXXX
 //	X       X
 //	XXXXXXX X
 //	X       X

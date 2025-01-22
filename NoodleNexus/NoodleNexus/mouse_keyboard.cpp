@@ -14,6 +14,8 @@
 #include <sstream>
 #include "../sharedThings.h"
 
+#include "cTerrainPathChooser.h"
+
 // The commands
 //#include "cMoveRelativeTime.h"
 // Now we use the g_pCommandFactory to get all of our commands
@@ -21,6 +23,8 @@
 //#include <Windows.h>
 
 //extern cLightManager* g_pLightManager;
+
+extern cTerrainPathChooser* g_pTerrainPathChooser;
 
 struct sMouseState
 {
@@ -478,6 +482,43 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
     if (areAllModifiersUp(window))
     {
+        {// START OF: change destination path
+            bool bDidDestinationChange = false;
+            glm::vec3 oldDest = ::g_pTerrainPathChooser->destinationXYZ;
+            // Change the destination path location
+            if (key == GLFW_KEY_UP && action == GLFW_PRESS)
+            {
+                oldDest.z += 1.0f;
+                bDidDestinationChange = true;
+            }
+            if (key == GLFW_KEY_DOWN && action == GLFW_PRESS)
+            {
+                oldDest.z -= 1.0f;
+                bDidDestinationChange = true;
+
+            }
+            if (key == GLFW_KEY_LEFT && action == GLFW_PRESS)
+            {
+                oldDest.x -= 1.0f;
+                bDidDestinationChange = true;
+
+            }
+            if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS)
+            {
+                oldDest.x += 1.0f;
+                bDidDestinationChange = true;
+            }
+            if (bDidDestinationChange)
+            {
+                // Adjust it based on the 
+                oldDest = ::g_pTerrainPathChooser->getClosestPoint(oldDest);
+                ::g_pTerrainPathChooser->destinationXYZ = oldDest;
+            }
+        }// END OF: change destination path
+
+
+
+
         if (key == GLFW_KEY_F11 && action == GLFW_PRESS)
         {
             std::ifstream luaCommandFile("lua_commands.txt");

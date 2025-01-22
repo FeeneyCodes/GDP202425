@@ -128,6 +128,7 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
         pPlaneForSoftBodiesToHit->textures[0] = "Grey_Brick_Wall_Texture.bmp";
         pPlaneForSoftBodiesToHit->blendRatio[0] = 1.0f;
         pPlaneForSoftBodiesToHit->alphaTransparency = 0.8f;
+        pPlaneForSoftBodiesToHit->bIsVisible = false;
         ::g_vecMeshesToDraw.push_back(pPlaneForSoftBodiesToHit);
 
 
@@ -449,12 +450,24 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
         pTerrain->modelFileName = "assets/models/Simple_MeshLab_terrain_x5_xyz_N_uv.ply";
         pTerrain->positionXYZ = glm::vec3(0.0f, -175.0f, 0.0f);
         pTerrain->uniqueFriendlyName = "Terrain";
-        pTerrain->rotationEulerXYZ.y = 90.0f;
         pTerrain->textures[0] = "Grey_Brick_Wall_Texture.bmp";
         pTerrain->blendRatio[0] = 1.0f;
-        //
-
         ::g_vecMeshesToDraw.push_back(pTerrain);
+
+
+
+//        sMesh* pTerrainWireFrame = new sMesh();
+//        pTerrainWireFrame->modelFileName = "assets/models/Simple_MeshLab_terrain_x5_xyz_N_uv.ply";
+//        pTerrainWireFrame->positionXYZ = glm::vec3(0.0f, -173.8f, 0.0f);
+//        pTerrainWireFrame->bDoNotLight = true;
+//        pTerrainWireFrame->bOverrideObjectColour = true;
+//        pTerrainWireFrame->objectColourRGBA = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+//        pTerrainWireFrame->uniqueFriendlyName = "Terrain_Wireframe";
+//        pTerrainWireFrame->rotationEulerXYZ.y = 90.0f;
+//        pTerrainWireFrame->bIsWireframe = true;
+////        pTerrainWireFrame->textures[0] = "Grey_Brick_Wall_Texture.bmp";
+////        pTerrainWireFrame->blendRatio[0] = 1.0f;
+//        ::g_vecMeshesToDraw.push_back(pTerrainWireFrame);
     }
 
     {

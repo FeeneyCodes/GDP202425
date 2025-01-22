@@ -132,8 +132,9 @@ void main()
 //		vertexColour.rgb =   (texColour03.rgb * texColour02.r) 
 //		                   + (texColour00.rgb * (1.0f - texColour02.r));
 						   
-					   
 	} 
+	
+
 	
 
 	

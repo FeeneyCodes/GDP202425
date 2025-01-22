@@ -57,6 +57,9 @@
     <Filter Include="FBO">
       <UniqueIdentifier>{6c221408-e8d3-455b-895a-e051c54c9323}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Containers_Tree">
+      <UniqueIdentifier>{badb2a26-89b4-4f5e-9de1-18cdc2a248db}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="theMain.cpp">
@@ -179,6 +182,9 @@
     <ClCompile Include="AddModelsToScene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="cTerrainPathChooser.cpp">
+      <Filter>Containers_Tree</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PlyFileLoaders.h">
@@ -282,6 +288,9 @@
     </ClInclude>
     <ClInclude Include="cFBO\cFBO_RGB_depth.h">
       <Filter>FBO</Filter>
+    </ClInclude>
+    <ClInclude Include="cTerrainPathChooser.h">
+      <Filter>Containers_Tree</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

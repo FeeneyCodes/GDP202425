@@ -39,6 +39,8 @@
 
 #include "cLowPassFilter.h"
 
+#include "cTerrainPathChooser.h"
+
 // Frame Buffer Object (FBO)
 #include "cFBO/cFBO_RGB_depth.h"
 
@@ -58,7 +60,7 @@ cBasicTextureManager* g_pTextures = NULL;
 cCommandGroup* g_pCommandDirector = NULL;
 cCommandFactory* g_pCommandFactory = NULL;
 
-
+cTerrainPathChooser* g_pTerrainPathChooser = NULL;
 
 //cLightManager* g_pLightManager = NULL;
 
@@ -260,6 +262,22 @@ int main(void)
 //    cVAOManager* pMeshManager = new cVAOManager();
     ::g_pMeshManager = new cVAOManager();
 
+
+    // Traversing the path
+    ::g_pTerrainPathChooser = new cTerrainPathChooser(::g_pMeshManager);
+    // Set the terrain, etc. 
+    // HACK:
+    ::g_pTerrainPathChooser->setTerrainMesh(
+        "assets/models/Simple_MeshLab_terrain_x5_xyz_N_uv.ply", 
+        glm::vec3(0.0f, -175.0f, 0.0f));        // Offset of mesh
+    //
+    ::g_pTerrainPathChooser->startXYZ = glm::vec3(-500.0f, -75.0f, -500.0f);
+    ::g_pTerrainPathChooser->destinationXYZ = glm::vec3(+500.0f, -75.0f, +500.0f);
+
+
+
+
+
     ::g_pPhysicEngine = new cPhysics();
     // For triangle meshes, let the physics object "know" about the VAO manager
     ::g_pPhysicEngine->setVAOManager(::g_pMeshManager);
@@ -278,7 +296,10 @@ int main(void)
     
      
     ::g_pFlyCamera = new cBasicFlyCamera();
-    ::g_pFlyCamera->setEyeLocation(glm::vec3(0.0f, -25.0f, -75.0f));
+//    ::g_pFlyCamera->setEyeLocation(glm::vec3(0.0f, -25.0f, -75.0f));
+    // To see the terrain from high above
+    ::g_pFlyCamera->setEyeLocation(glm::vec3(72.2f, 1270.0f, -1123.0f));
+    ::g_pFlyCamera->pitchUpDown(-45.0f);
     // To see the Galactica:
 //    ::g_pFlyCamera->setEyeLocation(glm::vec3(10'000.0f, 25'000.0f, 160'000.0f));
     // Rotate the camera 180 degrees
@@ -621,6 +642,17 @@ int main(void)
         // 
         // **************************************************
 
+
+        DrawDebugSphere(::g_pTerrainPathChooser->startXYZ, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), 10.0f, program);
+        DrawDebugSphere(::g_pTerrainPathChooser->destinationXYZ, glm::vec4(0.0f, 1.0f, 1.0f, 1.0f), 10.0f, program);
+
+        // Draw the paths along the terrain
+        std::vector<glm::vec3> vecPathPoints;
+        ::g_pTerrainPathChooser->CalculatePath(vecPathPoints);
+        for (glm::vec3 points : vecPathPoints)
+        {
+            DrawDebugSphere(points, glm::vec4(0.0f, 1.0f, 0.0f, 1.0f), 0.1f, program);
+        }
 
         // **************************************************
 

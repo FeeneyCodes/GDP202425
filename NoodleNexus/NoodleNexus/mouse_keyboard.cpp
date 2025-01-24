@@ -486,24 +486,24 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
             bool bDidDestinationChange = false;
             glm::vec3 oldDest = ::g_pTerrainPathChooser->destinationXYZ;
             // Change the destination path location
-            if (key == GLFW_KEY_UP && action == GLFW_PRESS)
+            if (key == GLFW_KEY_UP )
             {
                 oldDest.z += 1.0f;
                 bDidDestinationChange = true;
             }
-            if (key == GLFW_KEY_DOWN && action == GLFW_PRESS)
+            if (key == GLFW_KEY_DOWN )
             {
                 oldDest.z -= 1.0f;
                 bDidDestinationChange = true;
 
             }
-            if (key == GLFW_KEY_LEFT && action == GLFW_PRESS)
+            if (key == GLFW_KEY_LEFT )
             {
                 oldDest.x -= 1.0f;
                 bDidDestinationChange = true;
 
             }
-            if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS)
+            if (key == GLFW_KEY_RIGHT )
             {
                 oldDest.x += 1.0f;
                 bDidDestinationChange = true;

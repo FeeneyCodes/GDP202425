@@ -38,6 +38,12 @@ void cTerrainPathChooser::setTerrainMesh(std::string meshName, glm::vec3 meshXYZ
 // This is called every frame
 void cTerrainPathChooser::CalculatePath(std::vector<glm::vec3>& vecVertexPathLocations)
 {
+	glm::vec3 curLoc = this->startXYZ;
+	while (curLoc != this->destinationXYZ)		// **DANGER! WILL ROBINSON!**
+	{
+		// Pick the next spot
+		// Add current to the vecVertexPathLocations
+	}
 
 
 	return;

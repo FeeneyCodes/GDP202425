@@ -651,7 +651,7 @@ int main(void)
         ::g_pTerrainPathChooser->CalculatePath(vecPathPoints);
         for (glm::vec3 points : vecPathPoints)
         {
-            DrawDebugSphere(points, glm::vec4(0.0f, 1.0f, 0.0f, 1.0f), 0.1f, program);
+            DrawDebugSphere(points, glm::vec4(0.0f, 1.0f, 0.0f, 1.0f), 25.0f, program);
         }
 
         // **************************************************

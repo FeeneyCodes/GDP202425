@@ -35,10 +35,10 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
 
     // Load a few soft bodies (two flags and a bunny)
     {
-//        sModelDrawInfo softBodyFlagMesh;
-//        ::g_pMeshManager->LoadModelIntoVAO("assets/models/10x10_FlatPlane_for_VerletSoftBodyFlag_xyz_n_uv.ply",
-//            softBodyFlagMesh, program);
-//        std::cout << softBodyFlagMesh.numberOfVertices << " vertices loaded" << std::endl;
+        sModelDrawInfo softBodyFlagMesh;
+        ::g_pMeshManager->LoadModelIntoVAO("assets/models/10x10_FlatPlane_for_VerletSoftBodyFlag_xyz_n_uv.ply",
+            softBodyFlagMesh, program);
+        std::cout << softBodyFlagMesh.numberOfVertices << " vertices loaded" << std::endl;
 
         sModelDrawInfo bun_zipper_res4_larger_Mesh;
         ::g_pMeshManager->LoadModelIntoVAO("assets/models/bun_zipper_res4_larger_for_soft_body.ply",
@@ -82,35 +82,53 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
 //
 //
 //
-//            sMesh* pCanadianFlag = new sMesh();
-//            //            pCanadianFlag->modelFileName = "Canadian_Flag_Mesh";
-//            pCanadianFlag->modelFileName = "Canadian_Flag_Mesh";
-//            pCanadianFlag->positionXYZ = glm::vec3(0.0f, 0.0f, 0.0f);
-//            pCanadianFlag->objectColourRGBA = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-//            pCanadianFlag->bOverrideObjectColour = true;
-//            pCanadianFlag->bIsWireframe = true;
-//            //            pCanadianFlag->rotationEulerXYZ = glm::vec3(0.0f);
-//            //            pCanadianFlag->rotationEulerXYZ.y = 180.0f;
-//            pCanadianFlag->textures[0] = "Canadian_Flag_Texture.bmp";
-//            pCanadianFlag->blendRatio[0] = 1.0f;
-//            pCanadianFlag->uniformScale = 1.0f;
-//            pCanadianFlag->bDoNotLight = true;
+            sModelDrawInfo softBodyCanadianFlagMesh;
+            ::g_pMeshManager->FindDrawInfoByModelName("assets/models/10x10_FlatPlane_for_VerletSoftBodyFlag_xyz_n_uv.ply", softBodyCanadianFlagMesh);
+            ::g_pMeshManager->CloneMeshToDynamicVAO("CanadaFlag_SoftBodyMesh", softBodyCanadianFlagMesh, program);
+
+
+            sMesh* pCanadianFlag = new sMesh();
+            //            pCanadianFlag->modelFileName = "Canadian_Flag_Mesh";
+            pCanadianFlag->modelFileName = "CanadaFlag_SoftBodyMesh";
+
+//            pCanadianFlag->positionXYZ = glm::vec3(0.0f, +30.0f, 0.0f);
+//            pCanadianFlag->rotationEulerXYZ = glm::vec3(0.0f, 0.0f, -90.0f);
+
+            pCanadianFlag->objectColourRGBA = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+            pCanadianFlag->bOverrideObjectColour = true;
+            pCanadianFlag->bIsWireframe = true;
+            //            pCanadianFlag->rotationEulerXYZ = glm::vec3(0.0f);
+            //            pCanadianFlag->rotationEulerXYZ.y = 180.0f;
+            pCanadianFlag->textures[0] = "Canadian_Flag_Texture.bmp";
+            pCanadianFlag->blendRatio[0] = 1.0f;
+            pCanadianFlag->uniformScale = 1.0f;
+            pCanadianFlag->bDoNotLight = true;
 //            pCanadianFlag->bIsVisible = false;
-//            ::g_vecMeshesToDraw.push_back(pCanadianFlag);
-//
-            //            sMesh* pChineseFlag = new sMesh();
-            ////            pChineseFlag->modelFileName = "Canadian_Flag_Mesh";
-            //            pChineseFlag->modelFileName = "Chinese_Flag_Mesh";
-            //            pChineseFlag->positionXYZ = glm::vec3(50.0f, 0.0f, 200.0f);
-            //            pChineseFlag->objectColourRGBA = glm::vec4(0.6f, 0.6f, 0.6f, 1.0f);
-            //            pChineseFlag->bOverrideObjectColour = true;
-            //            pChineseFlag->bIsWireframe = true;
-            //            pChineseFlag->rotationEulerXYZ = glm::vec3(0.0f);
-            //            pChineseFlag->rotationEulerXYZ.y = 180.0f;
-            //            pChineseFlag->textures[0] = "Chinese_Flag_Texture.bmp";
-            //            pChineseFlag->blendRatio[0] = 1.0f;
-            //            pChineseFlag->uniformScale = 5.0f;
-            //            ::g_vecMeshesToDraw.push_back(pChineseFlag);
+            ::g_vecMeshesToDraw.push_back(pCanadianFlag);
+
+
+            glm::mat4 matModelCF = glm::mat4(1.0f);
+    //        matModelCF = pCanadianFlag->calcMatModel();
+
+            cSoftBodyVerlet* pSB_CanadianFlag = ::g_pPhysicEngine->createSoftBodyFromMesh("CanadaFlag_SoftBodyMesh", matModelCF, error);
+            pSB_CanadianFlag->acceleration = glm::vec3(0.0f, -1.0f, 0.0f);
+
+
+            //sModelDrawInfo softBodyCanadianFlagMesh;
+            //::g_pMeshManager->FindDrawInfoByModelName("assets/models/10x10_FlatPlane_for_VerletSoftBodyFlag_xyz_n_uv.ply", softBodyCanadianFlagMesh);
+            //::g_pMeshManager->CloneMeshToDynamicVAO("ChineseFlag_SoftBodyMesh", softBodyBunnyMeshDrawInfo, program);
+            //sMesh* pChineseFlag = new sMesh();
+            //pChineseFlag->modelFileName = "ChineseFlag_SoftBodyMesh";
+            //pChineseFlag->positionXYZ = glm::vec3(50.0f, 0.0f, 200.0f);
+            //pChineseFlag->objectColourRGBA = glm::vec4(0.6f, 0.6f, 0.6f, 1.0f);
+            //pChineseFlag->bOverrideObjectColour = true;
+            //pChineseFlag->bIsWireframe = true;
+            //pChineseFlag->rotationEulerXYZ = glm::vec3(0.0f);
+            //pChineseFlag->rotationEulerXYZ.y = 180.0f;
+            //pChineseFlag->textures[0] = "Chinese_Flag_Texture.bmp";
+            //pChineseFlag->blendRatio[0] = 1.0f;
+            //pChineseFlag->uniformScale = 5.0f;
+            //::g_vecMeshesToDraw.push_back(pChineseFlag);
 //
 //
 //        }

@@ -20,6 +20,8 @@ struct sMesh
 	glm::vec3 rotationEulerXYZ;		// 90 degrees around the x axis
 	float uniformScale = 1.0f;				// Same for each axis
 
+	glm::mat4 calcMatModel(void);
+
 	glm::vec4 objectColourRGBA;		// 0 - 1.0 
 	// If true, it uses the colour above
 	bool bOverrideObjectColour = true;

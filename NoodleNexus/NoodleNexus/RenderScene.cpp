@@ -118,28 +118,28 @@ void RenderScene(
  //       flagMesh.pVertices[index].y += getRandomFloat(-0.01f, 0.01f);
  //       flagMesh.pVertices[index].z += getRandomFloat(-0.01f, 0.01f);
  //   }
-    sModelDrawInfo softBodyBunnyMesh;
-    ::g_pMeshManager->FindDrawInfoByModelName("SoftBodyBunnyMesh", softBodyBunnyMesh);
-
-
-    cPhysics::cSoftBody_Verlet* pSoftBodyBunny
-        = ::g_pPhysicEngine->pFindSoftBodyByFriendlyName("Soft_Body_Bunny");
-
-    // Found it?
-    if (pSoftBodyBunny)
-    {
-        // Copy the current soft body vertex information back to the mesh
-        //  we are rendering...
-        for (unsigned int index = 0; index != softBodyBunnyMesh.numberOfVertices; index++)
-        {
-            softBodyBunnyMesh.pVertices[index].x = pSoftBodyBunny->vecPoints[index].position.x;
-            softBodyBunnyMesh.pVertices[index].y = pSoftBodyBunny->vecPoints[index].position.y;
-            softBodyBunnyMesh.pVertices[index].z = pSoftBodyBunny->vecPoints[index].position.z;
-        }
-
-        ::g_pMeshManager->UpdateDynamicMesh("SoftBodyBunnyMesh", softBodyBunnyMesh, program);
-    }
-
+//    sModelDrawInfo softBodyBunnyMesh;
+//    ::g_pMeshManager->FindDrawInfoByModelName("SoftBodyBunnyMesh", softBodyBunnyMesh);
+//
+//
+//    cPhysics::cSoftBody_Verlet* pSoftBodyBunny
+//        = ::g_pPhysicEngine->pFindSoftBodyByFriendlyName("Soft_Body_Bunny");
+//
+//    // Found it?
+//    if (pSoftBodyBunny)
+//    {
+//        // Copy the current soft body vertex information back to the mesh
+//        //  we are rendering...
+//        for (unsigned int index = 0; index != softBodyBunnyMesh.numberOfVertices; index++)
+//        {
+//            softBodyBunnyMesh.pVertices[index].x = pSoftBodyBunny->vecPoints[index].position.x;
+//            softBodyBunnyMesh.pVertices[index].y = pSoftBodyBunny->vecPoints[index].position.y;
+//            softBodyBunnyMesh.pVertices[index].z = pSoftBodyBunny->vecPoints[index].position.z;
+//        }
+//
+//        ::g_pMeshManager->UpdateDynamicMesh("SoftBodyBunnyMesh", softBodyBunnyMesh, program);
+//    }
+//
 //    sModelDrawInfo flagMesh;
 //    ::g_pMeshManager->FindDrawInfoByModelName("Canadian_Flag_Mesh", flagMesh);
  //   cPhysics::cSoftBody_Verlet* pCanFlagSB 

@@ -4,7 +4,7 @@
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
 
-bool cVAOManager::CopyMeshToDynamicVAO(
+bool cVAOManager::CloneMeshToDynamicVAO(
 	std::string newMeshName,
 	sModelDrawInfo& drawInfo,
 	unsigned int shaderProgramID)
@@ -41,7 +41,7 @@ bool cVAOManager::CopyMeshToDynamicVAO(
 		sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV) * cloneMeshDrawInfo.numberOfVertices,
 		(GLvoid*)cloneMeshDrawInfo.pVertices,
 // ************************************************
-		GL_DYNAMIC_DRAW);			// <-- KEY CHANGE
+		GL_DYNAMIC_DRAW);			// <-- KEY CHANGE (GL_STATIC_DRAW)
 // ************************************************
 
 	glGenBuffers(1, &(cloneMeshDrawInfo.IndexBufferID));

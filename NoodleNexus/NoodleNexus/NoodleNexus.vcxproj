@@ -162,9 +162,13 @@
     <ClCompile Include="cMoveRelativeTime.cpp" />
     <ClCompile Include="cPhysics.cpp" />
     <ClCompile Include="cPhysics_BroadPhase.cpp" />
-    <ClCompile Include="cPhysics_cSoftBody_Verlet.cpp" />
+    <ClCompile Include="cPhysics_cSoftBody_Verlet.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="cRailGun.cpp" />
     <ClCompile Include="cSheild.cpp" />
+    <ClCompile Include="cSoftBodyVerlet.cpp" />
     <ClCompile Include="cSuperTank.cpp" />
     <ClCompile Include="cSword.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -210,6 +214,7 @@
     <ClInclude Include="cPhysics.h" />
     <ClInclude Include="cRailGun.h" />
     <ClInclude Include="cSheild.h" />
+    <ClInclude Include="cSoftBodyVerlet.h" />
     <ClInclude Include="cSuperTank.h" />
     <ClInclude Include="cSword.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>

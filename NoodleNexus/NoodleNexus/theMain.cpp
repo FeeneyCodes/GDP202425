@@ -296,10 +296,12 @@ int main(void)
     
      
     ::g_pFlyCamera = new cBasicFlyCamera();
-//    ::g_pFlyCamera->setEyeLocation(glm::vec3(0.0f, -25.0f, -75.0f));
-    // To see the terrain from high above
-    ::g_pFlyCamera->setEyeLocation(glm::vec3(72.2f, 1270.0f, -1123.0f));
-    ::g_pFlyCamera->pitchUpDown(-45.0f);
+    ::g_pFlyCamera->setEyeLocation(glm::vec3(0.0f, -25.0f, -75.0f));
+
+// To see the terrain from high above
+//    ::g_pFlyCamera->setEyeLocation(glm::vec3(72.2f, 1270.0f, -1123.0f));
+//    ::g_pFlyCamera->pitchUpDown(-45.0f);
+
     // To see the Galactica:
 //    ::g_pFlyCamera->setEyeLocation(glm::vec3(10'000.0f, 25'000.0f, 160'000.0f));
     // Rotate the camera 180 degrees
@@ -513,6 +515,11 @@ int main(void)
         //  but I'm leaving it here for clarification
         //  or if you DON'T want any soft bodies
         ::g_pPhysicEngine->updateSoftBodies(deltaTime);
+
+        // Update the meshes in the VAO to match any soft bodies
+        ::g_pPhysicEngine->updateSoftBodyMeshes(program);
+
+
 
 
         // Update the commands, too

@@ -60,6 +60,9 @@
     <Filter Include="Containers_Tree">
       <UniqueIdentifier>{badb2a26-89b4-4f5e-9de1-18cdc2a248db}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Phsyics_Stuff\Verlet_SoftBody">
+      <UniqueIdentifier>{a98460ca-a653-49c3-82f5-4dcf01527014}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="theMain.cpp">
@@ -185,6 +188,9 @@
     <ClCompile Include="cTerrainPathChooser.cpp">
       <Filter>Containers_Tree</Filter>
     </ClCompile>
+    <ClCompile Include="cSoftBodyVerlet.cpp">
+      <Filter>Phsyics_Stuff\Verlet_SoftBody</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PlyFileLoaders.h">
@@ -291,6 +297,9 @@
     </ClInclude>
     <ClInclude Include="cTerrainPathChooser.h">
       <Filter>Containers_Tree</Filter>
+    </ClInclude>
+    <ClInclude Include="cSoftBodyVerlet.h">
+      <Filter>Phsyics_Stuff\Verlet_SoftBody</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

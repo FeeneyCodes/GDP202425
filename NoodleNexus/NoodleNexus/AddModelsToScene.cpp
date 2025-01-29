@@ -47,47 +47,41 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
 
 
 
-        sModelDrawInfo softBodyBunny;
-        ::g_pMeshManager->FindDrawInfoByModelName("assets/models/bun_zipper_res4_larger_for_soft_body.ply", softBodyBunny);
-        ::g_pMeshManager->CopyMeshToDynamicVAO("SoftBodyBunnyMesh", softBodyBunny, program);
-        ::g_pPhysicEngine->createSoftBodyFromMesh("Soft_Body_Bunny", &softBodyBunny);
-        // Add a force (gravity) to this bunny
-        glm::vec3 gravity = glm::vec3(0.0f, -1.0f, 0.0f);
-        ::g_pPhysicEngine->setSoftBodyAcceleration("Soft_Body_Bunny", gravity);
+        sModelDrawInfo softBodyBunnyMeshDrawInfo;
+        ::g_pMeshManager->FindDrawInfoByModelName("assets/models/bun_zipper_res4_larger_for_soft_body.ply", softBodyBunnyMeshDrawInfo);
+        ::g_pMeshManager->CloneMeshToDynamicVAO("SoftBodyBunnyMesh_01", softBodyBunnyMeshDrawInfo, program);
+        //
+       glm::mat4 matModel = glm::mat4(1.0f);
+//       // Add transforms you'd like...
+//
+       std::string error;
+       cSoftBodyVerlet* pSB_Bunny = ::g_pPhysicEngine->createSoftBodyFromMesh("SoftBodyBunnyMesh_01", matModel, error);
+//
+//       // Add a force (gravity) to this bunny
+       pSB_Bunny->acceleration = glm::vec3(0.0f, -1.0f, 0.0f);
 
+       pSB_Bunny->CreateRandomBracing(1000, 5.0f);
 
-
-        // Make a copy of the mesh in the VAO:
-        // i.e. these will be updated each frame
-//        sModelDrawInfo flagMesh;
-//        ::g_pMeshManager->FindDrawInfoByModelName("assets/models/10x10_FlatPlane_for_VerletSoftBodyFlag_xyz_n_uv.ply", flagMesh);
-//        ::g_pMeshManager->CopyMeshToDynamicVAO("Canadian_Flag_Mesh", flagMesh, program);
-        //        ::g_pMeshManager->CopyMeshToDynamicVAO("Chinese_Flag_Mesh", flagMesh, program);
-
-
-                // Make a soft body object from a mesh object
-//        ::g_pPhysicEngine->createSoftBodyFromMesh("Flag_Canada_SoftBody", &flagMesh);
-        //        ::g_pPhysicEngine->createSoftBodyFromMesh("Flag_China", &flagMesh);
 
         // DEBUG
-        {
+//        {
             sMesh* pSoftBodyBunny = new sMesh();
-            pSoftBodyBunny->modelFileName = "SoftBodyBunnyMesh";
+            pSoftBodyBunny->modelFileName = "SoftBodyBunnyMesh_01";
             pSoftBodyBunny->positionXYZ = glm::vec3(0.0f, 0.0f, 0.0f);
             pSoftBodyBunny->objectColourRGBA = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
             pSoftBodyBunny->bOverrideObjectColour = true;
             pSoftBodyBunny->bIsWireframe = true;
             //            pCanadianFlag->rotationEulerXYZ = glm::vec3(0.0f);
             //            pCanadianFlag->rotationEulerXYZ.y = 180.0f;
-            pSoftBodyBunny->textures[0] = "Canadian_Flag_Texture.bmp";
-            pSoftBodyBunny->blendRatio[0] = 1.0f;
-            pSoftBodyBunny->uniformScale = 1.0f;
-            pSoftBodyBunny->bDoNotLight = true;
+            //pSoftBodyBunny->textures[0] = "Canadian_Flag_Texture.bmp";
+            //pSoftBodyBunny->blendRatio[0] = 1.0f;
+            //pSoftBodyBunny->uniformScale = 1.0f;
+            //pSoftBodyBunny->bDoNotLight = true;
             ::g_vecMeshesToDraw.push_back(pSoftBodyBunny);
-
-
-
-
+//
+//
+//
+//
 //            sMesh* pCanadianFlag = new sMesh();
 //            //            pCanadianFlag->modelFileName = "Canadian_Flag_Mesh";
 //            pCanadianFlag->modelFileName = "Canadian_Flag_Mesh";
@@ -103,7 +97,7 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
 //            pCanadianFlag->bDoNotLight = true;
 //            pCanadianFlag->bIsVisible = false;
 //            ::g_vecMeshesToDraw.push_back(pCanadianFlag);
-
+//
             //            sMesh* pChineseFlag = new sMesh();
             ////            pChineseFlag->modelFileName = "Canadian_Flag_Mesh";
             //            pChineseFlag->modelFileName = "Chinese_Flag_Mesh";
@@ -117,9 +111,9 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
             //            pChineseFlag->blendRatio[0] = 1.0f;
             //            pChineseFlag->uniformScale = 5.0f;
             //            ::g_vecMeshesToDraw.push_back(pChineseFlag);
-
-
-        }
+//
+//
+//        }
 
         // Add a "ground" for the bunny to hit
         sMesh* pPlaneForSoftBodiesToHit = new sMesh();
@@ -128,7 +122,7 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
         pPlaneForSoftBodiesToHit->textures[0] = "Grey_Brick_Wall_Texture.bmp";
         pPlaneForSoftBodiesToHit->blendRatio[0] = 1.0f;
         pPlaneForSoftBodiesToHit->alphaTransparency = 0.8f;
-        pPlaneForSoftBodiesToHit->bIsVisible = false;
+//        pPlaneForSoftBodiesToHit->bIsVisible = false;
         ::g_vecMeshesToDraw.push_back(pPlaneForSoftBodiesToHit);
 
 

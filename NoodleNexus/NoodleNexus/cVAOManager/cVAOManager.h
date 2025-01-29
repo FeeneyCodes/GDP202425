@@ -73,7 +73,7 @@ public:
 
 	// This is used for the soft body (or anything else, like water)
 	// Takes a mesh and copies it to another VAO, but the vertex array is DYNAMIC
-	bool CopyMeshToDynamicVAO( std::string newMeshName, 
+	bool CloneMeshToDynamicVAO( std::string newMeshName, 
 	                           sModelDrawInfo &drawInfo, 
 	                           unsigned int shaderProgramID);
 	bool UpdateDynamicMesh( std::string friendlyName, 

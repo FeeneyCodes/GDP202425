@@ -57,6 +57,9 @@ void cPhysics::updateSoftBodyMeshes(unsigned int shaderProgramID)
     {
         cSoftBodyVerlet* pCurrentSB = itSB->second;
 
+        // Update normals
+//        pCurrentSB->UpdateNormals();
+
         // Find the corresponding mesh in the VAO
         sModelDrawInfo softBodyDrawMeshLocalCopy;
         this->m_pVAOManager->FindDrawInfoByModelName(pCurrentSB->matching_VAO_MeshName, softBodyDrawMeshLocalCopy);
@@ -69,6 +72,9 @@ void cPhysics::updateSoftBodyMeshes(unsigned int shaderProgramID)
             softBodyDrawMeshLocalCopy.pVertices[vertexIndex].z = pCurrentSB->vec_pParticles[vertexIndex]->position.z;
 
             // Also the normals...
+            softBodyDrawMeshLocalCopy.pVertices[vertexIndex].nx = pCurrentSB->vec_pParticles[vertexIndex]->pModelVertex->nx;
+            softBodyDrawMeshLocalCopy.pVertices[vertexIndex].ny = pCurrentSB->vec_pParticles[vertexIndex]->pModelVertex->ny;
+            softBodyDrawMeshLocalCopy.pVertices[vertexIndex].nz = pCurrentSB->vec_pParticles[vertexIndex]->pModelVertex->nz;
 
             // Also anything else (colours? UVs?)
 

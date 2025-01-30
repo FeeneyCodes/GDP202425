@@ -373,6 +373,8 @@ int main(void)
     // 
     ::g_pTextures->Create2DTextureFromBMPFile("Canadian_Flag_Texture.bmp");
     ::g_pTextures->Create2DTextureFromBMPFile("Chinese_Flag_Texture.bmp");
+    //
+    ::g_pTextures->Create2DTextureFromBMPFile("solid_black.bmp");
 
     // Load the space skybox
     std::string errorString;
@@ -518,7 +520,6 @@ int main(void)
 
         // Update the meshes in the VAO to match any soft bodies
         ::g_pPhysicEngine->updateSoftBodyMeshes(program);
-
 
 
 

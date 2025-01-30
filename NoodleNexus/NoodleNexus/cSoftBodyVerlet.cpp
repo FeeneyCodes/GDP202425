@@ -290,7 +290,8 @@ void cSoftBodyVerlet::ApplyCollision(double deltaTime)
 	// Check to see if this particle is inside this sphere...
 	for (sParticle* pCurrentParticle : vec_pParticles)
 	{
-		glm::vec3 sphereCentre = glm::vec3(0.0f, -30.0f, 1.0f);
+		// Slightly off centre... 
+		glm::vec3 sphereCentre = glm::vec3(-1.0f, -30.0f, 1.0f);
 		float sphereRadius = 15.0f;
 
 		float distanceToSphere = glm::distance(pCurrentParticle->position,

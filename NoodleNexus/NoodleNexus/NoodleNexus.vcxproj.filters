@@ -191,6 +191,9 @@
     <ClCompile Include="cSoftBodyVerlet.cpp">
       <Filter>Phsyics_Stuff\Verlet_SoftBody</Filter>
     </ClCompile>
+    <ClCompile Include="cViperFlagConnector.cpp">
+      <Filter>Phsyics_Stuff</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PlyFileLoaders.h">
@@ -300,6 +303,9 @@
     </ClInclude>
     <ClInclude Include="cSoftBodyVerlet.h">
       <Filter>Phsyics_Stuff\Verlet_SoftBody</Filter>
+    </ClInclude>
+    <ClInclude Include="cViperFlagConnector.h">
+      <Filter>Phsyics_Stuff</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

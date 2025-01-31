@@ -2,11 +2,13 @@
 #include <iostream>
 #include <sstream>
 #include "cBasicTextureManager/cBasicTextureManager.h"
+#include "cViperFlagConnector.h"
 
 extern std::vector<sMesh*> g_vecMeshesToDraw;
 extern cPhysics* g_pPhysicEngine;
 extern cVAOManager* g_pMeshManager;
 extern cBasicTextureManager* g_pTextures;
+cViperFlagConnector* g_pViperFlagConnector = NULL;
 
 
 
@@ -30,6 +32,32 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
     pOffScreenViewMesh->bDoNotLight = true;
     ::g_vecMeshesToDraw.push_back(pOffScreenViewMesh);
 
+
+
+
+    // this is the object that the Lua script, etc. is going to handle
+    {
+        sMesh* pNewViper = new sMesh();
+        pNewViper->modelFileName = "assets/models/Viper_MkVII_xyz_n_uv.ply";
+        pNewViper->positionXYZ = glm::vec3(-10.0f, 10.0f, 0.0f);
+        pNewViper->objectColourRGBA = glm::vec4(0.6f, 0.6f, 0.6f, 1.0f);
+        pNewViper->bOverrideObjectColour = true;
+        pNewViper->uniqueFriendlyName = "New_Viper_Player";
+        pNewViper->bIsVisible = true;
+        pNewViper->uniformScale = 5.0f;
+        pNewViper->textures[0] = "dirty-metal-texture_1048-4784.bmp";
+        pNewViper->blendRatio[0] = 1.0f;
+
+        ::g_vecMeshesToDraw.push_back(pNewViper);
+
+        // Add a associated physics object to have the phsyics "move" this
+        cPhysics::sPhysInfo* pViperPhysObject = new  cPhysics::sPhysInfo();
+        pViperPhysObject->bDoesntMove = false;
+        pViperPhysObject->position = pNewViper->positionXYZ;
+        pViperPhysObject->velocity = glm::vec3(0.0f);
+        pViperPhysObject->pAssociatedDrawingMeshInstance = pNewViper;
+        g_pPhysicEngine->vecGeneralPhysicsObjects.push_back(pViperPhysObject);
+    }
 
 
 
@@ -124,7 +152,23 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
     //        matModelCF = pCanadianFlag->calcMatModel();
 
             cSoftBodyVerlet* pSB_CanadianFlag = ::g_pPhysicEngine->createSoftBodyFromMesh("CanadaFlag_SoftBodyMesh", matModelCF, error);
-            pSB_CanadianFlag->acceleration = glm::vec3(0.0f, -1.0f, 0.0f);
+            pSB_CanadianFlag->acceleration = glm::vec3(0.0f, -3.0f, 0.0f);
+
+            // ********************************************************
+            // START OF: Viper with flag set up
+
+            ::g_pViperFlagConnector = new cViperFlagConnector();
+
+            sMesh* pViperPlayer = g_pFindMeshByFriendlyName("New_Viper_Player");
+            ::g_pViperFlagConnector->setViperModel(pViperPlayer);
+
+            ::g_pViperFlagConnector->setFlagSoftBody(pSB_CanadianFlag);
+
+            ::g_pViperFlagConnector->ConnectViperToFlag();
+
+            // END OF: Viper with flag set up
+            // ********************************************************
+
 
 
            //  Add the sphere that they soft bodies are hitting. 
@@ -322,29 +366,6 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
 //    }//for (float x = -boxLimit...
 
 
-    // this is the object that the Lua script, etc. is going to handle
-    {
-        sMesh* pNewViper = new sMesh();
-        pNewViper->modelFileName = "assets/models/Viper_MkVII_xyz_n_uv.ply";
-        pNewViper->positionXYZ = glm::vec3(-50.0f, 0.0f, 0.0f);
-        pNewViper->objectColourRGBA = glm::vec4(0.6f, 0.6f, 0.6f, 1.0f);
-        pNewViper->bOverrideObjectColour = true;
-        pNewViper->uniqueFriendlyName = "New_Viper_Player";
-        pNewViper->bIsVisible = true;
-        pNewViper->uniformScale = 5.0f;
-        pNewViper->textures[0] = "dirty-metal-texture_1048-4784.bmp";
-        pNewViper->blendRatio[0] = 1.0f;
-
-        ::g_vecMeshesToDraw.push_back(pNewViper);
-
-        // Add a associated physics object to have the phsyics "move" this
-        cPhysics::sPhysInfo* pViperPhysObject = new  cPhysics::sPhysInfo();
-        pViperPhysObject->bDoesntMove = false;
-        pViperPhysObject->position = pNewViper->positionXYZ;
-        pViperPhysObject->velocity = glm::vec3(0.0f);
-        pViperPhysObject->pAssociatedDrawingMeshInstance = pNewViper;
-        g_pPhysicEngine->vecGeneralPhysicsObjects.push_back(pViperPhysObject);
-    }
 
     // Place a bunny somewhere else in the scene
     sMesh* pBunny_15 = ::g_pFindMeshByFriendlyName("Bunny_15");

@@ -255,17 +255,21 @@ void cSoftBodyVerlet::VerletUpdate(double deltaTime)
 //
 //		oldx = temp;
 
-		// This is the actual Verlet integration step (notice there isn't a velocity)
-		pCurrentParticle->position  += (current_pos - old_pos) 
-			                           + (this->acceleration * (float)(deltaTime * deltaTime) );
+		if (!pCurrentParticle->bIsFixed_DontUpdate)
+		{
 
-		pCurrentParticle->old_position = current_pos;
+			// This is the actual Verlet integration step (notice there isn't a velocity)
+			pCurrentParticle->position += (current_pos - old_pos)
+				+ (this->acceleration * (float)(deltaTime * deltaTime));
 
-		// Check if there is a LARGE different between old and new positions
+			pCurrentParticle->old_position = current_pos;
+
+			// Check if there is a LARGE different between old and new positions
 
 
-		this->cleanZeros(pCurrentParticle->position);
-		this->cleanZeros(pCurrentParticle->old_position);
+			this->cleanZeros(pCurrentParticle->position);
+			this->cleanZeros(pCurrentParticle->old_position);
+		}
 	}
 
 	return;

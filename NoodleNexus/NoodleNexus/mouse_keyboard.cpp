@@ -16,6 +16,8 @@
 
 #include "cTerrainPathChooser.h"
 
+#include "cViperFlagConnector.h"
+
 // The commands
 //#include "cMoveRelativeTime.h"
 // Now we use the g_pCommandFactory to get all of our commands
@@ -25,6 +27,8 @@
 //extern cLightManager* g_pLightManager;
 
 extern cTerrainPathChooser* g_pTerrainPathChooser;
+
+extern cViperFlagConnector* g_pViperFlagConnector;
 
 struct sMouseState
 {
@@ -104,7 +108,7 @@ void handleMouseAsync(GLFWwindow* window)
 void handleKeyboardAsync(GLFWwindow* window)
 {
 //    const float CAMERA_MOVE_SPEED = 100.0f;
-    const float CAMERA_MOVE_SPEED = 10.0f;
+    const float CAMERA_MOVE_SPEED = 1.0f;
 //    const float CAMERA_MOVE_SPEED = 0.1f;
     const float CAMERA_TURN_SPEED = 0.1f;
 
@@ -270,10 +274,19 @@ void handleKeyboardAsync(GLFWwindow* window)
     {
         cPhysics::sPhysInfo* pViperPhys = ::g_pPhysicEngine->pFindAssociateMeshByFriendlyName("New_Viper_Player");
 
-        const float VIPER_SPEED_CHANGE = 1.0f;
+        const float VIPER_SPEED_CHANGE = 0.1f;
+
         // Exists? 
         if (pViperPhys)         // or != NULL
         {
+            if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
+            {
+                if (::g_pViperFlagConnector)
+                {
+                    ::g_pViperFlagConnector->ReleaseFlag();
+                }
+            }
+
             // CUT THE ENGINES!!!
             if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
             {

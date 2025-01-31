@@ -180,6 +180,7 @@
     <ClCompile Include="cTerrainPathChooser.cpp" />
     <ClCompile Include="cVAOManager\cVAOManager.cpp" />
     <ClCompile Include="cVAOManager\cVAOManager_DynamicMesh.cpp" />
+    <ClCompile Include="cViperFlagConnector.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="mouse_keyboard.cpp" />
     <ClCompile Include="PlyFileLoaders.cpp" />
@@ -225,6 +226,7 @@
     <ClInclude Include="cTankFactory.h" />
     <ClInclude Include="cTerrainPathChooser.h" />
     <ClInclude Include="cVAOManager\cVAOManager.h" />
+    <ClInclude Include="cViperFlagConnector.h" />
     <ClInclude Include="iCommand.h" />
     <ClInclude Include="iMessaging.h" />
     <ClInclude Include="iTank.h" />

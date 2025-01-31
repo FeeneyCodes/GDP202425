@@ -49,6 +49,9 @@ public:
 		glm::vec3 old_position = glm::vec3(0.0f);
 		// Pointer back to the model vertex info
 		sVertex* pModelVertex = NULL;					// See typedef above...
+		//
+		// If "fixed" then don't update with Verlet step
+		bool bIsFixed_DontUpdate = false;
 	};
 
 	void cleanZeros(glm::vec3& value);

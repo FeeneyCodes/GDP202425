@@ -58,7 +58,7 @@ void cPhysics::updateSoftBodyMeshes(unsigned int shaderProgramID)
         cSoftBodyVerlet* pCurrentSB = itSB->second;
 
         // Update normals
-//        pCurrentSB->UpdateNormals();
+        pCurrentSB->UpdateNormals();
 
         // Find the corresponding mesh in the VAO
         sModelDrawInfo softBodyDrawMeshLocalCopy;

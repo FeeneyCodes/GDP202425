@@ -35,15 +35,15 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
 
     // Load a few soft bodies (two flags and a bunny)
     {
-        //sModelDrawInfo softBodyFlagMesh;
-        //::g_pMeshManager->LoadModelIntoVAO("assets/models/10x10_FlatPlane_for_VerletSoftBodyFlag_xyz_n_uv.ply",
-        //    softBodyFlagMesh, program);
-        //std::cout << softBodyFlagMesh.numberOfVertices << " vertices loaded" << std::endl;
-
         sModelDrawInfo softBodyFlagMesh;
-        ::g_pMeshManager->LoadModelIntoVAO("assets/models/30x30_FlatPlane_for_VerletSoftBodyFlag_xyz_n_uv.ply",
+        ::g_pMeshManager->LoadModelIntoVAO("assets/models/10x10_FlatPlane_for_VerletSoftBodyFlag_xyz_n_uv.ply",
             softBodyFlagMesh, program);
         std::cout << softBodyFlagMesh.numberOfVertices << " vertices loaded" << std::endl;
+
+        sModelDrawInfo softBodyFlagMesh1;
+        ::g_pMeshManager->LoadModelIntoVAO("assets/models/30x30_FlatPlane_for_VerletSoftBodyFlag_xyz_n_uv.ply",
+            softBodyFlagMesh1, program);
+        std::cout << softBodyFlagMesh1.numberOfVertices << " vertices loaded" << std::endl;
 
         sModelDrawInfo softBodyFlagMesh2;
         ::g_pMeshManager->LoadModelIntoVAO("assets/models/60x60_FlatPlane_for_VerletSoftBodyFlag_xyz_n_uv_82,944_faces.ply",
@@ -102,20 +102,21 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
             sMesh* pCanadianFlag = new sMesh();
             //            pCanadianFlag->modelFileName = "Canadian_Flag_Mesh";
             pCanadianFlag->modelFileName = "CanadaFlag_SoftBodyMesh";
+            pCanadianFlag->uniqueFriendlyName = "Canadian_Flag";
 
 //            pCanadianFlag->positionXYZ = glm::vec3(0.0f, +30.0f, 0.0f);
 //            pCanadianFlag->rotationEulerXYZ = glm::vec3(0.0f, 0.0f, -90.0f);
 
-            pCanadianFlag->objectColourRGBA = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-            pCanadianFlag->bOverrideObjectColour = true;
-            pCanadianFlag->bIsWireframe = true;
+//            pCanadianFlag->objectColourRGBA = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+//            pCanadianFlag->bOverrideObjectColour = true;
+//            pCanadianFlag->bIsWireframe = true;
             //            pCanadianFlag->rotationEulerXYZ = glm::vec3(0.0f);
             //            pCanadianFlag->rotationEulerXYZ.y = 180.0f;
             pCanadianFlag->textures[0] = "Canadian_Flag_Texture.bmp";
             pCanadianFlag->blendRatio[0] = 1.0f;
             pCanadianFlag->uniformScale = 1.0f;
-            pCanadianFlag->bDoNotLight = true;
-//            pCanadianFlag->bIsVisible = false;
+//            pCanadianFlag->bDoNotLight = true;
+            pCanadianFlag->bIsVisible = false;
             ::g_vecMeshesToDraw.push_back(pCanadianFlag);
 
 
@@ -126,17 +127,17 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
             pSB_CanadianFlag->acceleration = glm::vec3(0.0f, -1.0f, 0.0f);
 
 
-            // Add the sphere that they soft bodies are hitting. 
-            // NOTE: The collision is HARD CODED (in the ApplyCollision() method of cSoftBodyVerlet.cpp).
-            // This object is here to make the collision more visible:
-            //
-            //  glm::vec3 sphereCentre = glm::vec3(-1.0f, -30.0f, 1.0f);
-            //  float sphereRadius = 15.0f;
-            //
+           //  Add the sphere that they soft bodies are hitting. 
+           //  NOTE: The collision is HARD CODED (in the ApplyCollision() method of cSoftBodyVerlet.cpp).
+           //  This object is here to make the collision more visible:
+            
+            glm::vec3 sphereCentre = glm::vec3(-1.0f, -30.0f, 1.0f);
+            float sphereRadius = 15.0f;
+            
             sMesh* pSoftBodyCollisionSphere = new sMesh();
             pSoftBodyCollisionSphere->modelFileName = "assets/models/Sphere_radius_1_xyz_N_uv.ply";
-            pSoftBodyCollisionSphere->positionXYZ = glm::vec3(-1.0f, -30.0f, 1.0f);
-            pSoftBodyCollisionSphere->uniformScale = 15.0f;
+            pSoftBodyCollisionSphere->positionXYZ = sphereCentre;
+            pSoftBodyCollisionSphere->uniformScale = sphereRadius;
             pSoftBodyCollisionSphere->textures[0] = "Grey_Brick_Wall_Texture.bmp";
             pSoftBodyCollisionSphere->blendRatio[0] = 1.0f;
             ::g_vecMeshesToDraw.push_back(pSoftBodyCollisionSphere);

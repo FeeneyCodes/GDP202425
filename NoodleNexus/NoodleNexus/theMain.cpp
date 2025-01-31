@@ -608,7 +608,10 @@ int main(void)
             100'000.0f);
 
         // Render the offscreen FBO texture onto where Dua Lipa was...
-        sMesh* pFBOTextureMesh = ::g_pFindMeshByFriendlyName("WareHouseView");
+//        sMesh* pFBOTextureMesh = ::g_pFindMeshByFriendlyName("WareHouseView");
+        // 
+        // Now apply that off-screen texture (from the FBO) to the canadian flag model
+        sMesh* pFBOTextureMesh = ::g_pFindMeshByFriendlyName("Canadian_Flag");
 
         if (pFBOTextureMesh)
         {

@@ -166,7 +166,7 @@ void cSoftBodyVerlet::UpdateNormals(void)
 	}
 
 
-	for ( unsigned int triIndex = 0; triIndex != this->m_ModelVertexInfo.numberOfTriangles; triIndex++ )
+	for ( unsigned int triIndex = 0; triIndex != this->m_ModelVertexInfo.numberOfIndices; triIndex += 3 )
 	{
 		// Indices are sets of 3, one per 
 		unsigned int vertAIndex = this->m_ModelVertexInfo.pIndices[triIndex + 0];

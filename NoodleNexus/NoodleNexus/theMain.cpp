@@ -522,6 +522,55 @@ int main(void)
         ::g_pPhysicEngine->updateSoftBodyMeshes(program);
 
 
+        // HACK
+        //   __        __             _                   _                            _ 
+        //   \ \      / /__  _ __ ___| |_    ___ ___   __| | ___    _____   _____ _ __| |
+        //    \ \ /\ / / _ \| '__/ __| __|  / __/ _ \ / _` |/ _ \  / _ \ \ / / _ \ '__| |
+        //     \ V  V / (_) | |  \__ \ |_  | (_| (_) | (_| |  __/ |  __/\ V /  __/ |  |_|
+        //      \_/\_/ \___/|_|  |___/\__|  \___\___/ \__,_|\___|  \___| \_/ \___|_|  (_)
+        //                                                                               
+        // 
+        // "Slice" the cloth into to along the x = 0 axis
+        // as soon as the cloth touches the sphere.
+        // So imagine there is a large knife/plane the length of the screen.
+        // 
+        // glm::vec3 sphereCentre = glm::vec3(-1.0f, -30.0f, 1.0f);
+        // float sphereRadius = 15.0f;
+        //
+        // Top of "knife" = -15.0f in the y
+        // X = -1.0
+        glm::vec3 knifeEdge = glm::vec3(-1.0f, -15.0f, 0.0f);
+
+        cSoftBodyVerlet* pSB = ::g_pPhysicEngine->pFindSoftBodyByFriendlyName("CanadaFlag_SoftBodyMesh");
+        if (pSB != NULL)
+        {
+            // HACK: See if any active constrants are at this "knife" location
+            for (cSoftBodyVerlet::sConstraint* pCurConstraint : pSB->vec_pConstraints)
+            {
+                if (pCurConstraint->bIsActive)
+                {
+                    // Are both vertices below -15.0f and close to x = -1.0f
+                    if ((pCurConstraint->pParticleA->position.y < knifeEdge.y) &&
+                        (pCurConstraint->pParticleB->position.y < knifeEdge.y))
+                    {
+                        // Low enough to be cut
+                        // Are the x locations "near enough" to X = -1.0f
+                        const float CLOSE_ENOUGH_DISTANCE = 0.01f;
+                        if ( ( (pCurConstraint->pParticleA->position.x - knifeEdge.x) < CLOSE_ENOUGH_DISTANCE)
+                            &&
+                             ( (pCurConstraint->pParticleB->position.x - knifeEdge.x) < CLOSE_ENOUGH_DISTANCE) )
+                        {
+                            // Disable constraint (i.e. "cut" it)
+                            pCurConstraint->bIsActive = false;
+                        }
+                    }
+                }
+
+            }// for (...pCurConstraint
+
+        }//if (pSB != NULL)
+
+
 
         // Update the commands, too
         ::g_pCommandDirector->Update(deltaTime);
@@ -608,10 +657,10 @@ int main(void)
             100'000.0f);
 
         // Render the offscreen FBO texture onto where Dua Lipa was...
-//        sMesh* pFBOTextureMesh = ::g_pFindMeshByFriendlyName("WareHouseView");
+        sMesh* pFBOTextureMesh = ::g_pFindMeshByFriendlyName("WareHouseView");
         // 
         // Now apply that off-screen texture (from the FBO) to the canadian flag model
-        sMesh* pFBOTextureMesh = ::g_pFindMeshByFriendlyName("Canadian_Flag");
+//        sMesh* pFBOTextureMesh = ::g_pFindMeshByFriendlyName("Canadian_Flag");
 
         if (pFBOTextureMesh)
         {

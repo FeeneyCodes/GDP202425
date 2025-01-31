@@ -49,6 +49,27 @@ void cPhysics::updateSoftBodies(double deltaTime)
     return;
 }
 
+cSoftBodyVerlet* cPhysics::pFindSoftBodyByFriendlyName(std::string friendlyName)
+{
+    std::map< std::string /*freindly name*/, cSoftBodyVerlet* >::iterator itSB 
+        = this->m_MapSoftBodiesByName.find(friendlyName);
+
+    // Found it? 
+    if (itSB == this->m_MapSoftBodiesByName.end())
+    {
+        // NO, we didn't
+        return NULL;
+    }
+
+    // return pointer to soft body
+    return itSB->second;
+
+}
+
+
+// 
+//	std::map< std::string /*freindly name*/, cSoftBody_Verlet* > m_MapSoftBodiesByName;
+
 
 void cPhysics::updateSoftBodyMeshes(unsigned int shaderProgramID)
 {

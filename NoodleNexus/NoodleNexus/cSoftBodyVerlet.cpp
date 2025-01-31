@@ -317,49 +317,69 @@ void cSoftBodyVerlet::ApplyCollision(double deltaTime)
 
 void cSoftBodyVerlet::SatisfyConstraints(void)
 {
-	const unsigned int NUM_ITERATIONS = 1;
+	const unsigned int MAX_GLOBAL_ITERATIONS = 3;
 	
-	for ( unsigned int iteration = 0; iteration != NUM_ITERATIONS; iteration++ )
+	for ( unsigned int iteration = 0; iteration != MAX_GLOBAL_ITERATIONS; iteration++ )
 	{
 		// This is ONE pass of the constraint resolution
 		for (sConstraint* pCurConstraint : this->vec_pConstraints )
 		{
-			if ( pCurConstraint->bIsActive )
+			// Ripped or broken
+			if ( ! pCurConstraint->bIsActive )
 			{
+				continue;
+			}
+			// How many iterations for THIS constraint
+			if (iteration > pCurConstraint->maxIterations)
+			{
+				continue;
+			}
 
-
-				cSoftBodyVerlet::sParticle* pX1 = pCurConstraint->pParticleA;
-				cSoftBodyVerlet::sParticle* pX2 = pCurConstraint->pParticleB;
+			// Constraint (edge) IS active, etc. 
+			cSoftBodyVerlet::sParticle* pX1 = pCurConstraint->pParticleA;
+			cSoftBodyVerlet::sParticle* pX2 = pCurConstraint->pParticleB;
 		
-				glm::vec3 delta = pX2->position - pX1->position;
+			glm::vec3 delta = pX2->position - pX1->position;
 
-				float deltaLength = glm::length(delta);
+			float deltaLength = glm::length(delta);
+
+			// TODO: 
+			// Do we break this when it's "too far apart"
+			if (pCurConstraint->bIsBreakable)
+			{
+				if (deltaLength >= pCurConstraint->breakingDistance)
+				{
+					// Disable this contraint the next time
+					// i.e. "it's ripped" or broken
+					pCurConstraint->bIsActive;
+					continue;
+				}
+			}
 
 
-				float diff = (deltaLength - pCurConstraint->restLength) / deltaLength;
+			float diff = (deltaLength - pCurConstraint->restLength) / deltaLength;
 
-				// If we were having this 'tear' or break apart, 
-				//	you could check some maximum length and if it's 'too long'
-				//	then the constraint 'breaks'
-				// Handle this by:
-				// - Setting a bool (where it doesn't check the constraint any more)
-				// - Remove the constraint (but removing from a vector is sketchy...)
+			// If we were having this 'tear' or break apart, 
+			//	you could check some maximum length and if it's 'too long'
+			//	then the constraint 'breaks'
+			// Handle this by:
+			// - Setting a bool (where it doesn't check the constraint any more)
+			// - Remove the constraint (but removing from a vector is sketchy...)
 
 //				if ( diff > 0.1f )
 //				{
 //					pCurConstraint->bIsActive = false;
 //				}
 
-				// Making this non-one, will change how quickly the objects move together
-				// For example, making this < 1.0 will make it "bouncier"
-				float tightnessFactor = 1.0f;
+			// Making this non-one, will change how quickly the objects move together
+			// For example, making this < 1.0 will make it "bouncier"
+			float tightnessFactor = 1.0f;
 
-				pX1->position += delta * 0.5f * diff * tightnessFactor;
-				pX2->position -= delta * 0.5f * diff * tightnessFactor;
+			pX1->position += delta * 0.5f * diff * tightnessFactor;
+			pX2->position -= delta * 0.5f * diff * tightnessFactor;
 
-				this->cleanZeros(pX1->position);
-				this->cleanZeros(pX2->position);
-			}//if (pCurConstraint->bIsActive)
+			this->cleanZeros(pX1->position);
+			this->cleanZeros(pX2->position);
 
 		}//for (sConstraint* pCurConstraint...
 	}//for ( unsigned int iteration

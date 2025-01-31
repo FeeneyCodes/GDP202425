@@ -94,8 +94,8 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
 //
             sModelDrawInfo softBodyCanadianFlagMesh;
 //            ::g_pMeshManager->FindDrawInfoByModelName("assets/models/10x10_FlatPlane_for_VerletSoftBodyFlag_xyz_n_uv.ply", softBodyCanadianFlagMesh);
-//            ::g_pMeshManager->FindDrawInfoByModelName("assets/models/30x30_FlatPlane_for_VerletSoftBodyFlag_xyz_n_uv.ply", softBodyCanadianFlagMesh);
-            ::g_pMeshManager->FindDrawInfoByModelName("assets/models/60x60_FlatPlane_for_VerletSoftBodyFlag_xyz_n_uv_82,944_faces.ply", softBodyCanadianFlagMesh);
+            ::g_pMeshManager->FindDrawInfoByModelName("assets/models/30x30_FlatPlane_for_VerletSoftBodyFlag_xyz_n_uv.ply", softBodyCanadianFlagMesh);
+//            ::g_pMeshManager->FindDrawInfoByModelName("assets/models/60x60_FlatPlane_for_VerletSoftBodyFlag_xyz_n_uv_82,944_faces.ply", softBodyCanadianFlagMesh);
             ::g_pMeshManager->CloneMeshToDynamicVAO("CanadaFlag_SoftBodyMesh", softBodyCanadianFlagMesh, program);
 
 
@@ -109,14 +109,14 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
 
 //            pCanadianFlag->objectColourRGBA = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 //            pCanadianFlag->bOverrideObjectColour = true;
-//            pCanadianFlag->bIsWireframe = true;
+            pCanadianFlag->bIsWireframe = true;
             //            pCanadianFlag->rotationEulerXYZ = glm::vec3(0.0f);
             //            pCanadianFlag->rotationEulerXYZ.y = 180.0f;
             pCanadianFlag->textures[0] = "Canadian_Flag_Texture.bmp";
             pCanadianFlag->blendRatio[0] = 1.0f;
             pCanadianFlag->uniformScale = 1.0f;
-//            pCanadianFlag->bDoNotLight = true;
-            pCanadianFlag->bIsVisible = false;
+            pCanadianFlag->bDoNotLight = true;
+//            pCanadianFlag->bIsVisible = false;
             ::g_vecMeshesToDraw.push_back(pCanadianFlag);
 
 

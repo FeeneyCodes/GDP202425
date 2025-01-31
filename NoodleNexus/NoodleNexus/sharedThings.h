@@ -65,4 +65,3 @@ glm::vec3 g_getRandom_vec3(glm::vec3 min, glm::vec3 max);
 std::string g_getStringVec3(glm::vec3 theVec3);
 // Returns NULL if NOT found
 sMesh* g_pFindMeshByFriendlyName(std::string theNameToFind);
-

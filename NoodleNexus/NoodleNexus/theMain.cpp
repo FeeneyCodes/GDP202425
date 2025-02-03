@@ -260,6 +260,13 @@ int main(void)
 
     glUseProgram(program);
 
+    
+    cShaderManager::cShaderProgram* pShaderProgram
+        = pShaderManager->pGetShaderProgramFromFriendlyName("shader01");
+
+    std::string strUniformSummary = pShaderProgram->getActiveUniformSummary();
+
+//    std::cout << strUniformSummary << std::endl;
 
     ::g_pMyLuaMasterBrain = new cLuaBrain();
 

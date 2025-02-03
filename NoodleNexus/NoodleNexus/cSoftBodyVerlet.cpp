@@ -257,10 +257,27 @@ void cSoftBodyVerlet::VerletUpdate(double deltaTime)
 
 		if (!pCurrentParticle->bIsFixed_DontUpdate)
 		{
+			// You can limit how much movement is happening here
+			//	by comparing the distance between the old and current position.
+			// Remember that you don't have a velocity, but you do have 
+			//	it indirectly (difference between two positions)
+
+			glm::vec3 deltaPosition = current_pos - old_pos;
+
+//			// If the movement is "too far", then clamp it to some maximum
+//			if (glm::length(deltaPosition) > 0.05f)
+//			{
+//				// Adjust it
+//				deltaPosition = glm::normalize(deltaPosition) * 0.01f;
+//			}
 
 			// This is the actual Verlet integration step (notice there isn't a velocity)
-			pCurrentParticle->position += (current_pos - old_pos)
+			pCurrentParticle->position += deltaPosition
 				+ (this->acceleration * (float)(deltaTime * deltaTime));
+
+//			pCurrentParticle->position += (current_pos - old_pos)
+//				+ (this->acceleration * (float)(deltaTime * deltaTime));
+
 
 			pCurrentParticle->old_position = current_pos;
 

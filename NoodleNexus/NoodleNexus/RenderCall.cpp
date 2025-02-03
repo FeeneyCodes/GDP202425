@@ -38,6 +38,7 @@ void SetUpTextures(sMesh* pCurMesh, GLuint program)
 
         GLint texture00_UL = glGetUniformLocation(program, "texture00");
         glUniform1i(texture00_UL, 0);       // <-- Note we use the NUMBER, not the GL_TEXTURE3 here
+//        mYProgram.SetUniform("texture00", 0)
     }
 
     {

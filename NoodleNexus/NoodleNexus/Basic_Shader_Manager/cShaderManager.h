@@ -44,6 +44,9 @@ public:
 		// Look up the uniform location and save it.
 		bool LoadUniformLocation(std::string variableName);
 
+		// Calls this: https://registry.khronos.org/OpenGL-Refpages/gl4/html/glGetActiveUniform.xhtml
+		std::string getActiveUniformSummary(void);
+
 	};
 
 	cShaderManager();

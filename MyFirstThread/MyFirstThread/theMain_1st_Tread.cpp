@@ -23,6 +23,16 @@ float getAverage(std::vector< float > theNums)
 	return theTotal;
 }
 
+void CalculatePathOnTerrain(void)
+{
+	// 1. Use VAO to get mesh info
+	// 2. Calculate path
+	// 3. Add spheres to vecMeshesToDraw to indicate path
+
+	return;
+}
+
+
 // Global variables
 std::vector< float > g_theNums;
 float g_average = 0;
@@ -46,11 +56,24 @@ struct sGetAverageParams
 	float average = 0.0f;
 };
 
+//struct sMyThings
+//{
+//	float s;
+//	std::string hey;
+//	std::vector< int> vecWhatever;
+//};
+
 DWORD WINAPI getAverageThreadProc_V2(LPVOID params)
 {
 	// void* pVoidParams = (void*)&myData;
 
 	sGetAverageParams* pMyData = (sGetAverageParams*)params;
+
+	if (pMyData->theNums.empty())
+	{
+		// Error
+		return -1;
+	}
 
 	float theTotal = 0.0f;
 	for (float theNum : pMyData->theNums)
@@ -64,7 +87,7 @@ DWORD WINAPI getAverageThreadProc_V2(LPVOID params)
 }
 
 
-int main(int argc, char* argv[])
+int main_1st_Tread(int argc, char* argv[])
 {
 //	std::vector< float > theNums;
 	sGetAverageParams myData;

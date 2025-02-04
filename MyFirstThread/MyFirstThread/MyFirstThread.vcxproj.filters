@@ -15,7 +15,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="theMain.cpp">
+    <ClCompile Include="theMain_1st_Tread.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="theMain_IO_ThreadSafe.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

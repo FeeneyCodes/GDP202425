@@ -521,24 +521,41 @@ int main(void)
         // 
         double deltaTime = frameTimeFilter.getAverage();
 
-
         // Physic update and test 
+        // (The phsyics "engine" is NOT updating the Verlet (soft bodies) 
+        //  in this method...)
         ::g_pPhysicEngine->StepTick(deltaTime);
 
-        // This might be better inside the StepTick(),
-        //  but I'm leaving it here for clarification
-        //  or if you DON'T want any soft bodies
-        ::g_pPhysicEngine->updateSoftBodies(deltaTime);
 
+// THREADED NOW
+//         
+//  Update this from THE LAST FRAME
+// 
         // Update the meshes in the VAO to match any soft bodies
+        // MUST keep this on the OpenGL thread that "has context"
+        // (i.e. the one that we created the GL window on)
+        // (i.e. we are NOT going to move this to another thread)
         ::g_pPhysicEngine->updateSoftBodyMeshes(program);
 
+
+        // Update the mesh information from the LAST frame:
+        // (i.e. from the thread we kicked off last frame)
 
         // Move the flag to where the viper is
         if (::g_pViperFlagConnector)
         {
             ::g_pViperFlagConnector->UpdateFlagLocation();
         }
+
+
+        // This might be better inside the StepTick(),
+        //  but I'm leaving it here for clarification
+        //  or if you DON'T want any soft bodies
+        ::g_pPhysicEngine->updateSoftBodies(deltaTime);
+
+        // NOTE: We are NOT updating the VAO mesh now
+        //  because the worker thread just started...
+
 
 
 

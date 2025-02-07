@@ -66,7 +66,6 @@ public:
 	//	information of the vertices
 	void updateSoftBodyMeshes(unsigned int shaderProgramID);
 
-	// Returns NULL if not found
 	cSoftBodyVerlet* pFindSoftBodyByFriendlyName(std::string friendlyName);
 
 

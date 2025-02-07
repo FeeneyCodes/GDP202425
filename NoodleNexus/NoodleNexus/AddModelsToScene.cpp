@@ -78,6 +78,11 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
             softBodyFlagMesh2, program);
         std::cout << softBodyFlagMesh2.numberOfVertices << " vertices loaded" << std::endl;
 
+        sModelDrawInfo softBodyFlagMesh3;
+        ::g_pMeshManager->LoadModelIntoVAO("assets/models/60x60_FlatPlane_for_VerletSoftBodyFlag_xyz_n_uv_497,656_faces.ply",
+            softBodyFlagMesh3, program);
+        std::cout << softBodyFlagMesh3.numberOfVertices << " vertices loaded" << std::endl;
+
         sModelDrawInfo bun_zipper_res4_larger_Mesh;
         ::g_pMeshManager->LoadModelIntoVAO("assets/models/bun_zipper_res4_larger_for_soft_body.ply",
             bun_zipper_res4_larger_Mesh, program);
@@ -122,8 +127,9 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
 //
             sModelDrawInfo softBodyCanadianFlagMesh;
 //            ::g_pMeshManager->FindDrawInfoByModelName("assets/models/10x10_FlatPlane_for_VerletSoftBodyFlag_xyz_n_uv.ply", softBodyCanadianFlagMesh);
-            ::g_pMeshManager->FindDrawInfoByModelName("assets/models/30x30_FlatPlane_for_VerletSoftBodyFlag_xyz_n_uv.ply", softBodyCanadianFlagMesh);
-//            ::g_pMeshManager->FindDrawInfoByModelName("assets/models/60x60_FlatPlane_for_VerletSoftBodyFlag_xyz_n_uv_82,944_faces.ply", softBodyCanadianFlagMesh);
+//            ::g_pMeshManager->FindDrawInfoByModelName("assets/models/30x30_FlatPlane_for_VerletSoftBodyFlag_xyz_n_uv.ply", softBodyCanadianFlagMesh);
+            ::g_pMeshManager->FindDrawInfoByModelName("assets/models/60x60_FlatPlane_for_VerletSoftBodyFlag_xyz_n_uv_82,944_faces.ply", softBodyCanadianFlagMesh);
+//            ::g_pMeshManager->FindDrawInfoByModelName("assets/models/60x60_FlatPlane_for_VerletSoftBodyFlag_xyz_n_uv_497,656_faces.ply", softBodyCanadianFlagMesh);
             ::g_pMeshManager->CloneMeshToDynamicVAO("CanadaFlag_SoftBodyMesh", softBodyCanadianFlagMesh, program);
 
 

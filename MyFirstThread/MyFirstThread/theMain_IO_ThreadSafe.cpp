@@ -44,6 +44,7 @@ DWORD WINAPI threadProc_01(LPVOID params)
 		}
 		//
 		//
+		
 
 		// it's own total
 		pData->totalTime += waitTime;

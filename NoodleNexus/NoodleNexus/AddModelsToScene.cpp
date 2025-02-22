@@ -78,6 +78,11 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
             softBodyFlagMesh2, program);
         std::cout << softBodyFlagMesh2.numberOfVertices << " vertices loaded" << std::endl;
 
+        sModelDrawInfo softBodyTube;
+        ::g_pMeshManager->LoadModelIntoVAO("assets/models/tube_xyz_n_uv.ply",
+            softBodyTube, program);
+        std::cout << softBodyTube.numberOfVertices << " vertices loaded" << std::endl;
+
         sModelDrawInfo softBodyFlagMesh3;
         ::g_pMeshManager->LoadModelIntoVAO("assets/models/60x60_FlatPlane_for_VerletSoftBodyFlag_xyz_n_uv_497,656_faces.ply",
             softBodyFlagMesh3, program);
@@ -127,9 +132,10 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
 //
             sModelDrawInfo softBodyCanadianFlagMesh;
 //            ::g_pMeshManager->FindDrawInfoByModelName("assets/models/10x10_FlatPlane_for_VerletSoftBodyFlag_xyz_n_uv.ply", softBodyCanadianFlagMesh);
-//            ::g_pMeshManager->FindDrawInfoByModelName("assets/models/30x30_FlatPlane_for_VerletSoftBodyFlag_xyz_n_uv.ply", softBodyCanadianFlagMesh);
-            ::g_pMeshManager->FindDrawInfoByModelName("assets/models/60x60_FlatPlane_for_VerletSoftBodyFlag_xyz_n_uv_82,944_faces.ply", softBodyCanadianFlagMesh);
+            ::g_pMeshManager->FindDrawInfoByModelName("assets/models/30x30_FlatPlane_for_VerletSoftBodyFlag_xyz_n_uv.ply", softBodyCanadianFlagMesh);
+//            ::g_pMeshManager->FindDrawInfoByModelName("assets/models/60x60_FlatPlane_for_VerletSoftBodyFlag_xyz_n_uv_82,944_faces.ply", softBodyCanadianFlagMesh);
 //            ::g_pMeshManager->FindDrawInfoByModelName("assets/models/60x60_FlatPlane_for_VerletSoftBodyFlag_xyz_n_uv_497,656_faces.ply", softBodyCanadianFlagMesh);
+//            ::g_pMeshManager->FindDrawInfoByModelName("assets/models/tube_xyz_n_uv.ply", softBodyCanadianFlagMesh);
             ::g_pMeshManager->CloneMeshToDynamicVAO("CanadaFlag_SoftBodyMesh", softBodyCanadianFlagMesh, program);
 
 
@@ -242,7 +248,7 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
 
     {
         sModelDrawInfo galacticaModel;
-        ::g_pMeshManager->LoadModelIntoVAO("assets/models/Battlestar_Galactica_Res_0_(444,087 faces)_xyz_n_uv (facing +z, up +y).ply",
+        ::g_pMeshManager->LoadModelIntoVAO_Async("assets/models/Battlestar_Galactica_Res_0_(444,087 faces)_xyz_n_uv (facing +z, up +y).ply",
             galacticaModel, program);
         std::cout << galacticaModel.meshName << ": " << galacticaModel.numberOfVertices << " vertices loaded" << std::endl;
     }
@@ -257,7 +263,7 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
     {
         sModelDrawInfo warehouseModel;
         //    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Warehouse_xyz_n.ply",
-        ::g_pMeshManager->LoadModelIntoVAO("assets/models/Warehouse_xyz_n_uv.ply",
+        ::g_pMeshManager->LoadModelIntoVAO_Async("assets/models/Warehouse_xyz_n_uv.ply",
             warehouseModel, program);
         std::cout << warehouseModel.numberOfVertices << " vertices loaded" << std::endl;
     }
@@ -285,7 +291,7 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
         //    pMeshManager->LoadModelIntoVAO("assets/models/Simple_MeshLab_terrain_xyz_only.ply", 
     //    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Simple_MeshLab_terrain_xyz_N.ply",
     //    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Simple_MeshLab_terrain_xyz_N_uv.ply",
-        ::g_pMeshManager->LoadModelIntoVAO("assets/models/Simple_MeshLab_terrain_x5_xyz_N_uv.ply",
+        ::g_pMeshManager->LoadModelIntoVAO_Async("assets/models/Simple_MeshLab_terrain_x5_xyz_N_uv.ply",
             terrainModel, program);
         std::cout << terrainModel.numberOfVertices << " vertices loaded" << std::endl;
     }
@@ -328,14 +334,14 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
 
     {
         sModelDrawInfo newViperModelInfo;
-        ::g_pMeshManager->LoadModelIntoVAO("assets/models/Viper_MkVII_xyz_n_uv.ply",
+        ::g_pMeshManager->LoadModelIntoVAO_Async("assets/models/Viper_MkVII_xyz_n_uv.ply",
             newViperModelInfo, program);
         std::cout << newViperModelInfo.numberOfVertices << " vertices loaded" << std::endl;
     }
 
     {
         sModelDrawInfo cheeseMesh;
-        ::g_pMeshManager->LoadModelIntoVAO("assets/models/Cheese_xyz_n_uv.ply",
+        ::g_pMeshManager->LoadModelIntoVAO_Async("assets/models/Cheese_xyz_n_uv.ply",
             cheeseMesh, program);
         std::cout << cheeseMesh.numberOfVertices << " vertices loaded" << std::endl;
     }

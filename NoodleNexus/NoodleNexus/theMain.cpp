@@ -202,6 +202,8 @@ int main(void)
     AABBOctTree();
 
 
+
+
     glfwSetErrorCallback(error_callback);
 
     if (!glfwInit())
@@ -371,6 +373,9 @@ int main(void)
     ::g_pTextures = new cBasicTextureManager();
 
     ::g_pTextures->SetBasePath("assets/textures");
+
+    std::cout << "Loading textures...";
+
     ::g_pTextures->Create2DTextureFromBMPFile("bad_bunny_1920x1080.bmp");
     ::g_pTextures->Create2DTextureFromBMPFile("dua-lipa-promo.bmp");
     ::g_pTextures->Create2DTextureFromBMPFile("Puzzle_parts.bmp");
@@ -432,6 +437,7 @@ int main(void)
     }
         
         
+    std::cout << "done." << std::endl;
         
         
 
@@ -730,7 +736,17 @@ int main(void)
                 0.0f,
                 0.0f);
 
+            // This is for the blurring effect
+            GLint b_Is_FBO_Texture_UL = glGetUniformLocation(program, "b_Is_FBO_Texture");
+            GLint bUseTextureAsColour_UL = glGetUniformLocation(program, "bUseTextureAsColour");
+
+            glUniform1f(b_Is_FBO_Texture_UL, (float)GL_TRUE);
+            glUniform1f(bUseTextureAsColour_UL, (float)GL_FALSE);
+
             DrawMesh(pFBOTextureMesh, program, false);
+
+            glUniform1f(b_Is_FBO_Texture_UL, (float)GL_FALSE);
+            glUniform1f(bUseTextureAsColour_UL, (float)GL_TRUE);
 
             pFBOTextureMesh->bIsVisible = false;
         }
@@ -746,14 +762,16 @@ int main(void)
 
         // Draw the paths along the terrain
         std::vector<glm::vec3> vecPathPoints;
-        ::g_pTerrainPathChooser->CalculatePath(vecPathPoints);
-        for (glm::vec3 points : vecPathPoints)
-        {
-            DrawDebugSphere(points, glm::vec4(0.0f, 1.0f, 0.0f, 1.0f), 25.0f, program);
-        }
+//        ::g_pTerrainPathChooser->CalculatePath(vecPathPoints);
+//        for (glm::vec3 points : vecPathPoints)
+//        {
+//            DrawDebugSphere(points, glm::vec4(0.0f, 1.0f, 0.0f, 1.0f), 25.0f, program);
+//        }
 
         // **************************************************
-
+        
+        // Load any outstanding models async...
+        ::g_pMeshManager->LoadAsynModels(program);
 
         // Handle async IO stuff
         handleKeyboardAsync(window);

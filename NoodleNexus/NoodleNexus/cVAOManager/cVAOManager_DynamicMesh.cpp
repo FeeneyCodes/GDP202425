@@ -102,7 +102,9 @@ bool cVAOManager::CloneMeshToDynamicVAO(
 
 
 	// Store the draw information into the map
+	this->m_LockModelMap();
 	this->m_map_ModelName_to_VAOID[cloneMeshDrawInfo.meshName] = cloneMeshDrawInfo;
+	this->m_UnlockModelMap();
 
 	return true;
 }

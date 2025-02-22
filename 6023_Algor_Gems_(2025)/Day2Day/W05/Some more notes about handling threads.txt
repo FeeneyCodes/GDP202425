@@ -1,0 +1,17 @@
+
+1. Place the code into a SEPARATE stand alone function
+	1a. Fix all the issue around that
+	1b. How is the information shared, etc.?
+2. Get that to work
+3. Call CreateThread() on that function
+	3a. Cry because of race conditions
+4. Determine how you are going to control this thread, now	
+	4a. How to start?
+	4b. When to start?
+	4c. When to exit? 
+		does it run once, then exit?
+		does it run forever --> you need to call sleep()
+5. More crying and swearing...
+		
+		
+Sleep(a)

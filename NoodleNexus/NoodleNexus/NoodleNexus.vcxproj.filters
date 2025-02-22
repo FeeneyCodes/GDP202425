@@ -197,6 +197,9 @@
     <ClCompile Include="cPhysics_cSoftBody_Verlet_Threaded.cpp">
       <Filter>Phsyics_Stuff\Verlet_SoftBody</Filter>
     </ClCompile>
+    <ClCompile Include="cVAOManager\cVAOManager_Async_Loader.cpp">
+      <Filter>Meshes, etc.</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PlyFileLoaders.h">

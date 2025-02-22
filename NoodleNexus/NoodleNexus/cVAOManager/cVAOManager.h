@@ -60,6 +60,10 @@ struct sModelDrawInfo
 	// 
 	glm::vec3 maxXYZ, minXYZ, extenXYZ, centreXYZ;
 	void calculateExtents(void);
+
+	// For async loading
+	bool bIsLoaded = false;			// Thread has loaded file
+	bool bIsCopiedToVAO = false;	// File is loaded, ready to go to the VAO
 };
 
 
@@ -67,9 +71,42 @@ class cVAOManager
 {
 public:
 
+	cVAOManager();
+	~cVAOManager();
+
 	bool LoadModelIntoVAO(std::string fileName, 
 						  sModelDrawInfo &drawInfo, 
 						  unsigned int shaderProgramID);
+
+	// This will load models on a separate thread
+	// (i.e. it will return right away)
+	bool LoadModelIntoVAO_Async(std::string fileName, 
+						  sModelDrawInfo &drawInfo, 
+						  unsigned int shaderProgramID);
+
+
+	// This is called every frame to deal with 
+	//	any loaded models from the async thread
+	void LoadAsynModels(unsigned int shaderProgramID);
+
+	// Reads the PLY file, loading it into an sModelDrawInfo structure.
+	bool m_readPlyFile_XYZ(sModelDrawInfo& modelDrawInfo);
+	bool m_readPlyFile_XYZ_Normal(sModelDrawInfo& modelDrawInfo);
+	bool m_readPlyFile_XYZ_Normal_UV(sModelDrawInfo& modelDrawInfo);
+
+private:
+
+	// Called by c'tor
+	void m_InitThead_and_CS(void);
+	// Called by d'tor
+	void m_TerminateThread_and_CS(void);
+
+	// Once the file is loaded, this does the actual 
+	// copying to the VAO on the video card
+	bool m_CopyLoadedModelToVAO(sModelDrawInfo& drawInfo,
+		                        unsigned int shaderProgramID);
+
+public:
 
 	// This is used for the soft body (or anything else, like water)
 	// Takes a mesh and copies it to another VAO, but the vertex array is DYNAMIC
@@ -102,9 +139,15 @@ public:
 
 private:
 
+
+	// 
+	void m_LockModelMap(void);
+//	bool isModelMapLocked(void);
+//	bool m_bMapIsLocked = false;
 	std::map< std::string /*model name*/,
 		      sModelDrawInfo /* info needed to draw*/ >
 		m_map_ModelName_to_VAOID;
+	void m_UnlockModelMap(void);
 
 };
 

@@ -28,6 +28,10 @@ sModelDrawInfo::sModelDrawInfo()
 	this->pVertices = 0;	// or NULL
 	this->pIndices = 0;		// or NULL
 
+	this->centreXYZ = glm::vec3(0.0f);
+	this->extenXYZ = glm::vec3(0.0f);
+	this->maxXYZ = this->minXYZ = glm::vec3(0.0f);
+
 	// You could store the max and min values of the 
 	//  vertices here (determined when you load them):
 //	glm::vec3 maxValues;
@@ -39,10 +43,21 @@ sModelDrawInfo::sModelDrawInfo()
 	return;
 }
 
+
+cVAOManager::cVAOManager()
+{
+	this->m_InitThead_and_CS();
+}
+
+cVAOManager::~cVAOManager()
+{
+	this->m_TerminateThread_and_CS();
+}
+
 // Takes:
 // * 
 // Returns: true if the file is loaded
-bool readPlyFile_XYZ(sModelDrawInfo& modelDrawInfo)
+bool cVAOManager::m_readPlyFile_XYZ(sModelDrawInfo& modelDrawInfo)
 {
 
 	// ************************************************************
@@ -181,7 +196,7 @@ bool readPlyFile_XYZ(sModelDrawInfo& modelDrawInfo)
 // Takes:
 // * 
 // Returns: true if the file is loaded
-bool readPlyFile_XYZ_Normal(sModelDrawInfo& modelDrawInfo)
+bool cVAOManager::m_readPlyFile_XYZ_Normal(sModelDrawInfo& modelDrawInfo)
 {
 
 	// ************************************************************
@@ -314,7 +329,7 @@ bool readPlyFile_XYZ_Normal(sModelDrawInfo& modelDrawInfo)
 }
 
 // Returns: true if the file is loaded
-bool readPlyFile_XYZ_Normal_UV(sModelDrawInfo& modelDrawInfo)
+bool cVAOManager::m_readPlyFile_XYZ_Normal_UV(sModelDrawInfo& modelDrawInfo)
 {
 
 	// ************************************************************
@@ -450,6 +465,141 @@ bool readPlyFile_XYZ_Normal_UV(sModelDrawInfo& modelDrawInfo)
 }
 
 
+
+bool cVAOManager::m_CopyLoadedModelToVAO(
+	sModelDrawInfo& drawInfo,
+	unsigned int shaderProgramID)
+{
+	//
+	// 	// Create a VAO (Vertex Array Object), which will 
+		//	keep track of all the 'state' needed to draw 
+		//	from this buffer...
+
+		// Ask OpenGL for a new buffer ID...
+	glGenVertexArrays(1, &(drawInfo.VAO_ID));
+	// "Bind" this buffer:
+	// - aka "make this the 'current' VAO buffer
+	glBindVertexArray(drawInfo.VAO_ID);
+
+	// Now ANY state that is related to vertex or index buffer
+	//	and vertex attribute layout, is stored in the 'state' 
+	//	of the VAO... 
+
+
+	// NOTE: OpenGL error checks have been omitted for brevity
+	//	glGenBuffers(1, &vertex_buffer);
+	glGenBuffers(1, &(drawInfo.VertexBufferID));
+
+	//	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+	glBindBuffer(GL_ARRAY_BUFFER, drawInfo.VertexBufferID);
+	// sVert vertices[3]
+	//	glBufferData( GL_ARRAY_BUFFER, 
+	//				  sizeof(sVertex_SHADER_FORMAT_xyz_rgb) * drawInfo.numberOfVertices,	// ::g_NumberOfVertsToDraw,	// sizeof(vertices), 
+	//				  (GLvoid*) drawInfo.pVertices,							// pVertices,			//vertices, 
+	//				  GL_STATIC_DRAW );
+	//	glBufferData( GL_ARRAY_BUFFER, 
+	//				  sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N) * drawInfo.numberOfVertices,	// ::g_NumberOfVertsToDraw,	// sizeof(vertices), 
+	//				  (GLvoid*) drawInfo.pVertices,							// pVertices,			//vertices, 
+	//				  GL_STATIC_DRAW );
+	glBufferData(GL_ARRAY_BUFFER,
+		sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV) * drawInfo.numberOfVertices,	// ::g_NumberOfVertsToDraw,	// sizeof(vertices), 
+		(GLvoid*)drawInfo.pVertices,							// pVertices,			//vertices, 
+		GL_STATIC_DRAW);
+
+	// Copy the index buffer into the video card, too
+	// Create an index buffer.
+	glGenBuffers(1, &(drawInfo.IndexBufferID));
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, drawInfo.IndexBufferID);
+
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER,			// Type: Index element array
+		sizeof(unsigned int) * drawInfo.numberOfIndices,
+		(GLvoid*)drawInfo.pIndices,
+		GL_STATIC_DRAW);
+
+	// Set the vertex attributes.
+	// ************************************************************
+	// 	   SPECIFIC TO THE SHADER.
+	// 	   If the shader changes or the vertex layout changes,
+	// 		you have to change this part...
+	// ************************************************************
+	GLint vpos_location = glGetAttribLocation(shaderProgramID, "vPos");			// in vec3 vPos;
+	GLint vcol_location = glGetAttribLocation(shaderProgramID, "vCol");			// in vec3 vCol;
+	GLint vnorm_location = glGetAttribLocation(shaderProgramID, "vNormal");		// in vec3 vNormal;
+	GLint vUV_location = glGetAttribLocation(shaderProgramID, "vUV");			// in vec2 vUV;
+
+
+	//struct sVertex_SHADER_FORMAT_xyz_rgb_XXXXXXXXX
+	//{
+	//	float x, y, z;
+	//	float r, g, b;
+	//  float ny, ny, nz;	// When we added normals
+	//  float u, v;			// When we added texture coords
+	//};
+
+	// Set the vertex attributes for this shader
+	glEnableVertexAttribArray(vpos_location);	// vPos
+	glVertexAttribPointer(vpos_location,
+		3,		// vPos
+		GL_FLOAT, GL_FALSE,
+		//						   sizeof(sVertex_SHADER_FORMAT_xyz_rgb),	//  sizeof(float) * 6,		// Stride
+		//						   sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N),	//  sizeof(float) * 6,		// Stride
+		sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV),	//  sizeof(float) * 6,		// Stride
+		//						   ( void* )offsetof(sVertex_SHADER_FORMAT_xyz_rgb, x) );				// Offset
+		//						   ( void* )offsetof(sVertex_SHADER_FORMAT_xyz_rgb_N, x) );				// Offset
+		(void*)offsetof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV, x));				// Offset
+
+	glEnableVertexAttribArray(vcol_location);	// vCol
+	glVertexAttribPointer(vcol_location,
+		3,		// vCol
+		GL_FLOAT, GL_FALSE,
+		//		                   sizeof(sVertex_SHADER_FORMAT_xyz_rgb),						// sizeof(float) * 6,
+		//		                   sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N),			//( void* )( sizeof(float) * 3 ));
+		sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV),			//( void* )( sizeof(float) * 3 ));
+		//		                   sizeof(sVertex_SHADER_FORMAT_xyz_rgb),						// sizeof(float) * 6,
+		//		                   (void*)offsetof(sVertex_SHADER_FORMAT_xyz_rgb_N, r));			//( void* )( sizeof(float) * 3 ));
+		(void*)offsetof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV, r));			//( void* )( sizeof(float) * 3 ));
+
+	glEnableVertexAttribArray(vnorm_location);	// vNormal
+	glVertexAttribPointer(vnorm_location,
+		3,		// vNormal
+		GL_FLOAT, GL_FALSE,
+		//	                       sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N),			//( void* )( sizeof(float) * 3 ));
+		sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV),			//( void* )( sizeof(float) * 3 ));
+		//		                   (void*)offsetof(sVertex_SHADER_FORMAT_xyz_rgb_N, nx));			//( void* )( sizeof(float) * 3 ));
+		(void*)offsetof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV, nx));			//( void* )( sizeof(float) * 3 ));
+
+	glEnableVertexAttribArray(vUV_location);	// vUV
+	glVertexAttribPointer(vUV_location,
+		2,		// in vec2 vUV;
+		GL_FLOAT, GL_FALSE,
+		sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV),
+		(void*)offsetof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV, u));
+
+
+	// Now that all the parts are set up, set the VAO to zero
+	glBindVertexArray(0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+	glDisableVertexAttribArray(vpos_location);
+	glDisableVertexAttribArray(vcol_location);
+	glDisableVertexAttribArray(vnorm_location);
+	glDisableVertexAttribArray(vUV_location);
+
+	// Indicate that model is in VAO
+	drawInfo.bIsCopiedToVAO = true;
+
+	// Store the draw information into the map
+	this->m_LockModelMap();
+	this->m_map_ModelName_to_VAOID[drawInfo.meshName] = drawInfo;
+	this->m_UnlockModelMap();
+	//
+
+	return true;
+}
+
 bool cVAOManager::LoadModelIntoVAO(
 		std::string fileName, 
 		sModelDrawInfo &drawInfo,
@@ -471,140 +621,21 @@ bool cVAOManager::LoadModelIntoVAO(
 //	{
 //		return false;
 //	}
-	if ( ! readPlyFile_XYZ_Normal_UV(drawInfo) )
+	if ( ! this->m_readPlyFile_XYZ_Normal_UV(drawInfo) )
 	{
 		return false;
 	}
 	// Calculate extents
 	drawInfo.calculateExtents();
 
+	drawInfo.bIsLoaded = true;
+
 	// 
 	// Model is loaded and the vertices and indices are in the drawInfo struct
 	// 
 
-	// Create a VAO (Vertex Array Object), which will 
-	//	keep track of all the 'state' needed to draw 
-	//	from this buffer...
+	return this->m_CopyLoadedModelToVAO(drawInfo, shaderProgramID);
 
-	// Ask OpenGL for a new buffer ID...
-	glGenVertexArrays( 1, &(drawInfo.VAO_ID) );
-	// "Bind" this buffer:
-	// - aka "make this the 'current' VAO buffer
-	glBindVertexArray(drawInfo.VAO_ID);
-
-	// Now ANY state that is related to vertex or index buffer
-	//	and vertex attribute layout, is stored in the 'state' 
-	//	of the VAO... 
-
-
-	// NOTE: OpenGL error checks have been omitted for brevity
-//	glGenBuffers(1, &vertex_buffer);
-	glGenBuffers(1, &(drawInfo.VertexBufferID) );
-
-//	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-	glBindBuffer(GL_ARRAY_BUFFER, drawInfo.VertexBufferID);
-	// sVert vertices[3]
-//	glBufferData( GL_ARRAY_BUFFER, 
-//				  sizeof(sVertex_SHADER_FORMAT_xyz_rgb) * drawInfo.numberOfVertices,	// ::g_NumberOfVertsToDraw,	// sizeof(vertices), 
-//				  (GLvoid*) drawInfo.pVertices,							// pVertices,			//vertices, 
-//				  GL_STATIC_DRAW );
-//	glBufferData( GL_ARRAY_BUFFER, 
-//				  sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N) * drawInfo.numberOfVertices,	// ::g_NumberOfVertsToDraw,	// sizeof(vertices), 
-//				  (GLvoid*) drawInfo.pVertices,							// pVertices,			//vertices, 
-//				  GL_STATIC_DRAW );
-	glBufferData( GL_ARRAY_BUFFER, 
-				  sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV) * drawInfo.numberOfVertices,	// ::g_NumberOfVertsToDraw,	// sizeof(vertices), 
-				  (GLvoid*) drawInfo.pVertices,							// pVertices,			//vertices, 
-				  GL_STATIC_DRAW );
-
-	// Copy the index buffer into the video card, too
-	// Create an index buffer.
-	glGenBuffers( 1, &(drawInfo.IndexBufferID) );
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, drawInfo.IndexBufferID);
-
-	glBufferData( GL_ELEMENT_ARRAY_BUFFER,			// Type: Index element array
-	              sizeof( unsigned int ) * drawInfo.numberOfIndices, 
-	              (GLvoid*) drawInfo.pIndices,
-                  GL_STATIC_DRAW );
-
-	// Set the vertex attributes.
-// ************************************************************
-// 	   SPECIFIC TO THE SHADER.
-// 	   If the shader changes or the vertex layout changes,
-// 		you have to change this part...
-// ************************************************************
-	GLint vpos_location = glGetAttribLocation(shaderProgramID, "vPos");			// in vec3 vPos;
-	GLint vcol_location = glGetAttribLocation(shaderProgramID, "vCol");			// in vec3 vCol;
-	GLint vnorm_location = glGetAttribLocation(shaderProgramID, "vNormal");		// in vec3 vNormal;
-	GLint vUV_location = glGetAttribLocation(shaderProgramID, "vUV");			// in vec2 vUV;
-
-
-	//struct sVertex_SHADER_FORMAT_xyz_rgb_XXXXXXXXX
-	//{
-	//	float x, y, z;
-	//	float r, g, b;
-	//  float ny, ny, nz;	// When we added normals
-	//  float u, v;			// When we added texture coords
-	//};
-
-	// Set the vertex attributes for this shader
-	glEnableVertexAttribArray(vpos_location);	// vPos
-	glVertexAttribPointer( vpos_location, 
-		                   3,		// vPos
-						   GL_FLOAT, GL_FALSE,
-//						   sizeof(sVertex_SHADER_FORMAT_xyz_rgb),	//  sizeof(float) * 6,		// Stride
-//						   sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N),	//  sizeof(float) * 6,		// Stride
-						   sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV),	//  sizeof(float) * 6,		// Stride
-//						   ( void* )offsetof(sVertex_SHADER_FORMAT_xyz_rgb, x) );				// Offset
-//						   ( void* )offsetof(sVertex_SHADER_FORMAT_xyz_rgb_N, x) );				// Offset
-						   ( void* )offsetof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV, x) );				// Offset
-
-	glEnableVertexAttribArray(vcol_location);	// vCol
-	glVertexAttribPointer( vcol_location, 
-		                   3,		// vCol
-						   GL_FLOAT, GL_FALSE,
-//		                   sizeof(sVertex_SHADER_FORMAT_xyz_rgb),						// sizeof(float) * 6,
-//		                   sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N),			//( void* )( sizeof(float) * 3 ));
-		                   sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV),			//( void* )( sizeof(float) * 3 ));
-//		                   sizeof(sVertex_SHADER_FORMAT_xyz_rgb),						// sizeof(float) * 6,
-//		                   (void*)offsetof(sVertex_SHADER_FORMAT_xyz_rgb_N, r));			//( void* )( sizeof(float) * 3 ));
-		                   (void*)offsetof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV, r));			//( void* )( sizeof(float) * 3 ));
-
-	glEnableVertexAttribArray(vnorm_location);	// vNormal
-	glVertexAttribPointer( vnorm_location, 
-		                   3,		// vNormal
-						   GL_FLOAT, GL_FALSE,
-//	                       sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N),			//( void* )( sizeof(float) * 3 ));
-	                       sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV),			//( void* )( sizeof(float) * 3 ));
-//		                   (void*)offsetof(sVertex_SHADER_FORMAT_xyz_rgb_N, nx));			//( void* )( sizeof(float) * 3 ));
-		                   (void*)offsetof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV, nx));			//( void* )( sizeof(float) * 3 ));
-
-	glEnableVertexAttribArray(vUV_location);	// vUV
-	glVertexAttribPointer(vUV_location,
-		                   2,		// in vec2 vUV;
-						   GL_FLOAT, GL_FALSE,
-	                       sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV),			
-		                   (void*)offsetof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV, u));			
-
-	
-	// Now that all the parts are set up, set the VAO to zero
-	glBindVertexArray(0);
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-	glDisableVertexAttribArray(vpos_location);
-	glDisableVertexAttribArray(vcol_location);
-	glDisableVertexAttribArray(vnorm_location);
-	glDisableVertexAttribArray(vUV_location);
-
-
-	// Store the draw information into the map
-	this->m_map_ModelName_to_VAOID[ drawInfo.meshName ] = drawInfo;
-
-
-	return true;
 }
 
 
@@ -613,14 +644,32 @@ bool cVAOManager::FindDrawInfoByModelName(
 		std::string filename,
 		sModelDrawInfo &drawInfo) 
 {
+
+	this->m_LockModelMap();
+
 	std::map< std::string /*model name*/,
 			sModelDrawInfo /* info needed to draw*/ >::iterator 
 		itDrawInfo = this->m_map_ModelName_to_VAOID.find( filename );
+
+	this->m_UnlockModelMap();
 
 	// Find it? 
 	if ( itDrawInfo == this->m_map_ModelName_to_VAOID.end() )
 	{
 		// Nope
+		return false;
+	}
+
+	// We do have the file name, but has it been loaded, yet
+	if ( ! itDrawInfo->second.bIsLoaded )
+	{
+		// We have no drawing information to share
+		return false;
+	}
+
+	if ( ! itDrawInfo->second.bIsCopiedToVAO )
+	{
+		// It's loaded, but not in the VAO yet
 		return false;
 	}
 

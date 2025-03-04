@@ -5,7 +5,6 @@
 //#include <GLFW/glfw3.h>
 #include "GLCommon.h"
 
-#include "cPhysXWraper.h"
 
 //#include "linmath.h"
 #include <glm/glm.hpp>
@@ -48,6 +47,8 @@
 
 #include "cViperFlagConnector.h"
 
+#include "PhysXWraper/cPhysXWraper.h"
+
 //
 //const unsigned int MAX_NUMBER_OF_MESHES = 1000;
 //unsigned int g_NumberOfMeshesToDraw;
@@ -56,6 +57,8 @@
 std::vector<sMesh*> g_vecMeshesToDraw;
 
 cPhysics* g_pPhysicEngine = NULL;
+cPhysXWraper* p_gPhysX = NULL;
+
 // This loads the 3D models for drawing, etc.
 cVAOManager* g_pMeshManager = NULL;
 
@@ -204,7 +207,8 @@ int main(void)
     AABBOctTree();
 
 
-
+    ::p_gPhysX = new cPhysXWraper();
+    ::p_gPhysX->initPhysics(true);
 
 
     glfwSetErrorCallback(error_callback);

@@ -154,10 +154,13 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="cPhysicsObjectTypes.h" />
     <ClInclude Include="cPhysXWraper.h" />
+    <ClInclude Include="cPhysXWraper_Imp.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cPhysXWraper.cpp" />
+    <ClCompile Include="cPhysXWraper_Imp.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

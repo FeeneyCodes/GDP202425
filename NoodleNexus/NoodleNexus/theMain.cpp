@@ -5,6 +5,8 @@
 //#include <GLFW/glfw3.h>
 #include "GLCommon.h"
 
+#include "cPhysXWraper.h"
+
 //#include "linmath.h"
 #include <glm/glm.hpp>
 #include <glm/vec3.hpp> // glm::vec3
@@ -201,6 +203,8 @@ int main(void)
     
     AABBOctTree();
 
+
+    fncPhysXWraper("Hello!");
 
 
 

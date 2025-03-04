@@ -204,7 +204,6 @@ int main(void)
     AABBOctTree();
 
 
-    fncPhysXWraper("Hello!");
 
 
 

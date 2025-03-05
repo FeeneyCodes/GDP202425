@@ -165,4 +165,13 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+  <Target Name="CustomAfterBuild" AfterTargets="Build">
+    <Message Text="Copying PhyXWraper headers..." Importance="high"/>
+    <Copy SourceFiles="$(ProjectDir)cPhysXWraper.h" DestinationFolder="$(SolutionDir)NoodleNexus\include\PhysXWraper" />
+    <Copy SourceFiles="$(ProjectDir)cPhysicsObjectTypes.h" DestinationFolder="$(SolutionDir)NoodleNexus\include\PhysXWraper" />
+    <Message Text="Copying PhyXWraper libraries..." Importance="high"/>
+    <Copy SourceFiles="$(SolutionDir)x64\Debug\cPhysXWraper.lib" DestinationFolder="$(SolutionDir)NoodleNexus\lib\Debug" />
+    <Copy SourceFiles="$(SolutionDir)x64\Release\cPhysXWraper.lib" DestinationFolder="$(SolutionDir)NoodleNexus\lib\Release" />
+  </Target>
 </Project>
+

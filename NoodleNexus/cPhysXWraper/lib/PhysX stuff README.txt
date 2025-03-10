@@ -14,3 +14,8 @@ C:\PhysX (git)\PhysX\physx\include
 C:\PhysX (git)\PhysX\physx\bin            <-- the "library" and DLL files are here
 
 You'll have to copy the DLL files from the bin folder to the output folder. 
+
+
+This is the 5.5.1 release (February 2025)
+
+NOTE: There is still an issue with the release build, but I'm working on it!

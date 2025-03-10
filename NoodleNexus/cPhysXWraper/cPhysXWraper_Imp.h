@@ -21,7 +21,7 @@ public:
 
 
 	// HACK: Remove his later
-//	void HACK_ShootBall(void);
+	void HACK_Snippet_ShootBall(void);
 private:
 
 };

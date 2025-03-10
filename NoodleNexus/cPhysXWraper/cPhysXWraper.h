@@ -35,7 +35,7 @@ public:
 
 
 	// HACK: Remove this later
-//	void HACK_ShootBall(void);
+	void HACK_Snippet_ShootBall(void);
 
 private:
 	cPhysXWraper_Imp* m_pImp = nullptr;

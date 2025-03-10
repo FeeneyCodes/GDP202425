@@ -57,7 +57,7 @@
 std::vector<sMesh*> g_vecMeshesToDraw;
 
 cPhysics* g_pPhysicEngine = NULL;
-cPhysXWraper* p_gPhysX = NULL;
+cPhysXWraper* g_pPhysX = NULL;
 
 // This loads the 3D models for drawing, etc.
 cVAOManager* g_pMeshManager = NULL;
@@ -76,7 +76,10 @@ extern cViperFlagConnector* g_pViperFlagConnector;
 
 void AddModelsToScene(cVAOManager* pMeshManager, GLuint shaderProgram);
 
-void DrawMesh(sMesh* pCurMesh, GLuint program, bool SetTexturesFromMeshInfo = true);
+//void DrawMesh(sMesh* pCurMesh, GLuint program, bool SetTexturesFromMeshInfo = true);
+// Now we pass the original (parent) matrix.
+// We can also pass this matrix instead of the position, orientation, etc.
+void DrawMesh(sMesh* pCurMesh, glm::mat4 matModel, GLuint program, bool SetTexturesFromMeshInfo = true);
 
 //glm::vec3 cameraEye = glm::vec3(0.0, 0.0, 4.0f);
 
@@ -207,8 +210,8 @@ int main(void)
     AABBOctTree();
 
 
-    ::p_gPhysX = new cPhysXWraper();
-    ::p_gPhysX->initPhysics(true);
+    ::g_pPhysX = new cPhysXWraper();
+    ::g_pPhysX->initPhysics(true);
 
 
     glfwSetErrorCallback(error_callback);
@@ -567,7 +570,8 @@ int main(void)
         ::g_pPhysicEngine->updateSoftBodies(deltaTime);
 
 
-        ::p_gPhysX->update();
+        // Update PhysX...
+        ::g_pPhysX->update();
 
 
 
@@ -784,8 +788,8 @@ int main(void)
     delete ::g_pFlyCamera;
     delete ::g_pPhysicEngine;
 
-    ::p_gPhysX->cleanupPhysics(true);
-    delete ::p_gPhysX;
+    ::g_pPhysX->cleanupPhysics(true);
+    delete ::g_pPhysX;
 
     glfwDestroyWindow(window);
 

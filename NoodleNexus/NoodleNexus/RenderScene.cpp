@@ -12,6 +12,9 @@
 #include "cLightHelper/cLightHelper.h"
 
 #include "cPhysics.h"
+#include "PhysXWraper/cPhysXWraper.h"
+
+extern cPhysXWraper* g_pPhysX; //= NULL;
 
 
 extern cBasicTextureManager* g_pTextures;
@@ -19,7 +22,11 @@ extern cVAOManager* g_pMeshManager;
 extern std::vector<sMesh*> g_vecMeshesToDraw;
 
 // If SetTexturesFromMeshInfo == false, then we have to set them up manually
-void DrawMesh(sMesh* pCurMesh, GLuint program, bool SetTexturesFromMeshInfo /*=true*/ );
+// Now we pass the original (parent) matrix.
+// We can also pass this matrix instead of the position, orientation, etc.
+void DrawMesh(sMesh* pCurMesh, glm::mat4 matModel, GLuint program, bool SetTexturesFromMeshInfo = true);
+//void DrawMesh(sMesh* pCurMesh, GLuint program, bool SetTexturesFromMeshInfo = true);
+
 
 
 void RenderScene(
@@ -77,8 +84,8 @@ void RenderScene(
     GLint skyBoxTextureSampler_UL = glGetUniformLocation(program, "skyBoxTextureSampler");
     glUniform1i(skyBoxTextureSampler_UL, 40);       // <-- Note we use the NUMBER, not the GL_TEXTURE3 here
 
-
-    DrawMesh(pSkySphere, program, true);
+    glm::mat4 matWorld = glm::mat4(1.0f);
+    DrawMesh(pSkySphere, matWorld, program, true);
 
     pSkySphere->bIsVisible = false;
 
@@ -96,13 +103,66 @@ void RenderScene(
 
     ::g_pLightManager->updateShaderWithLightInfo();
 
+// ******************************************************************
+// Draw the stuff that's in the PhysX world
+    std::vector<cPhysicsObjectTypes> vecPhysActors;
+    ::g_pPhysX->getSceneActors(vecPhysActors);
+
+    sMesh* pPhysXCube = g_pFindMeshByFriendlyName("pPhysXCube");
+    sMesh* pPhysXSphere = g_pFindMeshByFriendlyName("pPhysXSphere");
+
+
+    for (cPhysicsObjectTypes& object : vecPhysActors)
+    {
+        switch (object.shapeType)
+        {
+        case cPhysicsObjectTypes::BOX:
+            if (pPhysXCube)
+            {
+                pPhysXCube->bIsVisible = true;
+                // Set to origin because we'll be using the model matrix
+                //  from PhysX to set the values
+                pPhysXCube->positionXYZ = glm::vec3(0.0f, 0.0f, 0.0f);
+                pPhysXCube->rotationEulerXYZ = glm::vec3(0.0f, 0.0f, 0.0f);
+                pPhysXCube->uniformScale = 1.0f;
+                // 
+                DrawMesh(pPhysXCube, object.matModel, program, true);
+                pPhysXCube->bIsVisible = false;
+            }
+
+            break;
+
+        case cPhysicsObjectTypes::SPHERE:
+            if (pPhysXSphere)
+            {
+                pPhysXSphere->bIsVisible = true;
+                // Set to origin because we'll be using the model matrix
+                //  from PhysX to set the values
+                pPhysXSphere->positionXYZ = glm::vec3(0.0f, 0.0f, 0.0f);
+                pPhysXSphere->rotationEulerXYZ = glm::vec3(0.0f, 0.0f, 0.0f);
+                pPhysXSphere->uniformScale = 1.0f;
+                // 
+                DrawMesh(pPhysXSphere, object.matModel, program, true);
+                pPhysXSphere->bIsVisible = false;
+            }
+            break;
+        }
+
+    }//for (cPhysicsObjectTypes&
+// ******************************************************************
+
+
+     
+
     // Draw everything again, but this time far away things
     for (unsigned int meshIndex = 0; meshIndex != ::g_vecMeshesToDraw.size(); meshIndex++)
     {
         //            sMesh* pCurMesh = ::g_myMeshes[meshIndex];
         sMesh* pCurMesh = ::g_vecMeshesToDraw[meshIndex];
         //            pCurMesh->bDoNotLight = true;
-        DrawMesh(pCurMesh, program, true);
+
+        glm::mat4 matModel = glm::mat4(1.0f);   // identity matrix
+        DrawMesh(pCurMesh, matModel, program, true);
 
     }//for (unsigned int meshIndex..
 

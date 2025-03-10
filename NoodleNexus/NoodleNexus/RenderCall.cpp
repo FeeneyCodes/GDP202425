@@ -96,7 +96,11 @@ void SetUpTextures(sMesh* pCurMesh, GLuint program)
 
 
 
-void DrawMesh(sMesh* pCurMesh, GLuint program, bool SetTexturesFromMeshInfo = true)
+void DrawMesh(
+    sMesh* pCurMesh, 
+    glm::mat4 matModel,         // "parent" or initial model matrix
+    GLuint program, 
+    bool SetTexturesFromMeshInfo = true)
 {
     // Is it visible? 
     if (!pCurMesh->bIsVisible)
@@ -157,7 +161,7 @@ void DrawMesh(sMesh* pCurMesh, GLuint program, bool SetTexturesFromMeshInfo = tr
     }
 
     // Could be called the "model" or "world" matrix
-    glm::mat4 matModel = glm::mat4(1.0f);
+ //   glm::mat4 matModel = glm::mat4(1.0f);
 
     // Translation (movement, position, placement...)
     glm::mat4 matTranslate
@@ -313,7 +317,8 @@ void DrawDebugSphere(glm::vec3 position, glm::vec4 RGBA, float scale, GLuint pro
     pDebugSphere->objectColourRGBA = RGBA;
     pDebugSphere->uniformScale = scale;
 
-    DrawMesh(pDebugSphere, program);
+    glm::mat4 matModel = glm::mat4(1.0f);   // identity matrix
+    DrawMesh(pDebugSphere, matModel, program);
 
     pDebugSphere->bIsVisible = false;
 

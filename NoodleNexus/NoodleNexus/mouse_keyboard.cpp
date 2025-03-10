@@ -18,6 +18,10 @@
 
 #include "cViperFlagConnector.h"
 
+#include "PhysXWraper/cPhysXWraper.h"
+extern cPhysXWraper* g_pPhysX;// = NULL;
+
+
 // The commands
 //#include "cMoveRelativeTime.h"
 // Now we use the g_pCommandFactory to get all of our commands
@@ -435,6 +439,18 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
     if (mods == GLFW_MOD_SHIFT)
     {
+        // PhysX example from the "hello world" snippet
+        if (::g_pPhysX)
+        {
+            if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
+            {
+                ::g_pPhysX->HACK_Snippet_ShootBall();
+            }
+        }
+
+
+
+
         if (key == GLFW_KEY_F9 && action == GLFW_PRESS)
         {
             // Save state to file

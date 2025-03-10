@@ -14,6 +14,40 @@ cViperFlagConnector* g_pViperFlagConnector = NULL;
 
 void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
 {
+    {// PhysX "Hello world" snippet example object
+        //  Sphere of radius 3:   PhysX_Spere_radius_of_3.0f_xyz_n_uv.ply
+        //  Cube of 1 / 2 extent 2 : PhysX_Cube_half-extent_of_2.0f_xyz_n_uv.ply
+
+        sModelDrawInfo PhysXSphereRaidus3;
+        ::g_pMeshManager->LoadModelIntoVAO("assets/models/PhysX_Spere_radius_of_3.0f_xyz_n_uv.ply",
+            PhysXSphereRaidus3, program);
+        std::cout << PhysXSphereRaidus3.numberOfVertices << " vertices loaded" << std::endl;
+        //
+        sMesh* pPhysXSphere = new sMesh();
+        pPhysXSphere->modelFileName = "assets/models/PhysX_Spere_radius_of_3.0f_xyz_n_uv.ply";
+        pPhysXSphere->uniqueFriendlyName = "pPhysXSphere";
+        pPhysXSphere->textures[0] = "dua-lipa-promo.bmp";
+        pPhysXSphere->blendRatio[0] = 1.0f;
+        pPhysXSphere->bIsVisible = false;
+        ::g_vecMeshesToDraw.push_back(pPhysXSphere);
+
+        sModelDrawInfo PhysXCubeHalfExtent2;
+        ::g_pMeshManager->LoadModelIntoVAO("assets/models/PhysX_Cube_half-extent_of_2.0f_xyz_n_uv.ply",
+            PhysXCubeHalfExtent2, program);
+        std::cout << PhysXCubeHalfExtent2.numberOfVertices << " vertices loaded" << std::endl;
+        //
+        sMesh* pPhysXCube = new sMesh();
+        pPhysXCube->modelFileName = "assets/models/PhysX_Cube_half-extent_of_2.0f_xyz_n_uv.ply";
+        pPhysXCube->uniqueFriendlyName = "pPhysXCube";
+        pPhysXCube->textures[0] = "dua-lipa-promo.bmp";
+        pPhysXCube->blendRatio[0] = 1.0f;
+        pPhysXCube->bIsVisible = false;
+        ::g_vecMeshesToDraw.push_back(pPhysXCube);
+
+    }// PhysX "Hello world" snippet example object
+
+
+
 
     // Off screen quad
     sModelDrawInfo flat10x10Mesh;

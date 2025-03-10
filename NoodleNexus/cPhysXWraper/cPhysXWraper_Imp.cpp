@@ -142,6 +142,23 @@ void cPhysXWraper_Imp::initPhysics(bool interactive, std::string PVD_Host_Addres
 	}
 	gMaterial = gPhysics->createMaterial(0.5f, 0.5f, 0.6f);
 
+// **** 
+	{
+		// Some code to create a sphere
+		PxShape* sphereShape = gPhysics->createShape(PxSphereGeometry(3.0f), *gMaterial);
+		PxTransform localTm(PxVec3(10.0f, 50.0f, 0.0f));
+		PxRigidDynamic* body = gPhysics->createRigidDynamic(PxTransform(localTm));
+		body->attachShape(*sphereShape);
+		PxRigidBodyExt::updateMassAndInertia(*body, 10.0f);
+		gScene->addActor(*body);
+	}
+// **** 
+
+
+
+// ********************************************************
+// This block of code is from the hello world PhyX example.
+
 	PxRigidStatic* groundPlane = PxCreatePlane(*gPhysics, PxPlane(0, 1, 0, 0), *gMaterial);
 	gScene->addActor(*groundPlane);
 
@@ -151,18 +168,29 @@ void cPhysXWraper_Imp::initPhysics(bool interactive, std::string PVD_Host_Addres
 
 	if (!interactive)
 		createDynamic(PxTransform(PxVec3(0, 40, 100)), PxSphereGeometry(10), PxVec3(0, -50, -100));
+// ********************************************************
+
+
 
 	return;
 }
 
-//// HACK: Remove this later
-//void cPhysXWraper_Imp::HACK_ShootBall(void)
-//{
-//
-//	createDynamic(PxTransform(PxVec3(0, 40, 100)), PxSphereGeometry(10), PxVec3(0, -50, -100));
-//
-//	return;
-//}
+// HACK: Remove this later
+void cPhysXWraper_Imp::HACK_Snippet_ShootBall(void)
+{
+	// In the original snippet example, it had this code:
+	//void keyPress(unsigned char key, const PxTransform & camera)
+	//{
+	//	switch (toupper(key))
+	//	{
+	//	case 'B':	createStack(PxTransform(PxVec3(0, 0, stackZ -= 10.0f)), 10, 2.0f);						break;
+	//	case ' ':	createDynamic(camera, PxSphereGeometry(3.0f), camera.rotate(PxVec3(0, 0, -1)) * 200);	break;
+	//	}
+	//}
+	createDynamic(PxTransform(PxVec3(0, 40, 100)), PxSphereGeometry(10), PxVec3(0, -50, -100));
+
+	return;
+}
 
 void cPhysXWraper_Imp::getSceneActors(std::vector<cPhysicsObjectTypes>& vecPhysActors)
 {
@@ -309,6 +337,8 @@ void cPhysXWraper_Imp::cleanupPhysics(bool interactive)
 
 	printf("SnippetHelloWorld done.\n");
 }
+
+
 
 
 // These are taken from the SnippedHelloWorld example.

@@ -20,11 +20,11 @@ cPhysXWraper::~cPhysXWraper()
 }
 
 // HACK: Remove this later
-//void cPhysXWraper::HACK_ShootBall(void)
-//{
-//	this->m_pImp->HACK_ShootBall();
-//	return;
-//}
+void cPhysXWraper::HACK_Snippet_ShootBall(void)
+{
+	this->m_pImp->HACK_Snippet_ShootBall();
+	return;
+}
 
 void cPhysXWraper::getSceneActors(std::vector<cPhysicsObjectTypes>& vecPhysActors)
 {

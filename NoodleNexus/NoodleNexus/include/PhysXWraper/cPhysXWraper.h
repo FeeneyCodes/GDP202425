@@ -1,4 +1,13 @@
 #pragma once
+
+#ifndef _DEBUG
+#define NDEBUG
+#endif // !_DEBUG
+
+#ifdef _DEBUG
+#define OH_NO_
+#endif
+
 // Forward declare for pointer to implementation
 class cPhysXWraper_Imp;
 
@@ -26,7 +35,7 @@ public:
 
 
 	// HACK: Remove this later
-//	void HACK_ShootBall(void);
+	void HACK_Snippet_ShootBall(void);
 
 private:
 	cPhysXWraper_Imp* m_pImp = nullptr;

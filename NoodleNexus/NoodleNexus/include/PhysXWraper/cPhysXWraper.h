@@ -1,12 +1,12 @@
 #pragma once
 
-#ifndef _DEBUG
-#define NDEBUG
-#endif // !_DEBUG
-
-#ifdef _DEBUG
-#define OH_NO_
-#endif
+//#ifndef _DEBUG
+//#define NDEBUG
+//#endif // !_DEBUG
+//
+//#ifdef _DEBUG
+//#define OH_NO_
+//#endif
 
 // Forward declare for pointer to implementation
 class cPhysXWraper_Imp;

@@ -200,6 +200,9 @@
     <ClCompile Include="cVAOManager\cVAOManager_Async_Loader.cpp">
       <Filter>Meshes, etc.</Filter>
     </ClCompile>
+    <ClCompile Include="cFBO_deferred.cpp">
+      <Filter>FBO</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PlyFileLoaders.h">
@@ -312,6 +315,9 @@
     </ClInclude>
     <ClInclude Include="cViperFlagConnector.h">
       <Filter>Phsyics_Stuff</Filter>
+    </ClInclude>
+    <ClInclude Include="cFBO_deferred.h">
+      <Filter>FBO</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

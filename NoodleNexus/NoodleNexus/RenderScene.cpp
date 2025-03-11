@@ -12,7 +12,7 @@
 #include "cLightHelper/cLightHelper.h"
 
 #include "cPhysics.h"
-#include "PhysXWraper/cPhysXWraper.h"
+#include <PhysXWraper/cPhysXWraper.h>
 
 extern cPhysXWraper* g_pPhysX; //= NULL;
 

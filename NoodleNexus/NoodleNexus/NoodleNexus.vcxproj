@@ -157,6 +157,7 @@
     <ClCompile Include="cCommandFactory.cpp" />
     <ClCompile Include="cCommandGroup.cpp" />
     <ClCompile Include="cFBO\cFBO_RGB_depth.cpp" />
+    <ClCompile Include="cFBO_deferred.cpp" />
     <ClCompile Include="cFollowObject_A.cpp" />
     <ClCompile Include="cHoverTank.cpp" />
     <ClCompile Include="cJetPack.cpp" />
@@ -210,6 +211,7 @@
     <ClInclude Include="cCommandFactory.h" />
     <ClInclude Include="cCommandGroup.h" />
     <ClInclude Include="cFBO\cFBO_RGB_depth.h" />
+    <ClInclude Include="cFBO_deferred.h" />
     <ClInclude Include="cFollowObject_A.h" />
     <ClInclude Include="cHoverTank.h" />
     <ClInclude Include="cJetPack.h" />

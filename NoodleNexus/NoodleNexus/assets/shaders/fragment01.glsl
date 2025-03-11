@@ -14,7 +14,17 @@ uniform bool bDoNotLight;			// if true, skips lighting
 uniform float wholeObjectTransparencyAlpha;
 
 // Written to the framebuffer (backbuffer)
-out vec4 finalPixelColour;	// RGB_A
+//out vec4 finalPixelColour;	// RGB_A
+
+// With deferred, we are writing to muliple outputs at the same time
+out vec4 vertexWorldLocationXYZ;	// w = TBD
+out vec4 vertexNormalXYZ;			// w = TBD
+out vec4 vertexDiffuseRGB;			// w = TBD
+out vec4 vertexSpecularRGA_P;		// w = power
+
+
+
+
 
 const int POINT_LIGHT_TYPE = 0;
 const int SPOT_LIGHT_TYPE = 1;
@@ -74,6 +84,7 @@ uniform bool bUseStencilTexture;
 
 void main()
 {
+
 	// discard transparency
 	// uniform sampler2D stencilTexture;
 	// uniform bool bUseStencilTexture;
@@ -95,8 +106,10 @@ void main()
 		//uniform samplerCube skyBoxTextureSampler;
 		// Note: We are passing the NORMALS (a ray to hit the inside
 		// 	of the cube) and NOT the texture coordinates
-		finalPixelColour.rgb = texture( skyBoxTextureSampler, fvertexNormal.xyz ).rgb;
-		finalPixelColour.a = 1.0f;
+		vertexWorldLocationXYZ.rgb = texture( skyBoxTextureSampler, fvertexNormal.xyz ).rgb;
+		vertexWorldLocationXYZ.a = 1.0f;
+//		finalPixelColour.rgb = texture( skyBoxTextureSampler, fvertexNormal.xyz ).rgb;
+//		finalPixelColour.a = 1.0f;
 		return;
 	}
 	
@@ -250,8 +263,10 @@ void main()
 	// Use lighting?
 	if ( bDoNotLight )
 	{
-		finalPixelColour.rgb = vertexColour.rgb;
-		finalPixelColour.a = wholeObjectTransparencyAlpha;
+		vertexWorldLocationXYZ.rgb = vertexColour.rgb;
+		vertexWorldLocationXYZ.a = wholeObjectTransparencyAlpha;
+//		finalPixelColour.rgb = vertexColour.rgb;
+//		finalPixelColour.a = wholeObjectTransparencyAlpha;
 		return;
 	}
 	
@@ -261,10 +276,10 @@ void main()
 	                                          fvertexWorldLocation.xyz, 
 											  vertexSpecular );
 
-											
-	finalPixelColour = pixelColour;
-	// Set the alpha channel
-	finalPixelColour.a = wholeObjectTransparencyAlpha;	
+	vertexWorldLocationXYZ = pixelColour;
+	vertexWorldLocationXYZ.a = wholeObjectTransparencyAlpha;	// Set the alpha channel											
+//	finalPixelColour = pixelColour;
+//	finalPixelColour.a = wholeObjectTransparencyAlpha;	// Set the alpha channel
 	
 //	// Reflection:
 //	vec3 eyeToVertexRay = normalize(eyeLocation.xyz - fvertexWorldLocation.xyz);

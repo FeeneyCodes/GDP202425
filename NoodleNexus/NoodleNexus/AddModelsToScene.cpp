@@ -26,7 +26,7 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
         sMesh* pPhysXSphere = new sMesh();
         pPhysXSphere->modelFileName = "assets/models/PhysX_Spere_radius_of_3.0f_xyz_n_uv.ply";
         pPhysXSphere->uniqueFriendlyName = "pPhysXSphere";
-        pPhysXSphere->textures[0] = "dua-lipa-promo.bmp";
+        pPhysXSphere->textures[0] = "UV_Test_750x750.bmp";
         pPhysXSphere->blendRatio[0] = 1.0f;
         pPhysXSphere->bIsVisible = false;
         ::g_vecMeshesToDraw.push_back(pPhysXSphere);
@@ -39,7 +39,7 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
         sMesh* pPhysXCube = new sMesh();
         pPhysXCube->modelFileName = "assets/models/PhysX_Cube_half-extent_of_2.0f_xyz_n_uv.ply";
         pPhysXCube->uniqueFriendlyName = "pPhysXCube";
-        pPhysXCube->textures[0] = "dua-lipa-promo.bmp";
+        pPhysXCube->textures[0] = "Canadian_Flag_Texture.bmp";
         pPhysXCube->blendRatio[0] = 1.0f;
         pPhysXCube->bIsVisible = false;
         ::g_vecMeshesToDraw.push_back(pPhysXCube);

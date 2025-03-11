@@ -210,8 +210,6 @@ int main(void)
     AABBOctTree();
 
 
-    ::g_pPhysX = new cPhysXWraper();
-    ::g_pPhysX->initPhysics(true);
 
 
     glfwSetErrorCallback(error_callback);
@@ -305,6 +303,12 @@ int main(void)
     ::g_pPhysicEngine = new cPhysics();
     // For triangle meshes, let the physics object "know" about the VAO manager
     ::g_pPhysicEngine->setVAOManager(::g_pMeshManager);
+
+
+    // Start up the PhysX middleware...
+    ::g_pPhysX = new cPhysXWraper();
+    ::g_pPhysX->initPhysics(true);
+
 
 
     ::g_pCommandDirector = new cCommandGroup();

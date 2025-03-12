@@ -35,7 +35,7 @@ void main()
 	vec3 vNormNormalize = normalize(vNormal.xyz);
 	fvertexNormal = matInvTransModel * vec4(vNormNormalize, 1.0);
 	// Just in case
-	fvertexNormal.xyz = normalize(vNormNormalize);
+	fvertexNormal.xyz = normalize(fvertexNormal.xyz);
 	
 	fColour = vCol;
 	fUV = vUV;			// Sent UVs to fragment shader

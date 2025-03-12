@@ -659,6 +659,12 @@ int main(void)
             ::g_pFlyCamera->getTargetLocation(),
             upVector);
 
+        GLint eyeLocation_UL = glGetUniformLocation(program, "eyeLocation");
+        glUniform4f(eyeLocation_UL, 
+            ::g_pFlyCamera->getEyeLocation().x,
+            ::g_pFlyCamera->getEyeLocation().y, 
+            ::g_pFlyCamera->getEyeLocation().z, 1.0f);
+
         matProjection = glm::perspective(0.6f,
             ratio,
             10.0f,
@@ -715,7 +721,10 @@ int main(void)
             pFBOTextureMesh->bIsVisible = false;
         }
 
-
+        glUniform4f(eyeLocation_UL,
+            ::g_pFlyCamera->getEyeLocation().x,
+            ::g_pFlyCamera->getEyeLocation().y,
+            ::g_pFlyCamera->getEyeLocation().z, 1.0f);
         RenderScene(program, matProjection, matView, ratio, ::g_pFlyCamera->getEyeLocation());
         // 
         // **************************************************

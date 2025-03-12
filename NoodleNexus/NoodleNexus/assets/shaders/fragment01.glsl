@@ -257,7 +257,7 @@ void main()
 //	finalPixelColour = vec4(finalColour, 1.0);
 
 //	vec3 fvertexNormal = vec3(0.0f, 1.0f, 0.0f);
-	vec4 vertexSpecular = vec4(1.0f, 1.0f, 1.0f, 1.0f);	
+	vec4 vertexSpecular = vec4(1.0f, 1.0f, 1.0f, 100.0f);	
 
 
 	// Use lighting?
@@ -270,6 +270,10 @@ void main()
 		return;
 	}
 	
+	// Gold colour and highlight
+	//https://i.pinimg.com/736x/49/71/e1/4971e1a994f6a208e04b53a2b98968d4.jpg
+//	vertexColour.rgb = vec3(212.0f/255.0f, 175.0f/255.0f, 55.0f/255.0f);
+//	vertexSpecular.rgba = vec4(255.0f/255.0f, 223.0f/255.0f, 0.0f/255.0f, 100.0f);
 
 	vec4 pixelColour = calculateLightContrib( vertexColour.rgb, 
 	                                          fvertexNormal.xyz, 
@@ -464,7 +468,7 @@ vec4 calculateLightContrib( vec3 vertexMaterialColour, vec3 vertexNormal,
 		
 					
 		finalObjectColour.rgb += (vertexMaterialColour.rgb * lightDiffuseContrib.rgb)
-								  + (vertexSpecular.rgb  * lightSpecularContrib.rgb );
+								  + (vertexSpecular.rgb  * lightSpecularContrib.rgb);
 
 	}//for(intindex=0...
 	

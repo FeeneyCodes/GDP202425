@@ -61,7 +61,7 @@ void RenderScene(
 {
 
     GLint matProjection_UL = glGetUniformLocation(program, "matProjection");
-    glUniformMatrix4fv(matProjection_UL, 1, GL_FALSE, (const GLfloat*)&matProjection);
+    //glUniformMatrix4fv(matProjection_UL, 1, GL_FALSE, (const GLfloat*)&matProjection);
 
     GLint matView_UL = glGetUniformLocation(program, "matView");
     glUniformMatrix4fv(matView_UL, 1, GL_FALSE, (const GLfloat*)&matView);
@@ -72,21 +72,23 @@ void RenderScene(
 // Move the sky sphere with the camera
     sMesh* pSkySphere = ::g_pFindMeshByFriendlyName("SkySphere");
     pSkySphere->positionXYZ = eyeLocation;
-    ;
+//    pSkySphere->positionXYZ = glm::vec3(30.0f, -5.0f, 0.0f);
 
     // Disable backface culling (so BOTH sides are drawn)
     glDisable(GL_CULL_FACE);
     // Don't perform depth buffer testing
-    glDisable(GL_DEPTH_TEST);
+//    glDisable(GL_DEPTH_TEST);
     // Don't write to the depth buffer when drawing to colour (back) buffer
 //        glDepthMask(GL_FALSE);
 //        glDepthFunc(GL_ALWAYS);// or GL_LESS (default)
         // GL_DEPTH_TEST : do or not do the test against what's already on the depth buffer
 
-    pSkySphere->bIsVisible = true;
-    //        pSkySphere->bDoNotLight = true;
 
-    pSkySphere->uniformScale = 1.0f;
+    // Move clipping plane close just for the skybox:
+    glm::mat4 matProjSkyBox = glm::perspective(0.6f, ratio, 0.1f, 10.0f); 
+    glUniformMatrix4fv(matProjection_UL, 1, GL_FALSE, (const GLfloat*)&matProjSkyBox);
+
+
 
     // Tell the shader this is the skybox, so use the cube map
     // uniform samplerCube skyBoxTexture;
@@ -95,17 +97,22 @@ void RenderScene(
     glUniform1f(bIsSkyBoxObject_UL, (GLfloat)GL_TRUE);
 
     // Set the cube map texture, just like we do with the 2D
-    GLuint cubeSamplerID = ::g_pTextures->getTextureIDFromName("Space");
+    GLuint spaceCubeMapID = ::g_pTextures->getTextureIDFromName("Space");
     //        GLuint cubeSamplerID = ::g_pTextures->getTextureIDFromName("SunnyDay");
             // Make sure this is an unused texture unit
-    glActiveTexture(GL_TEXTURE0 + 40);
+    glActiveTexture(GL_TEXTURE0 + 33);
     // *****************************************
     // NOTE: This is a CUBE_MAP, not a 2D
-    glBindTexture(GL_TEXTURE_CUBE_MAP, cubeSamplerID);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, spaceCubeMapID);
     //        glBindTexture(GL_TEXTURE_2D, cubeSamplerID);
             // *****************************************
     GLint skyBoxTextureSampler_UL = glGetUniformLocation(program, "skyBoxTextureSampler");
-    glUniform1i(skyBoxTextureSampler_UL, 40);       // <-- Note we use the NUMBER, not the GL_TEXTURE3 here
+    glUniform1i(skyBoxTextureSampler_UL, 33);       // <-- Note we use the NUMBER, not the GL_TEXTURE3 here
+
+    pSkySphere->bIsVisible = true;
+    //    pSkySphere->bDoNotLight = true;
+
+    pSkySphere->uniformScale = 1.0f;
 
     glm::mat4 matWorld = glm::mat4(1.0f);
     DrawMesh(pSkySphere, matWorld, program, true);
@@ -122,6 +129,9 @@ void RenderScene(
             // **************************************************************
 
 
+    // Set clipping planes back to normal
+
+    glUniformMatrix4fv(matProjection_UL, 1, GL_FALSE, (const GLfloat*)&matProjection);
 
 
     ::g_pLightManager->updateShaderWithLightInfo();

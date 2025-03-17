@@ -167,9 +167,10 @@ void Pass_1_DeferredGBuffer(void)
 	// For the skybox object
 	if ( bIsSkyBoxObject )
 	{
-		vertexDiffuseRGB.rgb = texture( skyBoxTextureSampler, fvertexNormal.xyz ).rgb;
+		//vertexDiffuseRGB.rgb = texture( skyBoxTextureSampler, fvertexNormal.xyz ).rgb;
+		vertexDiffuseRGB.rgb = texture( texture00, fUV.st ).rgb;
 		// Indicate that this it NOT to be lit (do lighting calculation in later pass)
-		vertexNormalXYZ.w = 0.0f;	// 1 is lit, 0 is not lit
+		//vertexNormalXYZ.w = 0.0f;	// 1 is lit, 0 is not lit
 	}
 	else
 	{
@@ -246,10 +247,10 @@ void Pass_3_DeferredLightingToFSQ(void)
 //	vec3 vertexDiffuseRGB = texture( vertexDiffuseRGB_texture, fUV.st ).rgb;
 	
 	
-	vec4 verWorldLocationXYZ = texture( vertexWorldLocationXYZ_texture, screenUV.st ).rgba;
-	vec4 verNormXYZ = texture( vertexNormalXYZ_texture, screenUV.st ).rgba;
-	vec4 verDiffRGB = texture( vertexDiffuseRGB_texture, screenUV.st ).rgba;
-	vec4 verSpecRGA_P = texture( vertexSpecularRGA_P_texture, screenUV.st ).rgba;
+	vec4 G_Buff_vertWorldLocationXYZ = texture( vertexWorldLocationXYZ_texture, screenUV.st ).rgba;
+	vec4 G_Buff_vertNormXYZ = texture( vertexNormalXYZ_texture, screenUV.st ).rgba;
+	vec4 G_Buff_vertDiffRGB = texture( vertexDiffuseRGB_texture, screenUV.st ).rgba;
+	vec4 G_Buff_vertSpecRGA_P = texture( vertexSpecularRGA_P_texture, screenUV.st ).rgba;
 	
 	// Shift the world locations and scale them
 //	verWorldLocationXYZ.xyz += 1000.0f;	
@@ -258,12 +259,25 @@ void Pass_3_DeferredLightingToFSQ(void)
 //	vertexWorldLocationXYZ.rgb = verSpecRGA_P.rgb;
 //	vertexWorldLocationXYZ.a = 1.0f;
 
+	// Was this object to be lit? 
+	// vertexNormalXYZ.w = 0.0 if NOT lit, non-0 if it IS to be lit
+	//
+	// The skybox, the debug objects, etc. 
+	//
+	if (  G_Buff_vertNormXYZ.w == 0.0f )
+	{
+		// Object ISN'T being lit by the lights
+		vertexWorldLocationXYZ.rgb = G_Buff_vertDiffRGB.rgb;
+		vertexWorldLocationXYZ.a = 1.0f;
+		return;
+	}
+
 	// Do the lighting calculation just like before
 	// (except we are reading the information from the 1st pass G buffer)
-	vec4 pixelColour = calculateLightContrib( verDiffRGB.rgb, 
-	                                          verNormXYZ.xyz, 
-	                                          verWorldLocationXYZ.xyz, 
-											  verSpecRGA_P );
+	vec4 pixelColour = calculateLightContrib( G_Buff_vertDiffRGB.rgb, 
+	                                          G_Buff_vertNormXYZ.xyz, 
+	                                          G_Buff_vertWorldLocationXYZ.xyz, 
+											  G_Buff_vertSpecRGA_P );
 
 	vertexWorldLocationXYZ.rgb = pixelColour.rgb;
 	vertexWorldLocationXYZ.a = pixelColour.a;

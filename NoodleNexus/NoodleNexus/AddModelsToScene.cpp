@@ -27,11 +27,27 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
         pFSQMesh->bIsVisible = false;
         // We're saving this into the vector of meshes, but
         //  we could not do this and keep the pointer to directly call
+  
         ::g_vecMeshesToDraw.push_back(pFSQMesh);
     }
 
 
 
+    {
+        sModelDrawInfo sphereMesh;
+        //    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Sphere_radius_1_xyz.ply",
+        //::g_pMeshManager->LoadModelIntoVAO("assets/models/Sphere_radius_1_xyz_N.ply",
+        ::g_pMeshManager->LoadModelIntoVAO("assets/models/Sphere_radius_1_xyz_N_uv.ply",
+            sphereMesh, program);
+        std::cout << sphereMesh.meshName << ": " << sphereMesh.numberOfVertices << " vertices loaded" << std::endl;
+    }
+
+    {
+        sModelDrawInfo smoothSphereMesh;
+        ::g_pMeshManager->LoadModelIntoVAO("assets/models/Smooth_Sphere.ply",
+            smoothSphereMesh, program);
+        std::cout << smoothSphereMesh.meshName << ": " << smoothSphereMesh.numberOfVertices << " vertices loaded" << std::endl;
+    }
 
     {// PhysX "Hello world" snippet example object
         //  Sphere of radius 3:   PhysX_Spere_radius_of_3.0f_xyz_n_uv.ply
@@ -367,15 +383,6 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
         std::cout << platPlaneDrawInfo.numberOfVertices << " vertices loaded" << std::endl;
     }
 
-    {
-        sModelDrawInfo sphereMesh;
-        //    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Sphere_radius_1_xyz.ply",
-        //::g_pMeshManager->LoadModelIntoVAO("assets/models/Sphere_radius_1_xyz_N.ply",
-        ::g_pMeshManager->LoadModelIntoVAO("assets/models/Sphere_radius_1_xyz_N_uv.ply",
-
-            sphereMesh, program);
-        std::cout << sphereMesh.numberOfVertices << " vertices loaded" << std::endl;
-    }
 
     {
         sModelDrawInfo sphereShadowMesh;
@@ -531,12 +538,13 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
 
     {
         sMesh* pSkySphere = new sMesh();
-        pSkySphere->modelFileName = "assets/models/Sphere_radius_1_xyz_N_uv.ply";
+//        pSkySphere->modelFileName = "assets/models/Sphere_radius_1_xyz_N_uv.ply";
+        pSkySphere->modelFileName = "assets/models/Smooth_Sphere.ply";
         pSkySphere->positionXYZ = glm::vec3(0.0f, 0.0f, 0.0f);
         pSkySphere->objectColourRGBA = glm::vec4(0.6f, 0.6f, 0.6f, 1.0f);
         //       pSkySphere->bIsWireframe = true;
         pSkySphere->bOverrideObjectColour = true;
-        pSkySphere->uniformScale = 25.0f;
+//        pSkySphere->uniformScale = 25.0f;
         pSkySphere->uniqueFriendlyName = "SkySphere";
         pSkySphere->textures[0] = "bad_bunny_1920x1080.bmp";
         pSkySphere->blendRatio[0] = 1.0f;

@@ -38,6 +38,8 @@ void cursor_enter_callback(GLFWwindow* window, int entered);
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
 // Mouse scroll wheel
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+// Windows resize callback (for resizing FBO)
+void window_size_callback(GLFWwindow* window, int width, int height);
 
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);

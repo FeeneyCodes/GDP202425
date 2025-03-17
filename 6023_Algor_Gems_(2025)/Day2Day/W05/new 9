@@ -1,0 +1,5 @@
+<Target Name="AfterBuild">
+    <Message>Copy PhyXWraper libary... </Message>
+    <Copy SourceFiles="$(SolutionDir)x64\Debug\cPhysXWraper.lib" DestinationFolder="$(SolutionDir)NoodleNexus\lib\Debug" />
+    <Copy SourceFiles="$(SolutionDir)x64\Release\cPhysXWraper.lib" DestinationFolder="$(SolutionDir)NoodleNexus\lib\Release" />
+</Target>

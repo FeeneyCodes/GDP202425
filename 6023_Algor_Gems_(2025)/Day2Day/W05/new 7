@@ -1,0 +1,75 @@
+class cMySexyPlyLoaderThing
+{
+	public:
+	 void operator()(sAsyncPLYLoaderInfo* pThreadControl)
+	 {
+
+		while ( ! pThreadControl->bKillThread )
+		{
+			if (pThreadControl->bThreadIsAwake)
+			{
+				pThreadControl->bThreadIsBusy = true;
+
+				sModelDrawInfo meshFileToLoad;
+				bool bFoundModelToLoad = false;
+
+				// Are there any ply models that need to be loaded? 
+				EnterCriticalSection(&cVAOManager_CS_ModelMapLock);
+
+				// Look through the map to see if any models haven't been loaded, yet
+				for (std::map< std::string, sModelDrawInfo>::iterator itMDI =
+					pThreadControl->p_mapModelName_to_VAOID->begin();
+					itMDI != pThreadControl->p_mapModelName_to_VAOID->end();
+					itMDI++)
+				{
+					if (!itMDI->second.bIsLoaded)
+					{
+						bFoundModelToLoad = true;
+						// Make a copy of the mesh info from the map
+						meshFileToLoad = itMDI->second;
+						break;	// Exit loop
+					}
+				}
+				LeaveCriticalSection(&cVAOManager_CS_ModelMapLock);
+
+				if (bFoundModelToLoad)
+				{
+					// Load the file (just like we did before)
+					if (pThreadControl->pVAOManager->m_readPlyFile_XYZ_Normal_UV(meshFileToLoad))
+					{
+						meshFileToLoad.bIsLoaded = true;
+
+						// File was loaded OK
+						meshFileToLoad.calculateExtents();
+						// Add it to the map (overwrite the old mesh info, which only had the name
+						EnterCriticalSection(&cVAOManager_CS_ModelMapLock);
+						// Note: this is a pointer, so we can't access the [] operator,
+						//	but at() is the same thing
+						pThreadControl->p_mapModelName_to_VAOID->at(meshFileToLoad.meshName) = meshFileToLoad;
+						// Or this nightmare:
+						// (*(pThreadControl->p_mapModelName_to_VAOID))[meshFileToLoad.meshName] = meshFileToLoad;
+						
+						LeaveCriticalSection(&cVAOManager_CS_ModelMapLock);
+					}
+					else
+					{
+						// TODO: We didn't load the file, so indicate this some way
+					}
+				}
+				else
+				{
+					// Didn't find a model to load, so go to sleep
+					pThreadControl->bThreadIsBusy = false;
+					// Go to sleep
+					pThreadControl->bThreadIsAwake = false;
+				}//if (bFoundModelToLoad)
+			}
+			else
+			{
+				Sleep(pThreadControl->threadSleepTime);
+			}
+		}//while ( ! pThreadControl->bKillThread )
+
+		return 0;
+	 }
+}'

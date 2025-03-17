@@ -7,9 +7,13 @@
 #include <glm/gtc/matrix_transform.hpp> 
 #include <glm/gtc/quaternion.hpp>       // for the LASER quaternion lookAt
 
+#include <iostream>
+
 #include "sharedThings.h"
 #include "cBasicTextureManager/cBasicTextureManager.h"
 #include "cLightHelper/cLightHelper.h"
+
+#include "cFBO/cFBO_deferred.h"
 
 #include "cPhysics.h"
 #include <PhysXWraper/cPhysXWraper.h>
@@ -21,11 +25,30 @@ extern cBasicTextureManager* g_pTextures;
 extern cVAOManager* g_pMeshManager;
 extern std::vector<sMesh*> g_vecMeshesToDraw;
 
+// Deferred rendering Geometry "G" buffer
+extern cFBO_deferred* g_pFBO_G_Buffer;
+
 // If SetTexturesFromMeshInfo == false, then we have to set them up manually
 // Now we pass the original (parent) matrix.
 // We can also pass this matrix instead of the position, orientation, etc.
 void DrawMesh(sMesh* pCurMesh, glm::mat4 matModel, GLuint program, bool SetTexturesFromMeshInfo = true);
 //void DrawMesh(sMesh* pCurMesh, GLuint program, bool SetTexturesFromMeshInfo = true);
+
+
+
+void window_size_callback(GLFWwindow* window, int width, int height)
+{
+    if (::g_pFBO_G_Buffer)
+    {
+        std::string error;
+        if (!::g_pFBO_G_Buffer->reset(width, height, error))
+        {
+            std::cout << "Error: Can't reset the deferred FBO because: "
+                << error << std::endl;
+        }
+    }
+    return;
+}
 
 
 

@@ -13,17 +13,36 @@ uniform bool bDoNotLight;			// if true, skips lighting
 // Controls the alpha channel
 uniform float wholeObjectTransparencyAlpha;
 
+// 0 = Regular forward (non-deferred) rendering pass (like the good old days)
+//      i.e. this is regular "forward" rendering
+const int REGULAR_FORWARD_RENDER = 0; 
+// 1 = deferred G buffer pass
+const int DEFERRED_G_BUFFER_PASS = 1;
+// 2 = Some optional pass (2nd pass effect, maybe?)
+// to come...
+// 3 = deferred lighting pass and output to full screen quad
+const int DEFERRED_LIGHTING_TO_FSQUAD_PASS = 3;
+uniform int renderPassNumber;
+
+
 // Written to the framebuffer (backbuffer)
 //out vec4 finalPixelColour;	// RGB_A
 
 // With deferred, we are writing to muliple outputs at the same time
+// NOTE: first output layer is ALSO the colour buffer on final pass
+//       (i.e. vertexWorldLocationXYZ is finalPixelColour on final pass)
+//       (Because we are using the same shader)
 out vec4 vertexWorldLocationXYZ;	// w = TBD
-out vec4 vertexNormalXYZ;			// w = TBD
+out vec4 vertexNormalXYZ;			// w : 1 = lit, 0 = do not light
 out vec4 vertexDiffuseRGB;			// w = TBD
 out vec4 vertexSpecularRGA_P;		// w = power
 
-
-
+// Our lighting pass textures (the inputs for them)
+// These come from the deferred rendering FBO 1st pass
+uniform sampler2D vertexWorldLocationXYZ_texture;
+uniform sampler2D vertexNormalXYZ_texture;
+uniform sampler2D vertexDiffuseRGB_texture;
+uniform sampler2D vertexSpecularRGA_P_texture;
 
 
 const int POINT_LIGHT_TYPE = 0;
@@ -81,8 +100,135 @@ uniform bool bUseStencilTexture;
 //uniform sampler2DArray textures[3]
 
 
+void Pass_0_RegularForward(void);
+void Pass_1_DeferredGBuffer(void);
+// Pass_2...
+void Pass_3_DeferredLightingToFSQ(void);		// FSQ (Full Screen Quad)
+
 
 void main()
+{
+	// Am casting this an int 
+	// even thought glUniform1i() 'should' work OK
+	
+	switch (int(renderPassNumber))
+	{
+	case REGULAR_FORWARD_RENDER:
+		// 0 = Regular forward (non-deferred) rendering pass (like the good old days)
+		//      i.e. this is regular "forward" rendering
+		Pass_0_RegularForward();
+		break;
+	case DEFERRED_G_BUFFER_PASS:
+		// 1 = deferred G buffer pass
+		Pass_1_DeferredGBuffer();
+		break;
+	case DEFERRED_LIGHTING_TO_FSQUAD_PASS:
+		// 3 = deferred lighting pass and output to full screen quad
+		Pass_3_DeferredLightingToFSQ();
+		
+		break;
+	}
+	
+// 1 = deferred G buffer pass
+// 2 = Some optional pass (2nd pass effect, maybe?)
+// 3 = deferred lighting pass and output to full screen quad
+	
+}//void main()
+
+void Pass_1_DeferredGBuffer(void)
+{
+	// GL_COLOR_ATTACHMENT0
+	vertexWorldLocationXYZ.xyz = fvertexWorldLocation.xyz;	
+	vertexWorldLocationXYZ.w = 1.0f;	// Not being used, so set to 1.0f
+	// GL_COLOR_ATTACHMENT1
+	vertexNormalXYZ.xyz = fvertexNormal.xyz;
+	// Default is vertex is to be lit
+	vertexNormalXYZ.w = 1.0f;	// 1 is lit, 0 is not lit
+
+	
+	// *********************************************
+	// Calcuate the colour (material) of this vertex
+
+	//GL_COLOR_ATTACHMENT2
+	vertexDiffuseRGB.rgb = vec3(0.0f, 0.0f, 0.0f);	// black
+	
+	if ( bUseStencilTexture )
+	{
+		float stencilColour = texture( stencilTexture, fUV.st ).r;
+		//
+		if ( stencilColour < 0.5f )	// Is it "black enough"
+		{
+			discard;	// don't draw this pixel
+		}
+	}
+
+	// For the skybox object
+	if ( bIsSkyBoxObject )
+	{
+		vertexDiffuseRGB.rgb = texture( skyBoxTextureSampler, fvertexNormal.xyz ).rgb;
+		// Indicate that this it NOT to be lit (do lighting calculation in later pass)
+		vertexNormalXYZ.w = 0.0f;	// 1 is lit, 0 is not lit
+	}
+	else
+	{
+		vec3 vertexColour = fColour;
+		if ( bUseObjectColour )
+		{
+			vertexColour = objectColour.rgb;
+		}
+	
+		if ( bUseTextureAsColour )
+		{
+			vec3 texColour00 = texture( texture00, fUV.st ).rgb;
+			vec3 texColour01 = texture( texture01, fUV.st ).rgb;	
+			vec3 texColour02 = texture( texture02, fUV.st ).rgb;	
+			vec3 texColour03 = texture( texture03, fUV.st ).rgb;	
+			
+			// All these ratios should add up to 1.0
+			vertexColour.rgb =   (texColour00.rgb * texRatio_0_to_3.x)
+							   + (texColour01.rgb * texRatio_0_to_3.y)
+		                       + (texColour02.rgb * texRatio_0_to_3.z)
+		                       + (texColour03.rgb * texRatio_0_to_3.w);
+			
+		}//if ( bUseTextureAsColour )
+	
+		vertexDiffuseRGB.rgb = vertexColour.rgb;
+		vertexDiffuseRGB.a = 1.0f;
+		
+		// Use lighting?
+		if ( bDoNotLight )
+		{
+			// Indicate that this it NOT to be lit (do lighting calculation in later pass)
+			vertexNormalXYZ.w = 0.0f;	// 1 is lit, 0 is not lit
+			return;
+		}
+
+		// GL_COLOR_ATTACHMENT3
+		vec4 vertexSpecular = vec4(1.0f, 1.0f, 1.0f, 100.0f);	// w = power
+		vertexSpecularRGA_P = vertexSpecular;		
+	
+
+	}//if ( bIsSkyBoxObject )
+	
+	return;
+}
+
+// Pass_2...
+void Pass_3_DeferredLightingToFSQ(void)
+{
+	vertexWorldLocationXYZ.rgba = vec4(0.0f, 1.0f, 0.0f, 1.0f);
+	
+//	uniform sampler2D vertexWorldLocationXYZ_texture;
+//	uniform sampler2D vertexNormalXYZ_texture;
+//	uniform sampler2D vertexDiffuseRGB_texture;
+//	uniform sampler2D vertexSpecularRGA_P_texture;
+	
+	
+	return;
+}
+
+
+void Pass_0_RegularForward(void)
 {
 
 	// discard transparency
@@ -125,28 +271,8 @@ void main()
 	
 	if ( bUseTextureAsColour )
 	{
-//			uniform sampler2D texture00;
-//		uniform sampler2D texture01;
-//		uniform sampler2D texture02;
-//		uniform sampler2D texture03;
-//		uniform vec4 texRatio_0_to_3;	// x index 0, y index 1, etc/
-	
-
-//	// chromatic aberration
-//		vec2 UV_Offset_R = vec2(fUV.s - 0.01f, fUV.t + 0.01f);
-//		vec2 UV_Offset_G = vec2(fUV.s - 0.01f, fUV.t - 0.01f);
-//		vec2 UV_Offset_B = vec2(fUV.s + 0.01f, fUV.t + 0.01f);
-//		
-//		vec3 texColour00 = vec3(0.0f);
-//		texColour00.r = texture( texture00, UV_Offset_R ).r;
-//		texColour00.g = texture( texture00, UV_Offset_G ).g;
-//		texColour00.b = texture( texture00, UV_Offset_B ).b;
 
 		vec3 texColour00 = texture( texture00, fUV.st ).rgb;
-//		vec2 screenRollUV = fUV.st;
-//		fUV.t += rollAmount;
-//		vec3 texColour00 = texture( texture00, screenRollUV ).rgb;
-		
 		vec3 texColour01 = texture( texture01, fUV.st ).rgb;	
 		vec3 texColour02 = texture( texture02, fUV.st ).rgb;	
 		vec3 texColour03 = texture( texture03, fUV.st ).rgb;	
@@ -158,12 +284,6 @@ void main()
 		                   + (texColour02.rgb * texRatio_0_to_3.z)
 		                   + (texColour03.rgb * texRatio_0_to_3.w);
 				
-				
-//		vertexColour.rgb = texColour00.rgb * (1.0f - texDirtyGlass.r)	
-//                           + texDirtyGlass.rgb;	
-		// Use #2 texture to modulate the 1st texture		
-//		vertexColour.rgb =   (texColour03.rgb * texColour02.r) 
-//		                   + (texColour00.rgb * (1.0f - texColour02.r));
 						   
 	} 
 	
@@ -317,7 +437,10 @@ void main()
 	//vec3 texColour = texture( texture00, fUV.st ).rgb;
 	//finalPixelColour.rgb += texColour;
 
+	return;
 }
+
+
 
 
 // Inspired by Mike Bailey's Graphic Shader, chapter 6

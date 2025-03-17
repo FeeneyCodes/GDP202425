@@ -43,7 +43,7 @@ bool cFBO_deferred::init(int width, int height, std::string& error)
 	glBindTexture(GL_TEXTURE_2D, this->vertexWorldLocationXYZ);
 
 	glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA32F,	// 32 bits (1 float) per colour
-		//	glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA32F,		
+		//	glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8,		
 		this->width,				// g_FBO_SizeInPixes
 		this->height);			// g_FBO_SizeInPixes
 
@@ -67,7 +67,8 @@ bool cFBO_deferred::init(int width, int height, std::string& error)
 	glGenTextures(1, &(this->vertexDiffuseRGB));
 	glBindTexture(GL_TEXTURE_2D, this->vertexDiffuseRGB);
 
-	glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA32F,	// 32 bits (1 float) per colour		
+	// likely 32 bit floats per pixel is too much (colours are 8 bit, so GL_RGBA32F not needed)
+	glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8,	// 32 bits (1 float) per colour		
 		this->width,				// g_FBO_SizeInPixes
 		this->height);				// g_FBO_SizeInPixes
 
@@ -80,7 +81,8 @@ bool cFBO_deferred::init(int width, int height, std::string& error)
 	glGenTextures(1, &(this->vertexSpecularRGA_P));
 	glBindTexture(GL_TEXTURE_2D, this->vertexSpecularRGA_P);
 
-	glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA32F,	// 32 bits (1 float) per colour		
+	// likely 32 bit floats per pixel is too much (colours are 8 bit, so GL_RGBA32F not needed)
+	glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8,	// 32 bits (1 float) per colour		
 		this->width,				// g_FBO_SizeInPixes
 		this->height);				// g_FBO_SizeInPixes
 
@@ -146,6 +148,8 @@ bool cFBO_deferred::init(int width, int height, std::string& error)
 	glFramebufferTexture(GL_FRAMEBUFFER,
 		GL_COLOR_ATTACHMENT3, this->vertexSpecularRGA_P, 0);
 
+	// this essentially "turns on and off" the various layers.
+	// note the strange parameters
 	static const GLenum draw_bufers[] =
 	{
 		GL_COLOR_ATTACHMENT0,

@@ -1,0 +1,18 @@
+class cTriangle
+{ 
+	int vertIndex[3];
+}
+
+class cNode
+{
+  glm vertexXYZ;
+  int vertindex;
+  cNode* pAdjacentNodes[6];
+  cTriangle* pTrangles[6];
+}
+
+class cTerrain
+{
+ vector<cNode*> getAdjacentNodes(int vertIndex);
+ vector<cNode*> getAdjacentNodes(glm::vec3 node);
+}

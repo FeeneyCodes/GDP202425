@@ -43,11 +43,18 @@
 #include "cTerrainPathChooser.h"
 
 // Frame Buffer Object (FBO)
-#include "cFBO/cFBO_RGB_depth.h"
+//#include "cFBO/cFBO_RGB_depth.h"
+// Deferred render FBO
+#include "cFBO/cFBO_deferred.h"
 
 #include "cViperFlagConnector.h"
 
 #include "PhysXWraper/cPhysXWraper.h"
+
+
+// Deferred rendering Geometry "G" buffer
+cFBO_deferred* g_pFBO_G_Buffer = NULL;
+
 
 //
 //const unsigned int MAX_NUMBER_OF_MESHES = 1000;
@@ -240,6 +247,9 @@ int main(void)
     glfwSetWindowFocusCallback(window, cursor_enter_callback);
     glfwSetMouseButtonCallback(window, mouse_button_callback);
     glfwSetScrollCallback(window, scroll_callback);
+    // Resets the FBO when we change window size
+    // https://www.glfw.org/docs/3.3/window_guide.html#window_events
+    glfwSetWindowSizeCallback(window, window_size_callback);
 
 
 
@@ -496,21 +506,35 @@ int main(void)
     unsigned int numberOfNarrowPhaseTrianglesInAABB_BroadPhaseThing = 0;
 
 
-    // Camera view from withing the warehouse
-    cFBO_RGB_depth FBO_WarehouseView;
-    std::string FBOError;
-    if (!FBO_WarehouseView.init(1920, 1080, FBOError))
-//    if (!FBO_WarehouseView.init(128, 64, FBOError))
-//    if (!FBO_WarehouseView.init(3840 * 2, 2180 * 2, FBOError))
+//    // Camera view from withing the warehouse
+//    cFBO_RGB_depth FBO_WarehouseView;
+//    std::string FBOError;
+//    if (!FBO_WarehouseView.init(1920, 1080, FBOError))
+////    if (!FBO_WarehouseView.init(128, 64, FBOError))
+////    if (!FBO_WarehouseView.init(3840 * 2, 2180 * 2, FBOError))
+//    {
+//        std::cout << "Error: FBO.init(): " << FBOError << std::endl;
+//    }
+//    else
+//    {
+//        std::cout << "FBO created OK" << std::endl;
+//    }
+
+    // Deferred rendering Geometry "G" buffer
+    int screen_width, screen_height;
+    glfwGetFramebufferSize(window, &screen_width, &screen_height);
+
+    ::g_pFBO_G_Buffer = new cFBO_deferred();
+    std::string FBOinitError;
+    if ( ! ::g_pFBO_G_Buffer->init(screen_width, screen_height, FBOinitError) )
     {
-        std::cout << "Error: FBO.init(): " << FBOError << std::endl;
+        std::cout << "ERROR: Can't init deferred FBO buffer because: "
+            << FBOinitError << std::endl;
     }
     else
     {
-        std::cout << "FBO created OK" << std::endl;
+        std::cout << "Deferred FBO init() OK." << std::endl;
     }
-
-
  
 
     while (!glfwWindowShouldClose(window))
@@ -614,45 +638,66 @@ int main(void)
         // RENDER from the inside of the warehouse
 
 
-        // Point output to the off-screen FBO
-        glBindFramebuffer(GL_FRAMEBUFFER, FBO_WarehouseView.ID);
+//        // Point output to the off-screen FBO
+//        glBindFramebuffer(GL_FRAMEBUFFER, FBO_WarehouseView.ID);
+//
+//        // These will ONLY work on the default framebuffer
+////        glViewport(0, 0, width, height);
+////       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//
+////        FBO_WarehouseView.clearColourBuffer(0);
+//        FBO_WarehouseView.clearBuffers(true, true);
+//
+//
+//        matProjection = glm::perspective(0.6f,
+//            ratio,
+//            10.0f,
+//            100'000.0f);
+//
+//        glm::vec3 eyeInsideWarehouse = glm::vec3(-197.0f, 14.0f, -72.0f);
+//        float xOffset = 10.0f * glm::sin((float)glfwGetTime() / 2.0f);
+//        glm::vec3 atInsideWareHouse =
+//            eyeInsideWarehouse + glm::vec3(xOffset, 0.0f, 10.0f);
+//        
+//        matView = glm::lookAt(eyeInsideWarehouse, atInsideWareHouse, glm::vec3(0.0f, 1.0f, 0.0f));
+//
+//        RenderScene(program, matProjection, matView, ratio, eyeInsideWarehouse);
+//        // 
+//        // **************************************************
 
-        // These will ONLY work on the default framebuffer
-//        glViewport(0, 0, width, height);
-//       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-//        FBO_WarehouseView.clearColourBuffer(0);
-        FBO_WarehouseView.clearBuffers(true, true);
-
-
-        matProjection = glm::perspective(0.6f,
-            ratio,
-            10.0f,
-            100'000.0f);
-
-        glm::vec3 eyeInsideWarehouse = glm::vec3(-197.0f, 14.0f, -72.0f);
-        float xOffset = 10.0f * glm::sin((float)glfwGetTime() / 2.0f);
-        glm::vec3 atInsideWareHouse =
-            eyeInsideWarehouse + glm::vec3(xOffset, 0.0f, 10.0f);
-        
-        matView = glm::lookAt(eyeInsideWarehouse, atInsideWareHouse, glm::vec3(0.0f, 1.0f, 0.0f));
-
-        RenderScene(program, matProjection, matView, ratio, eyeInsideWarehouse);
+        // Pass #0 --> Render the G buffer
+        //          output to the FBO deferred object
         // 
-        // **************************************************
+        // (Pass #1 --> optional effect pass, "2nd pass effect")
+        //
+        // Pass #2 --> Render the Deferred lighting pass 
+        //          output to the screen onto a full screen quad
+        //
 
-
-
-        // **************************************************
+        // uniform int renderPassNumber;
+        GLint renderPassNumber_UL = glGetUniformLocation(program, "renderPassNumber");
+        // Pass "0" (regular forward rendering)
         // 
-        // RENDER normally
 
-        // Point the output to the regular framebuffer (the screen)
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-        // These will ONLY work on the default framebuffer
-        glViewport(0, 0, width, height);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+// **************************************************
+//     ____           ____         __  __                                 
+//    / ___|         | __ ) _   _ / _|/ _| ___ _ __   _ __   __ _ ___ ___ 
+//   | |  _   _____  |  _ \| | | | |_| |_ / _ \ '__| | '_ \ / _` / __/ __|
+//   | |_| | |_____| | |_) | |_| |  _|  _|  __/ |    | |_) | (_| \__ \__ \
+//    \____|         |____/ \__,_|_| |_|  \___|_|    | .__/ \__,_|___/___/
+//                                                   |_|                  
+// 
+        // Pass "1" for deferred G buffer pass
+        glUniform1i(renderPassNumber_UL, 1);
+
+        // Point the output to the G buffer...
+        glBindFramebuffer(GL_FRAMEBUFFER, ::g_pFBO_G_Buffer->ID);
+
+        // Clear the buffers on the FBO
+        // (remember that glClear() only works on the regular screen buffer)
+        ::g_pFBO_G_Buffer->clearBuffers(true, true);
+
 
         matView = glm::lookAt(
             ::g_pFlyCamera->getEyeLocation(),
@@ -670,78 +715,183 @@ int main(void)
             10.0f,
             100'000.0f);
 
-        // Render the offscreen FBO texture onto where Dua Lipa was...
-        sMesh* pFBOTextureMesh = ::g_pFindMeshByFriendlyName("WareHouseView");
-        // 
-        // Now apply that off-screen texture (from the FBO) to the canadian flag model
-//        sMesh* pFBOTextureMesh = ::g_pFindMeshByFriendlyName("Canadian_Flag");
-
-        if (pFBOTextureMesh)
-        {
-            pFBOTextureMesh->bIsVisible = true;
-
-            GLint matProjection_UL = glGetUniformLocation(program, "matProjection");
-            glUniformMatrix4fv(matProjection_UL, 1, GL_FALSE, (const GLfloat*)&matProjection);
-
-            GLint matView_UL = glGetUniformLocation(program, "matView");
-            glUniformMatrix4fv(matView_UL, 1, GL_FALSE, (const GLfloat*)&matView);
-
-
-
-            // Connect texture unit #0 to the offscreen FBO
-            glActiveTexture(GL_TEXTURE0);
-
-            // The colour texture inside the FBO is just a regular colour texture.
-            // There's nothing special about it.
-            glBindTexture(GL_TEXTURE_2D, FBO_WarehouseView.colourTexture_0_ID);
-//            glBindTexture(GL_TEXTURE_2D, ::g_pTextures->getTextureIDFromName("dua-lipa-promo.bmp"));
-
-            GLint texture01_UL = glGetUniformLocation(program, "texture00");
-            glUniform1i(texture01_UL, 0);       // <-- Note we use the NUMBER, not the GL_TEXTURE3 here
-
-            GLint texRatio_0_to_3_UL = glGetUniformLocation(program, "texRatio_0_to_3");
-            glUniform4f(texRatio_0_to_3_UL,
-                1.0f,
-                0.0f,
-                0.0f,
-                0.0f);
-
-            // This is for the blurring effect
-            GLint b_Is_FBO_Texture_UL = glGetUniformLocation(program, "b_Is_FBO_Texture");
-            GLint bUseTextureAsColour_UL = glGetUniformLocation(program, "bUseTextureAsColour");
-
-            glUniform1f(b_Is_FBO_Texture_UL, (float)GL_TRUE);
-            glUniform1f(bUseTextureAsColour_UL, (float)GL_FALSE);
-
-            DrawMesh(pFBOTextureMesh, program, false);
-
-            glUniform1f(b_Is_FBO_Texture_UL, (float)GL_FALSE);
-            glUniform1f(bUseTextureAsColour_UL, (float)GL_TRUE);
-
-            pFBOTextureMesh->bIsVisible = false;
-        }
+//        // Render the offscreen FBO texture onto where Dua Lipa was...
+//        sMesh* pFBOTextureMesh = ::g_pFindMeshByFriendlyName("WareHouseView");
+//        // 
+//        // Now apply that off-screen texture (from the FBO) to the canadian flag model
+////        sMesh* pFBOTextureMesh = ::g_pFindMeshByFriendlyName("Canadian_Flag");
+//
+//        if (pFBOTextureMesh)
+//        {
+//            pFBOTextureMesh->bIsVisible = true;
+//
+//            GLint matProjection_UL = glGetUniformLocation(program, "matProjection");
+//            glUniformMatrix4fv(matProjection_UL, 1, GL_FALSE, (const GLfloat*)&matProjection);
+//
+//            GLint matView_UL = glGetUniformLocation(program, "matView");
+//            glUniformMatrix4fv(matView_UL, 1, GL_FALSE, (const GLfloat*)&matView);
+//
+//
+//
+//            // Connect texture unit #0 to the offscreen FBO
+//            glActiveTexture(GL_TEXTURE0);
+//
+//            // The colour texture inside the FBO is just a regular colour texture.
+//            // There's nothing special about it.
+//            glBindTexture(GL_TEXTURE_2D, FBO_WarehouseView.colourTexture_0_ID);
+////            glBindTexture(GL_TEXTURE_2D, ::g_pTextures->getTextureIDFromName("dua-lipa-promo.bmp"));
+//
+//            GLint texture01_UL = glGetUniformLocation(program, "texture00");
+//            glUniform1i(texture01_UL, 0);       // <-- Note we use the NUMBER, not the GL_TEXTURE3 here
+//
+//            GLint texRatio_0_to_3_UL = glGetUniformLocation(program, "texRatio_0_to_3");
+//            glUniform4f(texRatio_0_to_3_UL,
+//                1.0f,
+//                0.0f,
+//                0.0f,
+//                0.0f);
+//
+//            // This is for the blurring effect
+//            GLint b_Is_FBO_Texture_UL = glGetUniformLocation(program, "b_Is_FBO_Texture");
+//            GLint bUseTextureAsColour_UL = glGetUniformLocation(program, "bUseTextureAsColour");
+//
+//            glUniform1f(b_Is_FBO_Texture_UL, (float)GL_TRUE);
+//            glUniform1f(bUseTextureAsColour_UL, (float)GL_FALSE);
+//
+//            DrawMesh(pFBOTextureMesh, program, false);
+//
+//            glUniform1f(b_Is_FBO_Texture_UL, (float)GL_FALSE);
+//            glUniform1f(bUseTextureAsColour_UL, (float)GL_TRUE);
+//
+//            pFBOTextureMesh->bIsVisible = false;
+//        }
 
         glUniform4f(eyeLocation_UL,
             ::g_pFlyCamera->getEyeLocation().x,
             ::g_pFlyCamera->getEyeLocation().y,
             ::g_pFlyCamera->getEyeLocation().z, 1.0f);
+
         RenderScene(program, matProjection, matView, ratio, ::g_pFlyCamera->getEyeLocation());
         // 
-        // **************************************************
+// **************************************************
 
 
-        DrawDebugSphere(::g_pTerrainPathChooser->startXYZ, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), 10.0f, program);
-        DrawDebugSphere(::g_pTerrainPathChooser->destinationXYZ, glm::vec4(0.0f, 1.0f, 1.0f, 1.0f), 10.0f, program);
 
-        // Draw the paths along the terrain
-        std::vector<glm::vec3> vecPathPoints;
-//        ::g_pTerrainPathChooser->CalculatePath(vecPathPoints);
-//        for (glm::vec3 points : vecPathPoints)
-//        {
-//            DrawDebugSphere(points, glm::vec4(0.0f, 1.0f, 0.0f, 1.0f), 25.0f, program);
-//        }
+// **************************************************
+//    ____        __                        _   _ _       _     _   _                                   
+//   |  _ \  ___ / _| ___ _ __ _ __ ___  __| | | (_) __ _| |__ | |_(_)_ __   __ _   _ __   __ _ ___ ___ 
+//   | | | |/ _ \ |_ / _ \ '__| '__/ _ \/ _` | | | |/ _` | '_ \| __| | '_ \ / _` | | '_ \ / _` / __/ __|
+//   | |_| |  __/  _|  __/ |  | | |  __/ (_| | | | | (_| | | | | |_| | | | | (_| | | |_) | (_| \__ \__ \
+//   |____/ \___|_|  \___|_|  |_|  \___|\__,_| |_|_|\__, |_| |_|\__|_|_| |_|\__, | | .__/ \__,_|___/___/
+//                                                  |___/                   |___/  |_|                  
 
-        // **************************************************
+// Point the output to the regular framebuffer (the screen)
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        // These will ONLY work on the default framebuffer
+        glViewport(0, 0, width, height);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        // Pass "3" for deferred lighting pass
+        glUniform1i(renderPassNumber_UL, 3);
+
+
+        // We can render any object
+        sMesh* pFSQ = g_pFindMeshByFriendlyName("New_Viper_Player");
+        // Save current state
+        glm::vec3 oldPosition = pFSQ->positionXYZ;
+        glm::vec3 oldRotation = pFSQ->rotationEulerXYZ;
+        float oldScale = pFSQ->uniformScale;
+        bool oldIsWireframe = pFSQ->bIsWireframe;
+        bool oldIsVisible = pFSQ->bIsVisible;
+        bool oldDoNotLight = pFSQ->bDoNotLight;
+
+
+        // We are setting the camera (view) and projection matrix 
+        //  specifically for this shot of the FSQ
+
+        pFSQ->positionXYZ = glm::vec3(0.0f, 0.0f, 0.0f);
+        pFSQ->bIsVisible = true;
+        pFSQ->rotationEulerXYZ.y = -90.0f;
+        pFSQ->uniformScale = 0.5f;
+        // 
+        // 
+        // Set the camera 
+        matView = glm::lookAt(
+            glm::vec3(0.0f, 0.0f, +10.0f),  // +10 units along the z
+            glm::vec3(0.0f, 0.0f, 0.0f),    // Looking at the origin 
+            glm::vec3(0.0f, 1.0f, 0.0f));   // "up" is +ve Y
+
+        GLint matView_UL = glGetUniformLocation(program, "matView");
+        glUniformMatrix4fv(matView_UL, 1, GL_FALSE, (const GLfloat*)&matView);
+
+        // glm::ortho(
+        
+        matProjection = glm::perspective(0.6f,
+            ratio,
+            1.0f, 10.0f);       // FSQ is 10 units from the camera 
+                                // (and it's a flat object)
+
+        GLint matProjection_UL = glGetUniformLocation(program, "matProjection");
+        glUniformMatrix4fv(matProjection_UL, 1, GL_FALSE, (const GLfloat*)&matProjection);
+
+
+
+
+        // Connect the FBO deferred textures to the textures in our final salighting pass
+        //    uniform sampler2D vertexWorldLocationXYZ_texture;
+        //    uniform sampler2D vertexNormalXYZ_texture;
+        //    uniform sampler2D vertexDiffuseRGB_texture;
+        //    uniform sampler2D vertexSpecularRGA_P_texture;
+        //
+        // Note here I'm picking texture unit numbers for not particular 
+        //  reason. i.e. they don't have to be zero, or match the FBO, or 
+        //  even in any order. They are independent of all that
+        {
+            glActiveTexture(GL_TEXTURE0 + 13);
+            glBindTexture(GL_TEXTURE_2D, g_pFBO_G_Buffer->vertexWorldLocationXYZ);
+            GLint vertexWorldLocationXYZ_texture_UL 
+                = glGetUniformLocation(program, "vertexWorldLocationXYZ_texture");
+            glUniform1i(vertexWorldLocationXYZ_texture_UL, 13);       // <-- Note we use the NUMBER, not the GL_TEXTURE3 here
+        }
+        {
+            glActiveTexture(GL_TEXTURE0 + 14);
+            glBindTexture(GL_TEXTURE_2D, g_pFBO_G_Buffer->vertexNormalXYZ);
+            GLint vertexNormalXYZ_texture_UL
+                = glGetUniformLocation(program, "vertexNormalXYZ_texture");
+            glUniform1i(vertexNormalXYZ_texture_UL, 14);       // <-- Note we use the NUMBER, not the GL_TEXTURE3 here
+        }
+        {
+            glActiveTexture(GL_TEXTURE0 + 15);
+            glBindTexture(GL_TEXTURE_2D, g_pFBO_G_Buffer->vertexDiffuseRGB);
+            GLint vertexDiffuseRGB_texture_UL
+                = glGetUniformLocation(program, "vertexDiffuseRGB_texture");
+            glUniform1i(vertexDiffuseRGB_texture_UL, 15);       // <-- Note we use the NUMBER, not the GL_TEXTURE3 here
+        }
+        {
+            glActiveTexture(GL_TEXTURE0 + 16);
+            glBindTexture(GL_TEXTURE_2D, g_pFBO_G_Buffer->vertexSpecularRGA_P);
+            GLint vertexSpecularRGA_P_texture_UL
+                = glGetUniformLocation(program, "vertexSpecularRGA_P_texture");
+            glUniform1i(vertexSpecularRGA_P_texture_UL, 16);       // <-- Note we use the NUMBER, not the GL_TEXTURE3 here
+        }
+
+
+
+        glm::mat4 matModel = glm::mat4(1.0f);   // Identity
+        DrawMesh(pFSQ, matModel, program, false);
+
+
+
+        // restore state
+        pFSQ->positionXYZ = oldPosition;
+        pFSQ->rotationEulerXYZ = oldRotation;
+        pFSQ->uniformScale = oldScale;
+        pFSQ->bIsWireframe = oldIsWireframe;
+        pFSQ->bIsVisible = oldIsVisible;
+        pFSQ->bDoNotLight = oldDoNotLight;
+
+// **************************************************
+
         
         // Load any outstanding models async...
         ::g_pMeshManager->LoadAsynModels(program);
@@ -800,6 +950,8 @@ int main(void)
     // Delete everything
     delete ::g_pFlyCamera;
     delete ::g_pPhysicEngine;
+    ::g_pFBO_G_Buffer->shutdown();
+    delete ::g_pFBO_G_Buffer;
 
     ::g_pPhysX->cleanupPhysics(true);
     delete ::g_pPhysX;

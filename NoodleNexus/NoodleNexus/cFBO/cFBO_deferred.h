@@ -16,6 +16,7 @@ public:
 		vertexNormalXYZ(0),
 		vertexDiffuseRGB(0),
 		vertexSpecularRGA_P(0),
+		//
 		depthTexture_ID(0), 
 		width(-1), height(-1) {};
 
@@ -23,7 +24,7 @@ public:
 	GLuint vertexWorldLocationXYZ;	// w = TBD
 	GLuint vertexNormalXYZ;			// w = TBD
 	GLuint vertexDiffuseRGB;		// w = TBD
-	GLuint vertexSpecularRGA_P;		// w = power
+	GLuint vertexSpecularRGA_P;		// w = power 'P' for Power
 	
 	GLuint depthTexture_ID;		// = 0;
 	GLint width;		// = 512 the WIDTH of the framebuffer, in pixels;

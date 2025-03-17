@@ -1,0 +1,12 @@
+_DEBUG
+NDEBUG
+
+MDd_DynamicDebug
+MTd_StaticDebug
+
+
+Work on a 7z file "blackboard" sort of save state thing:
+* Dev side looks like files and folders
+* Actually stored as one large file
+
+Dynamic state/saves stored as another file

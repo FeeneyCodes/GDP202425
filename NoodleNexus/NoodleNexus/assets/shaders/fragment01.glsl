@@ -244,13 +244,30 @@ void Pass_3_DeferredLightingToFSQ(void)
 
 	// Get the vertex colour from the 1st pass
 //	vec3 vertexDiffuseRGB = texture( vertexDiffuseRGB_texture, fUV.st ).rgb;
-	vec3 vertexDiffuseRGB = texture( vertexDiffuseRGB_texture, screenUV.st ).rgb;
 	
 	
+	vec4 verWorldLocationXYZ = texture( vertexWorldLocationXYZ_texture, screenUV.st ).rgba;
+	vec4 verNormXYZ = texture( vertexNormalXYZ_texture, screenUV.st ).rgba;
+	vec4 verDiffRGB = texture( vertexDiffuseRGB_texture, screenUV.st ).rgba;
+	vec4 verSpecRGA_P = texture( vertexSpecularRGA_P_texture, screenUV.st ).rgba;
 	
-	// Sent to colour buffer (for now)
-	vertexWorldLocationXYZ.rgb = vertexDiffuseRGB.rgb;
-	vertexWorldLocationXYZ.a = 1.0f;
+	// Shift the world locations and scale them
+//	verWorldLocationXYZ.xyz += 1000.0f;	
+//	verWorldLocationXYZ.xyz /= 2000.0f;	
+//	// Sent to colour buffer (for now)
+//	vertexWorldLocationXYZ.rgb = verSpecRGA_P.rgb;
+//	vertexWorldLocationXYZ.a = 1.0f;
+
+	// Do the lighting calculation just like before
+	// (except we are reading the information from the 1st pass G buffer)
+	vec4 pixelColour = calculateLightContrib( verDiffRGB.rgb, 
+	                                          verNormXYZ.xyz, 
+	                                          verWorldLocationXYZ.xyz, 
+											  verSpecRGA_P );
+
+	vertexWorldLocationXYZ.rgb = pixelColour.rgb;
+	vertexWorldLocationXYZ.a = pixelColour.a;
+	
 	
 	return;
 }

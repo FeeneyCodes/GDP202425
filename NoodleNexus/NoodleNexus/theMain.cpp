@@ -796,28 +796,32 @@ int main(void)
 
 
         // We can render any object
-        sMesh* pFSQ = g_pFindMeshByFriendlyName("New_Viper_Player");
-        // Save current state
-        glm::vec3 oldPosition = pFSQ->positionXYZ;
-        glm::vec3 oldRotation = pFSQ->rotationEulerXYZ;
-        float oldScale = pFSQ->uniformScale;
-        bool oldIsWireframe = pFSQ->bIsWireframe;
-        bool oldIsVisible = pFSQ->bIsVisible;
-        bool oldDoNotLight = pFSQ->bDoNotLight;
+//        sMesh* pFSQ = g_pFindMeshByFriendlyName("New_Viper_Player");
+        sMesh* pFSQ = g_pFindMeshByFriendlyName("Full_Screen_Quad");
 
 
         // We are setting the camera (view) and projection matrix 
         //  specifically for this shot of the FSQ
 
+        // In our case, the quad is 2x2 in size, centred at the origin
+        //  facing along the +ve z axis.
+        // It goes from -1.0 to 1.0 on the x and y axes
+
         pFSQ->positionXYZ = glm::vec3(0.0f, 0.0f, 0.0f);
         pFSQ->bIsVisible = true;
-        pFSQ->rotationEulerXYZ.y = -90.0f;
-        pFSQ->uniformScale = 10.0f;
+       // pFSQ->rotationEulerXYZ.y += 0.1f;
         // 
         // 
         // Set the camera 
+        //
+        // ...We could make the quad bigger or move closer
+        //
+        // The key is we want to the full screen quad to be "too" big,
+        //  like it's completely filling the creen and going off the edges
+        // (that way whatever resolution or window size, we'll be OK)
+        //
         matView = glm::lookAt(
-            glm::vec3(0.0f, 0.0f, +10.0f),  // +10 units along the z
+            glm::vec3(0.0f, 0.0f, +1.0f),  // +1 units along the z
             glm::vec3(0.0f, 0.0f, 0.0f),    // Looking at the origin 
             glm::vec3(0.0f, 1.0f, 0.0f));   // "up" is +ve Y
 
@@ -826,9 +830,10 @@ int main(void)
 
         // glm::ortho(
         
+        // Watch the near and far plane as we are REALLY close to the quad...
         matProjection = glm::perspective(0.6f,
             ratio,
-            1.0f, 10.0f);       // FSQ is 10 units from the camera 
+            0.1f, 2.0f);       // FSQ is 10 units from the camera 
                                 // (and it's a flat object)
 
         GLint matProjection_UL = glGetUniformLocation(program, "matProjection");
@@ -891,15 +896,8 @@ int main(void)
         glm::mat4 matModel = glm::mat4(1.0f);   // Identity
         DrawMesh(pFSQ, matModel, program, false);
 
-
-
-        // restore state
-        pFSQ->positionXYZ = oldPosition;
-        pFSQ->rotationEulerXYZ = oldRotation;
-        pFSQ->uniformScale = oldScale;
-        pFSQ->bIsWireframe = oldIsWireframe;
-        pFSQ->bIsVisible = oldIsVisible;
-        pFSQ->bDoNotLight = oldDoNotLight;
+        // Hide the quad from rendering anywhere else
+        pFSQ->bIsVisible = false;
 
 // **************************************************
 

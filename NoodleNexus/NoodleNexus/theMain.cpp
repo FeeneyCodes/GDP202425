@@ -812,7 +812,7 @@ int main(void)
         pFSQ->positionXYZ = glm::vec3(0.0f, 0.0f, 0.0f);
         pFSQ->bIsVisible = true;
         pFSQ->rotationEulerXYZ.y = -90.0f;
-        pFSQ->uniformScale = 0.5f;
+        pFSQ->uniformScale = 10.0f;
         // 
         // 
         // Set the camera 
@@ -875,6 +875,17 @@ int main(void)
             glUniform1i(vertexSpecularRGA_P_texture_UL, 16);       // <-- Note we use the NUMBER, not the GL_TEXTURE3 here
         }
 
+        // Also pass the current screen size
+        // uniform vec2 screenSize_width_height
+        int screen_width, height_height;
+        glfwGetFramebufferSize(window, &screen_width, &height_height);
+
+        GLint screenSize_width_height_UL
+            = glGetUniformLocation(program, "screenSize_width_height");
+
+        glUniform2f(screenSize_width_height_UL, 
+                     (GLfloat)screen_width, 
+                     (GLfloat)height_height);
 
 
         glm::mat4 matModel = glm::mat4(1.0f);   // Identity

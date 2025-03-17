@@ -14,6 +14,25 @@ cViperFlagConnector* g_pViperFlagConnector = NULL;
 
 void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
 {
+    // Deferred rendering "full screen quad" (FSQ) mesh
+    {
+        sModelDrawInfo FSQMesh;
+        ::g_pMeshManager->LoadModelIntoVAO("assets/models/2x2_Quad_for_FSQuad_xyz_n_uv.ply",
+            FSQMesh, program);
+        std::cout << FSQMesh.numberOfVertices << " vertices loaded" << std::endl;
+        //
+        sMesh* pFSQMesh = new sMesh();
+        pFSQMesh->modelFileName = "assets/models/2x2_Quad_for_FSQuad_xyz_n_uv.ply";
+        pFSQMesh->uniqueFriendlyName = "Full_Screen_Quad";
+        pFSQMesh->bIsVisible = false;
+        // We're saving this into the vector of meshes, but
+        //  we could not do this and keep the pointer to directly call
+        ::g_vecMeshesToDraw.push_back(pFSQMesh);
+    }
+
+
+
+
     {// PhysX "Hello world" snippet example object
         //  Sphere of radius 3:   PhysX_Spere_radius_of_3.0f_xyz_n_uv.ply
         //  Cube of 1 / 2 extent 2 : PhysX_Cube_half-extent_of_2.0f_xyz_n_uv.ply

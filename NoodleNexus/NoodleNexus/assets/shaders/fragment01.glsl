@@ -43,6 +43,7 @@ uniform sampler2D vertexWorldLocationXYZ_texture;
 uniform sampler2D vertexNormalXYZ_texture;
 uniform sampler2D vertexDiffuseRGB_texture;
 uniform sampler2D vertexSpecularRGA_P_texture;
+uniform vec2 screenSize_width_height;
 
 
 const int POINT_LIGHT_TYPE = 0;
@@ -140,6 +141,7 @@ void Pass_1_DeferredGBuffer(void)
 	// GL_COLOR_ATTACHMENT0
 	vertexWorldLocationXYZ.xyz = fvertexWorldLocation.xyz;	
 	vertexWorldLocationXYZ.w = 1.0f;	// Not being used, so set to 1.0f
+	
 	// GL_COLOR_ATTACHMENT1
 	vertexNormalXYZ.xyz = fvertexNormal.xyz;
 	// Default is vertex is to be lit
@@ -216,13 +218,39 @@ void Pass_1_DeferredGBuffer(void)
 // Pass_2...
 void Pass_3_DeferredLightingToFSQ(void)
 {
-	vertexWorldLocationXYZ.rgba = vec4(0.0f, 1.0f, 0.0f, 1.0f);
+	// Remember: Because we are using the same shader, 
+	//	this 1st location is actually the frame buffer colour
+	// (was called: out vec4 finalPixelColour; in the forward render
+	//
+	vertexWorldLocationXYZ.rgba = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 	
 //	uniform sampler2D vertexWorldLocationXYZ_texture;
 //	uniform sampler2D vertexNormalXYZ_texture;
 //	uniform sampler2D vertexDiffuseRGB_texture;
 //	uniform sampler2D vertexSpecularRGA_P_texture;
+
+	// While you CAN use the UVs of a full screen quad or other object,
+	// that is tricky to align it to the screen, so we are 
+	// using the built in "vec4 gl_FragCoord" variable.
+	// https://www.khronos.org/opengl/wiki/Built-in_Variable_(GLSL)#Fragment_shader_inputs
+	// "The location of the fragment in window space. The X, Y and Z components are
+	//  the window-space position of the fragment."
+
+	// The 'catch' is the gl_FragCoord.xy is pixel locations, not 0.0 to 1.0
+	// We'll use the: uniform vec2 screenSize_width_height 
+	//	to calculate the UV sampler values
+	vec2 screenUV = vec2( gl_FragCoord.x / screenSize_width_height.x, 
+	                      gl_FragCoord.y / screenSize_width_height.y );
+
+	// Get the vertex colour from the 1st pass
+//	vec3 vertexDiffuseRGB = texture( vertexDiffuseRGB_texture, fUV.st ).rgb;
+	vec3 vertexDiffuseRGB = texture( vertexDiffuseRGB_texture, screenUV.st ).rgb;
 	
+	
+	
+	// Sent to colour buffer (for now)
+	vertexWorldLocationXYZ.rgb = vertexDiffuseRGB.rgb;
+	vertexWorldLocationXYZ.a = 1.0f;
 	
 	return;
 }

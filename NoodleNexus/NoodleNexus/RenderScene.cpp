@@ -77,7 +77,7 @@ void RenderScene(
     // Disable backface culling (so BOTH sides are drawn)
     glDisable(GL_CULL_FACE);
     // Don't perform depth buffer testing
-//    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_DEPTH_TEST);
     // Don't write to the depth buffer when drawing to colour (back) buffer
 //        glDepthMask(GL_FALSE);
 //        glDepthFunc(GL_ALWAYS);// or GL_LESS (default)

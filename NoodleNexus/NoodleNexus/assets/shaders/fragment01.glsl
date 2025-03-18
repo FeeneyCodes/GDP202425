@@ -153,6 +153,7 @@ void Pass_1_DeferredGBuffer(void)
 
 	//GL_COLOR_ATTACHMENT2
 	vertexDiffuseRGB.rgb = vec3(0.0f, 0.0f, 0.0f);	// black
+	vertexDiffuseRGB.a = 1.0f;
 	
 	if ( bUseStencilTexture )
 	{
@@ -167,10 +168,10 @@ void Pass_1_DeferredGBuffer(void)
 	// For the skybox object
 	if ( bIsSkyBoxObject )
 	{
-		//vertexDiffuseRGB.rgb = texture( skyBoxTextureSampler, fvertexNormal.xyz ).rgb;
-		vertexDiffuseRGB.rgb = texture( texture00, fUV.st ).rgb;
+		vertexDiffuseRGB.rgb = texture( skyBoxTextureSampler, fvertexNormal.xyz ).rgb;
+//		vertexDiffuseRGB.a = 1.0f;
 		// Indicate that this it NOT to be lit (do lighting calculation in later pass)
-		//vertexNormalXYZ.w = 0.0f;	// 1 is lit, 0 is not lit
+		vertexNormalXYZ.w = 0.0f;	// 1 is lit, 0 is not lit
 	}
 	else
 	{
@@ -268,6 +269,7 @@ void Pass_3_DeferredLightingToFSQ(void)
 	{
 		// Object ISN'T being lit by the lights
 		vertexWorldLocationXYZ.rgb = G_Buff_vertDiffRGB.rgb;
+//		vertexWorldLocationXYZ.rgb = vec3(1.0f, 0.0f, 0.0f);
 		vertexWorldLocationXYZ.a = 1.0f;
 		return;
 	}

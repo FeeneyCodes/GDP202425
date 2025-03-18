@@ -19,7 +19,7 @@ const int REGULAR_FORWARD_RENDER = 0;
 // 1 = deferred G buffer pass
 const int DEFERRED_G_BUFFER_PASS = 1;
 // 2 = Some optional pass (2nd pass effect, maybe?)
-// to come...
+const int EFFECTS_PASS = 2;
 // 3 = deferred lighting pass and output to full screen quad
 const int DEFERRED_LIGHTING_TO_FSQUAD_PASS = 3;
 uniform int renderPassNumber;
@@ -104,6 +104,8 @@ uniform bool bUseStencilTexture;
 void Pass_0_RegularForward(void);
 void Pass_1_DeferredGBuffer(void);
 // Pass_2...
+void Pass_2_Effects_Pass(void);
+//
 void Pass_3_DeferredLightingToFSQ(void);		// FSQ (Full Screen Quad)
 
 
@@ -123,6 +125,12 @@ void main()
 		// 1 = deferred G buffer pass
 		Pass_1_DeferredGBuffer();
 		break;
+	// This could be a pass for blur, whatever...
+	//   
+	case EFFECTS_PASS:
+		Pass_2_Effects_Pass();
+		break;
+		
 	case DEFERRED_LIGHTING_TO_FSQUAD_PASS:
 		// 3 = deferred lighting pass and output to full screen quad
 		Pass_3_DeferredLightingToFSQ();
@@ -200,7 +208,7 @@ void Pass_1_DeferredGBuffer(void)
 		vertexDiffuseRGB.a = 1.0f;
 		
 		// Use lighting?
-		if ( bDoNotLight )
+		if ( bDoNotLight )  // Debug objects, for example
 		{
 			// Indicate that this it NOT to be lit (do lighting calculation in later pass)
 			vertexNormalXYZ.w = 0.0f;	// 1 is lit, 0 is not lit
@@ -659,4 +667,13 @@ vec4 calculateLightContrib( vec3 vertexMaterialColour, vec3 vertexNormal,
 	finalObjectColour.a = 1.0f;
 	
 	return finalObjectColour;
+}
+
+
+void Pass_2_Effects_Pass(void)
+{
+
+
+
+	return;
 }

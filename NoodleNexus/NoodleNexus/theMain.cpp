@@ -51,6 +51,9 @@
 
 #include "PhysXWraper/cPhysXWraper.h"
 
+//#include "cParticleEmitter.h"
+#include "cParticleEmitter_2.h"
+
 
 // Deferred rendering Geometry "G" buffer
 cFBO_deferred* g_pFBO_G_Buffer = NULL;
@@ -78,6 +81,8 @@ cTerrainPathChooser* g_pTerrainPathChooser = NULL;
 
 extern cViperFlagConnector* g_pViperFlagConnector;
 
+//cParticleEmitter* g_pParticles = NULL;
+cParticleEmitter_2* g_pParticles = NULL;
 
 //cLightManager* g_pLightManager = NULL;
 
@@ -537,6 +542,19 @@ int main(void)
     }
  
 
+//    ::g_pParticles = new cParticleEmitter();
+    ::g_pParticles = new cParticleEmitter_2();
+    ::g_pParticles->SetMaximumNumberOfParticles(15'000);
+
+    ::g_pParticles->SetSourceLocation(glm::vec3(25.0f, -20.0f, 0.0f));
+    ::g_pParticles->SetInitalVelocity(
+        glm::vec3(-1.0f, 3.0f, -1.0f),        // Min
+        glm::vec3( 1.0f, 10.0f, 1.0f));       // Max
+
+         
+
+
+
     while (!glfwWindowShouldClose(window))
     {
         float ratio;
@@ -601,8 +619,8 @@ int main(void)
         // Update PhysX...
         ::g_pPhysX->update();
 
-
-
+        //
+        ::g_pParticles->Update(deltaTime);
 
         // Update the commands, too
         ::g_pCommandDirector->Update(deltaTime);
@@ -772,7 +790,13 @@ int main(void)
             ::g_pFlyCamera->getEyeLocation().z, 1.0f);
 
         RenderScene(program, matProjection, matView, ratio, ::g_pFlyCamera->getEyeLocation());
-        // 
+ 
+
+
+
+
+
+
 // **************************************************
 
 
@@ -927,7 +951,8 @@ int main(void)
             << "   "
             << "linear: " << ::g_pLightManager->theLights[0].atten.y
             << "   "
-            << "quad: " << ::g_pLightManager->theLights[0].atten.z;
+            << "quad: " << ::g_pLightManager->theLights[0].atten.z
+            << " particles:" << ::g_pParticles->GetNumberOfLiveParticles();
 
         ssTitle << " BP tris: " << numberOfNarrowPhaseTrianglesInAABB_BroadPhaseThing;
 

@@ -63,6 +63,9 @@
     <Filter Include="Phsyics_Stuff\Verlet_SoftBody">
       <UniqueIdentifier>{a98460ca-a653-49c3-82f5-4dcf01527014}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Phsyics_Stuff\cParticleEmitter">
+      <UniqueIdentifier>{612589bd-ba2e-4122-b25b-b35e3e6a72a4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="theMain.cpp">
@@ -203,6 +206,12 @@
     <ClCompile Include="cFBO\cFBO_deferred.cpp">
       <Filter>FBO</Filter>
     </ClCompile>
+    <ClCompile Include="cParticleEmitter_2.cpp">
+      <Filter>Phsyics_Stuff\cParticleEmitter</Filter>
+    </ClCompile>
+    <ClCompile Include="cParticleEmitter.cpp">
+      <Filter>Phsyics_Stuff\cParticleEmitter</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PlyFileLoaders.h">
@@ -318,6 +327,12 @@
     </ClInclude>
     <ClInclude Include="cFBO\cFBO_deferred.h">
       <Filter>FBO</Filter>
+    </ClInclude>
+    <ClInclude Include="cParticleEmitter.h">
+      <Filter>Phsyics_Stuff\cParticleEmitter</Filter>
+    </ClInclude>
+    <ClInclude Include="cParticleEmitter_2.h">
+      <Filter>Phsyics_Stuff\cParticleEmitter</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

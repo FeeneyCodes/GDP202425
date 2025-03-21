@@ -1,0 +1,191 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{11D21AB7-BF25-428B-82E0-784DC7C2C4FD}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>OpenGLForTheWin</RootNamespace>
+    <ProjectName>GLBasic_Step_023</ProjectName>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <LibraryPath>dev\lib\Debug_x86;$(LibraryPath)</LibraryPath>
+    <IncludePath>dev\include\;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>dev\include\;$(IncludePath)</IncludePath>
+    <LibraryPath>dev\lib\Release_x86;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>glew32s.lib;freeglut_static.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>glew32s.lib;freeglut_static.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="CError\CErrorLog.cpp" />
+    <ClCompile Include="CError\COpenGLError.cpp" />
+    <ClCompile Include="CGameObject.cpp" />
+    <ClCompile Include="CGameObjectBuilder.cpp" />
+    <ClCompile Include="CGameObjectBuilder_CreateALight.cpp" />
+    <ClCompile Include="CGameObjectBuilder_CreateBasicBunny.cpp" />
+    <ClCompile Include="CGameObjectBuilder_CreateBunnyWithTieFighter.cpp" />
+    <ClCompile Include="CGameObjectBuilder_CreateTieFighter.cpp" />
+    <ClCompile Include="CGameObjectBuilder_SwarmOfCylons.cpp" />
+    <ClCompile Include="CGameObjectManager.cpp" />
+    <ClCompile Include="CGameObjectManager_SendMessageToMediator.cpp" />
+    <ClCompile Include="CGLColourHelper.cpp" />
+    <ClCompile Include="CGLPrint.cpp" />
+    <ClCompile Include="CHRTimer.cpp" />
+    <ClCompile Include="CLight.cpp" />
+    <ClCompile Include="CLightDescription.cpp" />
+    <ClCompile Include="CModelTypeManager.cpp" />
+    <ClCompile Include="CNameValuePair.cpp" />
+    <ClCompile Include="CPhysicsWorld.cpp" />
+    <ClCompile Include="CreateAllTheObjectsYo.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="CreateAllTheObjectsYo_2.cpp" />
+    <ClCompile Include="CRoom.cpp" />
+    <ClCompile Include="CShaderManager\CGLShaderManager.cpp" />
+    <ClCompile Include="CShaderManager\CGLShaderManager_SHADER_VARIABLES.cpp" />
+    <ClCompile Include="CShaderManager\ShaderTypes.cpp" />
+    <ClCompile Include="CStringHelper.cpp" />
+    <ClCompile Include="CStringUtils.cpp" />
+    <ClCompile Include="CTriangle.cpp" />
+    <ClCompile Include="CVertex.cpp" />
+    <ClCompile Include="GenerateMaze.cpp" />
+    <ClCompile Include="GLTexture\C24BitBMPpixel.cpp" />
+    <ClCompile Include="GLTexture\CTextureFromBMP.cpp" />
+    <ClCompile Include="GLTexture\CTextureManager.cpp" />
+    <ClCompile Include="glutKeyboard_callback.cpp" />
+    <ClCompile Include="glutMenuHandler_callback.cpp" />
+    <ClCompile Include="glutMouseCallbacks.cpp" />
+    <ClCompile Include="IdleFunction.cpp" />
+    <ClCompile Include="Initialize.cpp" />
+    <ClCompile Include="InitWindow.cpp" />
+    <ClCompile Include="Mouse\CMouseState.cpp" />
+    <ClCompile Include="Ply\CPlyFile5nt.cpp" />
+    <ClCompile Include="Ply\CPlyFile5nt_experimental.cpp" />
+    <ClCompile Include="Ply\CVector3f.cpp" />
+    <ClCompile Include="Render.cpp" />
+    <ClCompile Include="TheMain.cpp" />
+    <ClCompile Include="global.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="CError\CErrorLog.h" />
+    <ClInclude Include="CError\CErrorLog.hpp" />
+    <ClInclude Include="CError\COpenGLError.h" />
+    <ClInclude Include="CGameObject.h" />
+    <ClInclude Include="CGameObjectBuilder.h" />
+    <ClInclude Include="CGameObjectManager.h" />
+    <ClInclude Include="CGLColourHelper.h" />
+    <ClInclude Include="CGLPrintf.h" />
+    <ClInclude Include="CHRTimer.h" />
+    <ClInclude Include="CLightDescription.h" />
+    <ClInclude Include="CModelTypeManager.h" />
+    <ClInclude Include="CNameValuePair.h" />
+    <ClInclude Include="CPhysicsWorld.h" />
+    <ClInclude Include="CPhysProps.h" />
+    <ClInclude Include="CRoom.h" />
+    <ClInclude Include="CShaderManager\CGLShaderManager.h" />
+    <ClInclude Include="CShaderManager\IGLShaderManager.h" />
+    <ClInclude Include="CShaderManager\ShaderTypes.h" />
+    <ClInclude Include="CStringHelper.h" />
+    <ClInclude Include="CStringUtils.h" />
+    <ClInclude Include="CTieFighter.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="CTriangle.h" />
+    <ClInclude Include="CVertex.h" />
+    <ClInclude Include="GLTexture\C24BitBMPpixel.h" />
+    <ClInclude Include="GLTexture\CTextureFromBMP.h" />
+    <ClInclude Include="CLight.h" />
+    <ClInclude Include="GLTexture\CTextureManager.h" />
+    <ClInclude Include="IGameObjectBuilder.h" />
+    <ClInclude Include="IMediator.h" />
+    <ClInclude Include="IPhysObject.h" />
+    <ClInclude Include="Mouse\CMouseState.h" />
+    <ClInclude Include="Ply\CPlyFile5nt.h" />
+    <ClInclude Include="Ply\CPlyInfo.h" />
+    <ClInclude Include="Ply\CVector3f.h" />
+    <ClInclude Include="global.h" />
+    <ClInclude Include="ShaderVertexTypes.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="assets\shaders\ADSLightModel.glsl" />
+    <None Include="assets\shaders\MultiLightsTextures.fragment.glsl" />
+    <None Include="assets\shaders\MultiLightsTextures.tessControl.glsl" />
+    <None Include="assets\shaders\MultiLightsTextures.tessEval.glsl" />
+    <None Include="assets\shaders\MultiLightsTextures.vertex.glsl" />
+    <None Include="assets\shaders\PointLight.fragment.glsl" />
+    <None Include="assets\shaders\SimpleShader.fragment.glsl" />
+    <None Include="assets\shaders\SimpleShader.vertex.glsl" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

@@ -15,11 +15,16 @@
 
 #include "cFBO/cFBO_deferred.h"
 
+//#include "cParticleEmitter.h"
+#include "cParticleEmitter_2.h"
+
 #include "cPhysics.h"
 #include <PhysXWraper/cPhysXWraper.h>
 
 extern cPhysXWraper* g_pPhysX; //= NULL;
 
+//extern cParticleEmitter* g_pParticles;
+extern cParticleEmitter_2* g_pParticles;
 
 extern cBasicTextureManager* g_pTextures;
 extern cVAOManager* g_pMeshManager;
@@ -184,7 +189,24 @@ void RenderScene(
     }//for (cPhysicsObjectTypes&
 // ******************************************************************
 
+    // Draw the particles
+    DrawDebugSphere(
+        ::g_pParticles->GetLocation(),
+        glm::vec4(0.0f, 1.0f, 1.0f, 1.0f),
+        0.2f,
+        program);
 
+    std::vector<cParticle*> vecLiveParticles;
+    ::g_pParticles->GetLiveParticles(vecLiveParticles);
+
+    for (cParticle* pCurParticle : vecLiveParticles)
+    {
+        DrawDebugSphere(
+            pCurParticle->position,
+            glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
+            0.1f,
+            program);
+    }
      
 
     // Draw everything again, but this time far away things

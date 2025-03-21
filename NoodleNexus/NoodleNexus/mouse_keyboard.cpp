@@ -18,9 +18,15 @@
 
 #include "cViperFlagConnector.h"
 
+//#include "cParticleEmitter.h"
+#include "cParticleEmitter_2.h"
+
 #include <PhysXWraper/cPhysXWraper.h>
 extern cPhysXWraper* g_pPhysX;// = NULL;
 
+
+//extern cParticleEmitter* g_pParticles;
+extern cParticleEmitter_2* g_pParticles;
 
 // The commands
 //#include "cMoveRelativeTime.h"
@@ -511,6 +517,38 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
     if (areAllModifiersUp(window))
     {
+        if (key == GLFW_KEY_P && action == GLFW_PRESS)
+        {
+            if (::g_pParticles)
+            {
+//                ::g_pParticles->CreateParticles(100);
+                ::g_pParticles->SetInitalVelocity(
+                    glm::vec3(-5.0f, -5.0f, -5.0f),        // Min
+                    glm::vec3( 5.0f,  5.0f,  5.0f));       // Max
+
+                double start = glfwGetTime();
+
+                ::g_pParticles->CreateParticlesImmediately(10'000);
+
+                double delta = glfwGetTime() - start;
+                std::cout << "Elapsed time: " << delta << " seconds" << std::endl;
+                std::cout << "Elapsed time: " << delta*1000.0 << " ms" << std::endl;
+
+            }
+        }
+
+        if (key == GLFW_KEY_L && action == GLFW_PRESS)
+        {
+            if (::g_pParticles)
+            {
+                ::g_pParticles->SetInitalVelocity(
+                    glm::vec3(-1.0f, 3.0f, -1.0f),        // Min
+                    glm::vec3(1.0f, 10.0f, 1.0f));       // Max
+                ::g_pParticles->SetNumberOfParticlesPerFrame(10);
+                ::g_pParticles->TurnOn();
+            }
+        }
+
         {// START OF: change destination path
             bool bDidDestinationChange = false;
             glm::vec3 oldDest = ::g_pTerrainPathChooser->destinationXYZ;

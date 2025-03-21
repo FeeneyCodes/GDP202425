@@ -34,6 +34,7 @@ struct sVertex_SHADER_FORMAT_xyz_rgb_N_UV
 	float u, v;			// in vec2 vUV;
 };
 
+
 struct sModelDrawInfo
 {
 	sModelDrawInfo(); 

@@ -1,8 +1,8 @@
 // Geometry draw normals to the surface
 #version 420
-layout(triangles) 			in;
-layout(line_strip)			out;	// NOTE we are generating LINES, not triangles
-layout(max_vertices = 2)	out;
+layout(points) 				in;		// Particles
+layout(triangle_strip)	    out;	// Render quads facing the camera
+layout(max_vertices = 4)	out;
 
 // From the vertex shader
 // Note the [] because you are accepting more than one vertex

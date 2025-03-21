@@ -279,6 +279,7 @@ int main(void)
     cShaderManager::cShader geometryShader;
 //    geometryShader.fileName = "assets/shaders/geom_pass_through.glsl";
     geometryShader.fileName = "assets/shaders/geom_split_triangle.glsl";
+//    geometryShader.fileName = "assets/shaders/geom_DrawNormal_lines.glsl";
 
     cShaderManager::cShader fragmentShader;
     fragmentShader.fileName = "assets/shaders/fragment01.glsl";

@@ -177,7 +177,7 @@ void Pass_1_DeferredGBuffer(void)
 	if ( bIsSkyBoxObject )
 	{
 		vertexDiffuseRGB.rgb = texture( skyBoxTextureSampler, fvertexNormal.xyz ).rgb;
-//		vertexDiffuseRGB.a = 1.0f;
+		vertexDiffuseRGB.a = 1.0f;
 		// Indicate that this it NOT to be lit (do lighting calculation in later pass)
 		vertexNormalXYZ.w = 0.0f;	// 1 is lit, 0 is not lit
 	}
@@ -221,7 +221,7 @@ void Pass_1_DeferredGBuffer(void)
 	
 
 	}//if ( bIsSkyBoxObject )
-	
+		
 	return;
 }
 
@@ -233,6 +233,8 @@ void Pass_3_DeferredLightingToFSQ(void)
 	// (was called: out vec4 finalPixelColour; in the forward render
 	//
 	vertexWorldLocationXYZ.rgba = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+	
+
 	
 //	uniform sampler2D vertexWorldLocationXYZ_texture;
 //	uniform sampler2D vertexNormalXYZ_texture;

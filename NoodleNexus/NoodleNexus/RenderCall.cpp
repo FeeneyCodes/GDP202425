@@ -160,6 +160,8 @@ void DrawMesh(
         SetUpTextures(pCurMesh, program);
     }
 
+
+
     // Could be called the "model" or "world" matrix
  //   glm::mat4 matModel = glm::mat4(1.0f);
 
@@ -268,6 +270,10 @@ void DrawMesh(
 
     //        glDrawArrays(GL_TRIANGLES, 0, 3);
 //            glDrawArrays(GL_TRIANGLES, 0, numberOfVertices_TO_DRAW);
+
+
+
+
 
     sModelDrawInfo meshToDrawInfo;
     if (::g_pMeshManager->FindDrawInfoByModelName(pCurMesh->modelFileName, meshToDrawInfo))

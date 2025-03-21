@@ -9,9 +9,6 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
-    <Filter Include="Basic Shader Manager">
-      <UniqueIdentifier>{520673ef-3672-4d15-bb1b-adab8add79bc}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Shaders">
       <UniqueIdentifier>{b440479f-ec7e-48cc-9e27-1ee18139ccd5}</UniqueIdentifier>
     </Filter>
@@ -66,6 +63,9 @@
     <Filter Include="Phsyics_Stuff\cParticleEmitter">
       <UniqueIdentifier>{612589bd-ba2e-4122-b25b-b35e3e6a72a4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders\Basic Shader Manager">
+      <UniqueIdentifier>{520673ef-3672-4d15-bb1b-adab8add79bc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="theMain.cpp">
@@ -78,10 +78,10 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Basic_Shader_Manager\cShader.cpp">
-      <Filter>Basic Shader Manager</Filter>
+      <Filter>Shaders\Basic Shader Manager</Filter>
     </ClCompile>
     <ClCompile Include="Basic_Shader_Manager\cShaderManager.cpp">
-      <Filter>Basic Shader Manager</Filter>
+      <Filter>Shaders\Basic Shader Manager</Filter>
     </ClCompile>
     <ClCompile Include="cVAOManager\cVAOManager.cpp">
       <Filter>Meshes, etc.</Filter>
@@ -218,7 +218,7 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Basic_Shader_Manager\cShaderManager.h">
-      <Filter>Basic Shader Manager</Filter>
+      <Filter>Shaders\Basic Shader Manager</Filter>
     </ClInclude>
     <ClInclude Include="sMesh.h">
       <Filter>Meshes, etc.</Filter>
@@ -340,6 +340,9 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="assets\shaders\vertex01.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="assets\shaders\geom_pass_through.glsl">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

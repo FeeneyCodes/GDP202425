@@ -20,6 +20,9 @@ std::string cShaderManager::cShader::getShaderTypeString(void)
 	case cShader::VERTEX_SHADER:
 		return "VERTEX_SHADER";
 		break;
+	case cShader::GEOMETRY_SHADER:
+		return "GEOMETRY_SHADER";
+		break;
 	case cShader::FRAGMENT_SHADER:
 		return "FRAGMENT_SHADER";
 		break;

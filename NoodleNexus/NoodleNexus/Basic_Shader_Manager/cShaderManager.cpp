@@ -349,6 +349,111 @@ bool cShaderManager::createProgramFromFile(
 }
 
 
+bool cShaderManager::createProgramFromFile(std::string friendlyName,
+	cShader& vertexShader,
+	cShader& geometryShader,
+	cShader& fragShader)
+{
+	std::string errorText = "";
+
+
+
+	//   __   __          _                      
+	//   \ \ / /___  _ _ | |_  ___ __ __         
+	//    \ V // -_)| '_||  _|/ -_)\ \ / _  _  _ 
+	//     \_/ \___||_|   \__|\___|/_\_\(_)(_)(_)
+	//                                           
+	// Shader loading happening before vertex buffer array
+	vertexShader.ID = glCreateShader(GL_VERTEX_SHADER);
+	vertexShader.shaderType = cShader::VERTEX_SHADER;
+	//  char* vertex_shader_text = "wewherlkherlkh";
+	// Load some text from a file...
+	if (!this->m_loadSourceFromFile(vertexShader))
+	{
+		return false;
+	}//if ( ! this->m_loadSourceFromFile(...
+
+	errorText = "";
+	if (!this->m_compileShaderFromSource(vertexShader, errorText))
+	{
+		this->m_lastError = errorText;
+		return false;
+	}//if ( this->m_compileShaderFromSource(...
+
+
+//     ___                        _                       
+//    / __| ___  ___  _ __   ___ | |_  _ _  _  _          
+//   | (_ |/ -_)/ _ \| '  \ / -_)|  _|| '_|| || | _  _  _ 
+//    \___|\___|\___/|_|_|_|\___| \__||_|   \_, |(_)(_)(_)
+//                                          |__/          
+	geometryShader.ID = glCreateShader(GL_GEOMETRY_SHADER);
+	geometryShader.shaderType = cShader::GEOMETRY_SHADER;
+	//  char* vertex_shader_text = "wewherlkherlkh";
+	// Load some text from a file...
+	if (!this->m_loadSourceFromFile(geometryShader))
+	{
+		return false;
+	}//if ( ! this->m_loadSourceFromFile(...
+
+	errorText = "";
+	if (!this->m_compileShaderFromSource(geometryShader, errorText))
+	{
+		this->m_lastError = errorText;
+		return false;
+	}//if ( this->m_compileShaderFromSource(...
+
+
+//    ___                                   _            
+//   | __|_ _  __ _  __ _  _ __   ___  _ _ | |_          
+//   | _|| '_|/ _` |/ _` || '  \ / -_)| ' \|  _| _  _  _ 
+//   |_| |_|  \__,_|\__, ||_|_|_|\___||_||_|\__|(_)(_)(_)
+//                  |___/                                
+	fragShader.ID = glCreateShader(GL_FRAGMENT_SHADER);
+	fragShader.shaderType = cShader::FRAGMENT_SHADER;
+	if (!this->m_loadSourceFromFile(fragShader))
+	{
+		return false;
+	}//if ( ! this->m_loadSourceFromFile(...
+
+	if (!this->m_compileShaderFromSource(fragShader, errorText))
+	{
+		this->m_lastError = errorText;
+		return false;
+	}//if ( this->m_compileShaderFromSource(...
+
+
+	cShaderProgram curProgram;
+	curProgram.ID = glCreateProgram();
+
+	glAttachShader(curProgram.ID, vertexShader.ID);
+	glAttachShader(curProgram.ID, geometryShader.ID);	// NEW!
+	glAttachShader(curProgram.ID, fragShader.ID);
+	glLinkProgram(curProgram.ID);
+
+	// Was there a link error? 
+	errorText = "";
+	if (this->m_wasThereALinkError(curProgram.ID, errorText))
+	{
+		std::stringstream ssError;
+		ssError << "Shader program link error: ";
+		ssError << errorText;
+		this->m_lastError = ssError.str();
+		return false;
+	}
+
+	// At this point, shaders are compiled and linked into a program
+
+	curProgram.friendlyName = friendlyName;
+
+	// Add the shader to the map
+	this->m_ID_to_Shader[curProgram.ID] = curProgram;
+	// Save to other map, too
+	this->m_name_to_ID[curProgram.friendlyName] = curProgram.ID;
+
+	return true;
+}
+
+
 // Calls this: https://registry.khronos.org/OpenGL-Refpages/gl4/html/glGetActiveUniform.xhtml
 std::string cShaderManager::cShaderProgram::getActiveUniformSummary(void)
 {

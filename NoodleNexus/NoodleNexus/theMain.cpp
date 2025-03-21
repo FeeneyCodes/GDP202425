@@ -263,16 +263,30 @@ int main(void)
     glfwSwapInterval(1);
 
 
+// **********************************************************
+//    ____  _               _           
+//   / ___|| |__   __ _  __| | ___ _ __ 
+//   \___ \| '_ \ / _` |/ _` |/ _ \ '__|
+//    ___) | | | | (_| | (_| |  __/ |   
+//   |____/|_| |_|\__,_|\__,_|\___|_|   
+//                                      
+
     cShaderManager* pShaderManager = new cShaderManager();
 
     cShaderManager::cShader vertexShader;
     vertexShader.fileName = "assets/shaders/vertex01.glsl";
 
+    cShaderManager::cShader geometryShader;
+//    geometryShader.fileName = "assets/shaders/geom_pass_through.glsl";
+    geometryShader.fileName = "assets/shaders/geom_split_triangle.glsl";
+
     cShaderManager::cShader fragmentShader;
     fragmentShader.fileName = "assets/shaders/fragment01.glsl";
 
+    //if ( ! pShaderManager->createProgramFromFile("shader01",
+    //                                             vertexShader, fragmentShader))
     if ( ! pShaderManager->createProgramFromFile("shader01",
-                                                 vertexShader, fragmentShader))
+                                                 vertexShader, geometryShader, fragmentShader))
     {
         std::cout << "Error: " << pShaderManager->getLastError() << std::endl;
     }
@@ -288,6 +302,9 @@ int main(void)
     
     cShaderManager::cShaderProgram* pShaderProgram
         = pShaderManager->pGetShaderProgramFromFriendlyName("shader01");
+
+// **********************************************************
+
 
     std::string strUniformSummary = pShaderProgram->getActiveUniformSummary();
 

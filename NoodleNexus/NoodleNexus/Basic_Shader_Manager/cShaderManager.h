@@ -15,6 +15,7 @@ public:
 		enum eShaderType
 		{
 			VERTEX_SHADER,
+			GEOMETRY_SHADER,	// ADDED March 21st, 2025
 			FRAGMENT_SHADER,
 			UNKNOWN
 		};
@@ -54,9 +55,18 @@ public:
 
 	bool useShaderProgram( unsigned int ID );
 	bool useShaderProgram( std::string friendlyName );
+
+	// Vertex and Fragment shader
 	bool createProgramFromFile( std::string friendlyName, 
-		                        cShader &vertexShad, 
+		                        cShader &vertexShader, 
 					            cShader &fragShader );
+
+	// Vertex, Geometry, and Fragment shader
+	bool createProgramFromFile( std::string friendlyName, 
+		                        cShader &vertexShader, 
+		                        cShader &geometryShader, 
+					            cShader &fragShader );
+
 	void setBasePath( std::string basepath );
 	unsigned int getIDFromFriendlyName( std::string friendlyName );
 

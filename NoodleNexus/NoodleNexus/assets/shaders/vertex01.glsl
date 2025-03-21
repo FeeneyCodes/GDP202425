@@ -5,10 +5,11 @@ in vec3 vPos;
 in vec3 vNormal;	// Normal from the model ("model" space)
 in vec2 vUV;		// Texture coordinates
 
-out vec3 fColour;
-out vec4 fvertexWorldLocation;
-out vec4 fvertexNormal;		// Normal in "world" space
-out vec2 fUV;				// Texture coordinates (to the fragment shader)
+// Changed 'f' (Fragment) to 'g' for Geometry shader
+out vec3 gColour;
+out vec4 gVertexWorldLocation;
+out vec4 gVertexNormal;		// Normal in "world" space
+out vec2 gUV;				// Texture coordinates (to the fragment shader)
 
 //uniform mat4 MVP;
 uniform mat4 matView;
@@ -24,7 +25,7 @@ void main()
 	gl_Position = matMVP * vec4(finalVert, 1.0);
 	
 	// Calculate location of the vertex in the "world"
-	fvertexWorldLocation = matModel * vec4(finalVert, 1.0);
+	gVertexWorldLocation = matModel * vec4(finalVert, 1.0);
 	
 	// Calculatte the vertex normal
 	// Don't wank scaling or translation
@@ -33,10 +34,10 @@ void main()
 	// Just in case
 	
 	vec3 vNormNormalize = normalize(vNormal.xyz);
-	fvertexNormal = matInvTransModel * vec4(vNormNormalize, 1.0);
+	gVertexNormal = matInvTransModel * vec4(vNormNormalize, 1.0);
 	// Just in case
-	fvertexNormal.xyz = normalize(fvertexNormal.xyz);
+	gVertexNormal.xyz = normalize(gVertexNormal.xyz);
 	
-	fColour = vCol;
-	fUV = vUV;			// Sent UVs to fragment shader
+	gColour = vCol;
+	gUV = vUV;			// Sent UVs to fragment shader
 }

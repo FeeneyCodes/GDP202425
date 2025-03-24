@@ -392,7 +392,7 @@ int main(void)
     ::g_pLightManager->loadUniformLocations(program);
 
     // Set up one of the lights in the scene
-    ::g_pLightManager->theLights[0].position = glm::vec4(2'000.0f, 100'000.0f, 10'000.0f, 1.0f);
+    ::g_pLightManager->theLights[0].position = glm::vec4(25'000.0f, 50'000.0f, -100'000.0f, 1.0f);
     ::g_pLightManager->theLights[0].diffuse = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
     ::g_pLightManager->theLights[0].atten.y = 0.000006877f;
     ::g_pLightManager->theLights[0].atten.z = 0.0000000001184f;
@@ -439,6 +439,8 @@ int main(void)
     ::g_pTextures->Create2DTextureFromBMPFile("Chinese_Flag_Texture.bmp");
     //
     ::g_pTextures->Create2DTextureFromBMPFile("solid_black.bmp");
+    //
+    ::g_pTextures->Create2DTextureFromBMPFile("SpidermanUV_square.bmp");
 
     // Load the space skybox
     std::string errorString;
@@ -748,8 +750,8 @@ int main(void)
 
         matProjection = glm::perspective(0.6f,
             ratio,
-            10.0f,
-            100'000.0f);
+            1.0f,
+            50'000.0f);
 
 //        // Render the offscreen FBO texture onto where Dua Lipa was...
 //        sMesh* pFBOTextureMesh = ::g_pFindMeshByFriendlyName("WareHouseView");

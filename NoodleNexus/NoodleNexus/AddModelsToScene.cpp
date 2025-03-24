@@ -3,6 +3,7 @@
 #include <sstream>
 #include "cBasicTextureManager/cBasicTextureManager.h"
 #include "cViperFlagConnector.h"
+#include <glm/gtc/matrix_transform.hpp> 
 
 extern std::vector<sMesh*> g_vecMeshesToDraw;
 extern cPhysics* g_pPhysicEngine;
@@ -14,6 +15,194 @@ cViperFlagConnector* g_pViperFlagConnector = NULL;
 
 void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
 {
+    // Spiderman: This model has parts all relative to 
+    //  the origin in model space
+    std::vector< std::pair<std::string, bool> > vecSpiderManMeshes;
+    vecSpiderManMeshes.push_back(std::pair<std::string, bool>("legospiderman_body_xyz_n_uv.ply", false));
+    vecSpiderManMeshes.push_back(std::pair<std::string, bool>("legospiderman_head_xyz_n_uv.ply", false));
+    vecSpiderManMeshes.push_back(std::pair<std::string, bool>("legospiderman_Hips_xyz_n_uv.ply", false));
+    vecSpiderManMeshes.push_back(std::pair<std::string, bool>("legospiderman_Left_arm_xyz_n_uv.ply", false));
+    vecSpiderManMeshes.push_back(std::pair<std::string, bool>("legospiderman_Left_hand_xyz_n_uv.ply", false));
+    vecSpiderManMeshes.push_back(std::pair<std::string, bool>("legospiderman_Left_leg_xyz_n_uv.ply", false));
+    vecSpiderManMeshes.push_back(std::pair<std::string, bool>("legospiderman_Right_arm_xyz_n_uv.ply", false));
+    vecSpiderManMeshes.push_back(std::pair<std::string, bool>("legospiderman_Right_hand_xyz_n_uv.ply", false));
+    vecSpiderManMeshes.push_back(std::pair<std::string, bool>("legospiderman_Right_leg_xyz_n_uv.ply", false));
+
+
+    if ( ! ::g_pMeshManager->LoadModelsIntoVAO("assets/models/LEGO_Spiderman/", vecSpiderManMeshes, program) )
+    {
+        std::cout << "Some spiderman meshes didn't load:" << std::endl;
+        for (std::pair<std::string, bool> filePair : vecSpiderManMeshes)
+        {
+            if (filePair.second == false)
+            {
+                std::cout << "\t" << filePair.first << std::endl;
+            }
+        }
+    }
+    else
+    {
+        std::cout << "Spiderman meshes loaded OK" << std::endl;
+    }
+
+
+    // Add a mesh with all the child meshes of spiderman
+
+
+    {// LEGO Spiderman mesh
+        sMesh* p_legospiderman_Hips = new sMesh();
+        p_legospiderman_Hips->modelFileName = "legospiderman_Hips_xyz_n_uv.ply";
+        p_legospiderman_Hips->uniqueFriendlyName = "legospiderman_Hips";
+        p_legospiderman_Hips->textures[0] = "SpidermanUV_square.bmp";
+        p_legospiderman_Hips->blendRatio[0] = 1.0f;
+//        p_legospiderman_Hips->uniformScale = 10.0f;
+        p_legospiderman_Hips->positionXYZ.x = 20.0f;
+        p_legospiderman_Hips->positionXYZ.y = -20.0f;
+        p_legospiderman_Hips->rotationEulerXYZ.x = -90.0f;
+//        p_legospiderman_Hips->rotationEulerXYZ.y = +90.0f;
+        p_legospiderman_Hips->rotationEulerXYZ.z = +90.0f;
+        ::g_vecMeshesToDraw.push_back(p_legospiderman_Hips);
+
+
+        sMesh* legospiderman_body = new sMesh();
+        legospiderman_body->modelFileName = "legospiderman_body_xyz_n_uv.ply";
+        legospiderman_body->uniqueFriendlyName = "legospiderman_body";
+        legospiderman_body->textures[0] = "SpidermanUV_square.bmp";
+        legospiderman_body->blendRatio[0] = 1.0f;
+//        legospiderman_body->uniformScale = 10.0f;
+//        legospiderman_body->positionXYZ.x = 30.0f;
+//        legospiderman_body->positionXYZ.y = -50.0f;
+//        legospiderman_body->rotationEulerXYZ.x = -90.0f;
+//        legospiderman_body->rotationEulerXYZ.z = +90.0f;
+        //::g_vecMeshesToDraw.push_back(legospiderman_body);
+        // 
+        // Connect the body to the hips as a "child" mesh
+        //
+        p_legospiderman_Hips->vec_pChildMeshes.push_back(legospiderman_body);
+
+
+        sMesh* legospiderman_head = new sMesh();
+        legospiderman_head->modelFileName = "legospiderman_head_xyz_n_uv.ply";
+        legospiderman_head->uniqueFriendlyName = "legospiderman_head";
+        legospiderman_head->textures[0] = "SpidermanUV_square.bmp";
+        legospiderman_head->blendRatio[0] = 1.0f;
+//        legospiderman_head->uniformScale = 10.0f;
+//        legospiderman_head->positionXYZ.x = 30.0f;
+//        legospiderman_head->positionXYZ.y = -50.0f;
+//        legospiderman_head->rotationEulerXYZ.x = -90.0f;
+//        legospiderman_head->rotationEulerXYZ.z = +90.0f;
+        //
+        p_legospiderman_Hips->vec_pChildMeshes.push_back(legospiderman_head);
+
+        sMesh* legospiderman_Left_arm = new sMesh();
+        legospiderman_Left_arm->modelFileName = "legospiderman_Left_arm_xyz_n_uv.ply";
+        legospiderman_Left_arm->uniqueFriendlyName = "legospiderman_Left_arm";
+        legospiderman_Left_arm->textures[0] = "SpidermanUV_square.bmp";
+        legospiderman_Left_arm->blendRatio[0] = 1.0f;
+        //
+        // (0, 0, -2.55)
+        //        
+//        legospiderman_Left_arm->positionXYZ = glm::vec3(0.0f, 0.0f, -2.55f);
+        legospiderman_Left_arm->matPreParentRelative
+            = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -0.5f, -2.55f));
+
+//        legospiderman_Left_arm->rotationEulerXYZ.y = -45.0f;
+
+        // Rotate the arm (at the shoulder)
+//        legospiderman_Left_arm->positionXYZ = glm::vec3(0.0f, 0.0f, 2.55f);
+        legospiderman_Left_arm->matPostParentRelative
+            = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.5f, 2.55f));
+
+
+        p_legospiderman_Hips->vec_pChildMeshes.push_back(legospiderman_Left_arm);
+
+
+
+        sMesh* legospiderman_Left_hand = new sMesh();
+        legospiderman_Left_hand->modelFileName = "legospiderman_Left_hand_xyz_n_uv.ply";
+        legospiderman_Left_hand->uniqueFriendlyName = "legospiderman_Left_hand";
+        legospiderman_Left_hand->textures[0] = "SpidermanUV_square.bmp";
+        legospiderman_Left_hand->blendRatio[0] = 1.0f;
+        //
+        // To move this to the origin, I do this:
+        //  Translate (-0.15, -0.9, -2.25)
+        //  Rotate -5 degrees around Z
+        //  Rotate -27 degrees around Y
+        //
+        legospiderman_Left_hand->matPreParentRelative = glm::mat4(1.0f);
+        //  Rotate -27 degrees around Y
+        legospiderman_Left_hand->matPreParentRelative 
+            = glm::rotate(legospiderman_Left_hand->matPreParentRelative, 
+                          glm::radians(-27.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        //  Rotate -5 degrees around Z
+        legospiderman_Left_hand->matPreParentRelative 
+            = glm::rotate(legospiderman_Left_hand->matPreParentRelative, 
+                          glm::radians(-5.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        //  Translate (-0.15, -0.9, -2.25)
+        legospiderman_Left_hand->matPreParentRelative
+            = glm::translate(legospiderman_Left_hand->matPreParentRelative, glm::vec3(-0.15f, -0.9f, -2.25f));
+
+  
+        // To move it back, we do the reverse
+        //  Rotate 27 degrees around Y
+        //  Rotate 5 degrees around Z
+        //  Translate (0.15, 0.9, 2.25)
+        //
+        // ...but it's mathematically in the reverse
+        legospiderman_Left_hand->matPostParentRelative = glm::mat4(1.0f);
+        //  Translate (0.15, 0.9, 2.25)
+        legospiderman_Left_hand->matPostParentRelative
+            = glm::translate(legospiderman_Left_hand->matPostParentRelative, glm::vec3(0.15f, 0.9f, 2.25f));
+        //  Rotate 5 degrees around Z
+        legospiderman_Left_hand->matPostParentRelative
+            = glm::rotate(legospiderman_Left_hand->matPostParentRelative,
+                          glm::radians(5.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        //  Rotate 27 degrees around Y
+        legospiderman_Left_hand->matPostParentRelative
+            = glm::rotate(legospiderman_Left_hand->matPostParentRelative,
+                          glm::radians(27.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+//        p_legospiderman_Hips->vec_pChildMeshes.push_back(legospiderman_Left_hand);
+        legospiderman_Left_arm->vec_pChildMeshes.push_back(legospiderman_Left_hand);
+
+
+        sMesh* legospiderman_Right_arm = new sMesh();
+        legospiderman_Right_arm->modelFileName = "legospiderman_Right_arm_xyz_n_uv.ply";
+        legospiderman_Right_arm->uniqueFriendlyName = "legospiderman_Right_arm";
+        legospiderman_Right_arm->textures[0] = "SpidermanUV_square.bmp";
+        legospiderman_Right_arm->blendRatio[0] = 1.0f;
+        p_legospiderman_Hips->vec_pChildMeshes.push_back(legospiderman_Right_arm);
+
+        sMesh* legospiderman_Right_hand = new sMesh();
+        legospiderman_Right_hand->modelFileName = "legospiderman_Right_hand_xyz_n_uv.ply";
+        legospiderman_Right_hand->uniqueFriendlyName = "legospiderman_Right_hand";
+        legospiderman_Right_hand->textures[0] = "SpidermanUV_square.bmp";
+        legospiderman_Right_hand->blendRatio[0] = 1.0f;
+        p_legospiderman_Hips->vec_pChildMeshes.push_back(legospiderman_Right_hand);
+
+        sMesh* legospiderman_Left_leg = new sMesh();
+        legospiderman_Left_leg->modelFileName = "legospiderman_Left_leg_xyz_n_uv.ply";
+        legospiderman_Left_leg->uniqueFriendlyName = "legospiderman_Left_leg";
+        legospiderman_Left_leg->textures[0] = "SpidermanUV_square.bmp";
+        legospiderman_Left_leg->blendRatio[0] = 1.0f;
+        p_legospiderman_Hips->vec_pChildMeshes.push_back(legospiderman_Left_leg);
+
+        sMesh* legospiderman_Right_leg = new sMesh();
+        legospiderman_Right_leg->modelFileName = "legospiderman_Right_leg_xyz_n_uv.ply";
+        legospiderman_Right_leg->uniqueFriendlyName = "legospiderman_Right_leg";
+        legospiderman_Right_leg->textures[0] = "SpidermanUV_square.bmp";
+        legospiderman_Right_leg->blendRatio[0] = 1.0f;
+        p_legospiderman_Hips->vec_pChildMeshes.push_back(legospiderman_Right_leg);
+
+    }
+
+
+
+
+
+
+
+
     // Deferred rendering "full screen quad" (FSQ) mesh
     {
         sModelDrawInfo FSQMesh;

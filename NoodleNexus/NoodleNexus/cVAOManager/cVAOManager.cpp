@@ -600,6 +600,59 @@ bool cVAOManager::m_CopyLoadedModelToVAO(
 	return true;
 }
 
+bool cVAOManager::LoadModelsIntoVAO(
+	std::string basepath, 
+	std::vector< std::pair<std::string, bool> >& vecFileNames,
+	unsigned int shaderProgramID)
+{
+	bool bAllGood = true;
+
+	for (std::vector< std::pair<std::string, bool> >::iterator itFN = vecFileNames.begin();
+		itFN != vecFileNames.end(); itFN++)
+	{
+		std::string fileName = itFN->first;
+		
+
+		sModelDrawInfo meshDrawInfo;
+
+		itFN->second = this->LoadModelIntoVAO(fileName, basepath, meshDrawInfo, shaderProgramID);
+
+		if ( ! itFN->second)
+		{
+			// Didn't load it
+			bAllGood = false;
+		}
+	}
+
+	return bAllGood;
+}
+
+bool cVAOManager::LoadModelIntoVAO(
+	std::string fileName,
+	std::string basepath,
+	sModelDrawInfo& drawInfo,
+	unsigned int shaderProgramID)
+{
+
+	drawInfo.meshName = basepath + fileName;
+
+	if (!this->m_readPlyFile_XYZ_Normal_UV(drawInfo))
+	{
+		return false;
+	}
+	// Calculate extents
+	drawInfo.calculateExtents();
+
+	drawInfo.bIsLoaded = true;
+
+	// Remove the base path from the map
+	drawInfo.meshName = fileName;
+
+	return this->m_CopyLoadedModelToVAO(drawInfo, shaderProgramID);
+
+}
+
+
 bool cVAOManager::LoadModelIntoVAO(
 		std::string fileName, 
 		sModelDrawInfo &drawInfo,

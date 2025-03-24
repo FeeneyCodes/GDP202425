@@ -97,3 +97,17 @@ glm::mat4 sMesh::calcMatModel(void)
 
 	return matModel;
 }
+
+
+sMesh* sMesh::pFindChildMeshByFriendlyName(std::string theNameToFind)
+{
+	for (unsigned int index = 0; index != vec_pChildMeshes.size(); index++)
+	{
+		if (vec_pChildMeshes[index]->uniqueFriendlyName == theNameToFind)
+		{
+			return vec_pChildMeshes[index];
+		}
+	}
+	// Didn't find it
+	return NULL;
+}

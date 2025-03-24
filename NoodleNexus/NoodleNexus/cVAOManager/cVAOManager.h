@@ -79,6 +79,17 @@ public:
 						  sModelDrawInfo &drawInfo, 
 						  unsigned int shaderProgramID);
 
+	bool LoadModelIntoVAO(std::string fileName, 
+	                      std::string basepath,
+						  sModelDrawInfo &drawInfo, 
+						  unsigned int shaderProgramID);
+
+	// Returns false if one of the models didn't load
+	// File name pait indicates if model is loaded or not
+	bool LoadModelsIntoVAO(std::string basepath, 
+		                   std::vector< std::pair<std::string, bool> > &vecFileNames,
+						   unsigned int shaderProgramID);
+
 	// This will load models on a separate thread
 	// (i.e. it will return right away)
 	bool LoadModelIntoVAO_Async(std::string fileName, 

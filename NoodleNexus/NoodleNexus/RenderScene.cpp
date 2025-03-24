@@ -217,6 +217,7 @@ void RenderScene(
         //            pCurMesh->bDoNotLight = true;
 
         glm::mat4 matModel = glm::mat4(1.0f);   // identity matrix
+
         DrawMesh(pCurMesh, matModel, program, true);
 
     }//for (unsigned int meshIndex..

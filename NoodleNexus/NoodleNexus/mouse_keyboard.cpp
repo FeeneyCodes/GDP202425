@@ -117,17 +117,14 @@ void handleMouseAsync(GLFWwindow* window)
 
 void handleKeyboardAsync(GLFWwindow* window)
 {
-//    const float CAMERA_MOVE_SPEED = 100.0f;
+    //    const float CAMERA_MOVE_SPEED = 100.0f;
     const float CAMERA_MOVE_SPEED = 1.0f;
-//    const float CAMERA_MOVE_SPEED = 0.1f;
+    //    const float CAMERA_MOVE_SPEED = 0.1f;
     const float CAMERA_TURN_SPEED = 0.1f;
 
-    if ( isShiftDown(window) )
-    {
-        // Keys move the target
-    }
 
-    if (isControlDown(window) )
+
+    if (isControlDown(window))
     {
         // Find the Light_Sphere
 //        sMesh* pLightSphere = pFindMeshByFriendlyName("Light_Sphere");
@@ -188,21 +185,21 @@ void handleKeyboardAsync(GLFWwindow* window)
         // Angles of spot light
         if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS)
         {
-            ::g_pLightManager->theLights[g_selectedLightIndex].param1.y -= 0.1f;     
-        }       
+            ::g_pLightManager->theLights[g_selectedLightIndex].param1.y -= 0.1f;
+        }
         if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS)
         {
-            ::g_pLightManager->theLights[g_selectedLightIndex].param1.y += 0.1f;     
-        }              
+            ::g_pLightManager->theLights[g_selectedLightIndex].param1.y += 0.1f;
+        }
 
         if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS)
         {
-            ::g_pLightManager->theLights[g_selectedLightIndex].param1.z -= 0.1f;     
-        }       
+            ::g_pLightManager->theLights[g_selectedLightIndex].param1.z -= 0.1f;
+        }
         if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS)
         {
-            ::g_pLightManager->theLights[g_selectedLightIndex].param1.z += 0.1f;     
-        }          
+            ::g_pLightManager->theLights[g_selectedLightIndex].param1.z += 0.1f;
+        }
         // HACK:Exit early
         return;
     }
@@ -216,27 +213,27 @@ void handleKeyboardAsync(GLFWwindow* window)
         {
             // Go forward
 //            ::g_cameraEye.z -= CAMERA_MOVE_SPEED;
-            ::g_pFlyCamera->moveForward( CAMERA_MOVE_SPEED );
+            ::g_pFlyCamera->moveForward(CAMERA_MOVE_SPEED);
         }
 
         if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
         {
             // Go back
 //            ::g_cameraEye.z += CAMERA_MOVE_SPEED;
-            ::g_pFlyCamera->moveForward( -CAMERA_MOVE_SPEED );
+            ::g_pFlyCamera->moveForward(-CAMERA_MOVE_SPEED);
         }
 
-        if ( glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS )
+        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
         {
             // Go left
 //           ::g_cameraEye.x -= CAMERA_MOVE_SPEED;
-            ::g_pFlyCamera->moveLeftRight( CAMERA_MOVE_SPEED );
+            ::g_pFlyCamera->moveLeftRight(CAMERA_MOVE_SPEED);
         }
         if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         {
             // Go right
 //            ::g_cameraEye.x += CAMERA_MOVE_SPEED;
-            ::g_pFlyCamera->moveLeftRight( -CAMERA_MOVE_SPEED );
+            ::g_pFlyCamera->moveLeftRight(-CAMERA_MOVE_SPEED);
         }
 
 
@@ -245,13 +242,13 @@ void handleKeyboardAsync(GLFWwindow* window)
         {
             // Go down
 //            ::g_cameraEye.y -= CAMERA_MOVE_SPEED;
-            ::g_pFlyCamera->moveUpDown( -CAMERA_MOVE_SPEED );
+            ::g_pFlyCamera->moveUpDown(-CAMERA_MOVE_SPEED);
         }
         if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
         {
             // Go up
 //            ::g_cameraEye.y += CAMERA_MOVE_SPEED;
-            ::g_pFlyCamera->moveUpDown( CAMERA_MOVE_SPEED );
+            ::g_pFlyCamera->moveUpDown(CAMERA_MOVE_SPEED);
         }
 
         // Use the arrow keys to turn and pitch the camera
@@ -259,25 +256,93 @@ void handleKeyboardAsync(GLFWwindow* window)
         // Left pitches negative (rotate around Y a negative value)
         if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
         {
-            ::g_pFlyCamera->rotateLeftRight_Yaw( CAMERA_TURN_SPEED );
+            ::g_pFlyCamera->rotateLeftRight_Yaw(CAMERA_TURN_SPEED);
         }
         if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
         {
-            ::g_pFlyCamera->rotateLeftRight_Yaw( -CAMERA_TURN_SPEED );
+            ::g_pFlyCamera->rotateLeftRight_Yaw(-CAMERA_TURN_SPEED);
         }
 
-         // Left pitches negative (rotate around Y a negative value)
+        // Left pitches negative (rotate around Y a negative value)
         if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
         {
-            ::g_pFlyCamera->pitchUpDown( -CAMERA_TURN_SPEED );
+            ::g_pFlyCamera->pitchUpDown(-CAMERA_TURN_SPEED);
         }
         if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
         {
-            ::g_pFlyCamera->pitchUpDown( CAMERA_TURN_SPEED );
+            ::g_pFlyCamera->pitchUpDown(CAMERA_TURN_SPEED);
         }
 
     }//if (areAllModifiersUp(window)
 
+
+    // move spiderman
+    if (isAltDown(window))
+    {
+        sMesh* pSM = g_pFindMeshByFriendlyName("legospiderman_Hips");
+
+        const float SPIDEY_MOVE_SPEED = 0.05f;
+
+        if (pSM)
+        {
+            sMesh* pLeftArm = pSM->pFindChildMeshByFriendlyName("legospiderman_Left_arm");
+            if (pLeftArm)
+            {
+                if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS)
+                {
+                    pLeftArm->rotationEulerXYZ.y -= SPIDEY_MOVE_SPEED;
+                }
+                if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
+                {
+                    pLeftArm->rotationEulerXYZ.y += SPIDEY_MOVE_SPEED;
+                }
+
+                sMesh* pLeftHand = pLeftArm->pFindChildMeshByFriendlyName("legospiderman_Left_hand");
+                if (pLeftHand)
+                {
+                    if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS)
+                    {
+                        pLeftHand->rotationEulerXYZ.x -= SPIDEY_MOVE_SPEED;
+                    }
+                    if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS)
+                    {
+                        pLeftHand->rotationEulerXYZ.x += SPIDEY_MOVE_SPEED;
+                    }
+                }//if (pLeftArm)           
+            }//if (pLeftArm)
+
+
+
+
+            if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+            {
+                pSM->positionXYZ.x -= SPIDEY_MOVE_SPEED;
+            }
+            if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+            {
+                pSM->positionXYZ.x += SPIDEY_MOVE_SPEED;
+            }
+            if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+            {
+                pSM->positionXYZ.z -= SPIDEY_MOVE_SPEED;
+            }
+            if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+            {
+                pSM->positionXYZ.z += SPIDEY_MOVE_SPEED;
+            }
+            if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+            {
+                pSM->positionXYZ.y -= SPIDEY_MOVE_SPEED;
+            }
+            if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+            {
+                pSM->positionXYZ.y += SPIDEY_MOVE_SPEED;
+            }
+
+        }//if (pSM)
+
+
+    }//if (isAltDown(window))
 
     // This will control the player's character
     if (areAllModifiersUp(window))

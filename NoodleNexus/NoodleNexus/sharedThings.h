@@ -53,6 +53,7 @@ void handleMouseAsync(GLFWwindow* window);
 void DrawDebugSphere(glm::vec3 position, glm::vec4 RGBA, float scale, GLuint program);
 
 extern bool g_bShowDebugSpheres;
+extern bool g_bShowLightBulbs;
 
 glm::vec3 g_rgb_from_HTML(unsigned int red, unsigned int green, unsigned int blue);
 
@@ -66,4 +67,4 @@ float g_getRandomFloat(float a, float b);
 glm::vec3 g_getRandom_vec3(glm::vec3 min, glm::vec3 max);
 std::string g_getStringVec3(glm::vec3 theVec3);
 // Returns NULL if NOT found
-sMesh* g_pFindMeshByFriendlyName(std::string theNameToFind);
+sMesh* g_pFindMeshByFriendlyName(std::string theNameToFind, bool bSearchChildrenToo = false);

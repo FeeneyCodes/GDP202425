@@ -133,7 +133,8 @@ bool cVAOManager::m_readPlyFile_XYZ(sModelDrawInfo& modelDrawInfo)
 //    sPlyVertex* pPlyVertices = new sPlyVertex[numberOfVertices];
 //	modelDrawInfo.pVertices = new sVertex_SHADER_FORMAT_xyz_rgb[modelDrawInfo.numberOfVertices];
 //	modelDrawInfo.pVertices = new sVertex_SHADER_FORMAT_xyz_rgb_N[modelDrawInfo.numberOfVertices];
-	modelDrawInfo.pVertices = new sVertex_SHADER_FORMAT_xyz_rgb_N_UV[modelDrawInfo.numberOfVertices];
+//	modelDrawInfo.pVertices = new sVertex_SHADER_FORMAT_xyz_rgb_N_UV[modelDrawInfo.numberOfVertices];
+	modelDrawInfo.pVertices = new sVertex_SHADER_FORMAT_xyz_rgb_N_UV_TanBi[modelDrawInfo.numberOfVertices];
 
 	// end_header
 	// -0.0369122 0.127512 0.00276757 0.850855 0.5
@@ -259,7 +260,8 @@ bool cVAOManager::m_readPlyFile_XYZ_Normal(sModelDrawInfo& modelDrawInfo)
 
 
 //	modelDrawInfo.pVertices = new sVertex_SHADER_FORMAT_xyz_rgb_N[modelDrawInfo.numberOfVertices];
-	modelDrawInfo.pVertices = new sVertex_SHADER_FORMAT_xyz_rgb_N_UV[modelDrawInfo.numberOfVertices];
+//	modelDrawInfo.pVertices = new sVertex_SHADER_FORMAT_xyz_rgb_N_UV[modelDrawInfo.numberOfVertices];
+	modelDrawInfo.pVertices = new sVertex_SHADER_FORMAT_xyz_rgb_N_UV_TanBi[modelDrawInfo.numberOfVertices];
 
 	// end_header
 	// -0.0369122 0.127512 0.00276757 0.850855 0.5
@@ -282,6 +284,13 @@ bool cVAOManager::m_readPlyFile_XYZ_Normal(sModelDrawInfo& modelDrawInfo)
 		modelDrawInfo.pVertices[index].u = 0.0f;
 		modelDrawInfo.pVertices[index].v = 0.0f;
 
+		modelDrawInfo.pVertices[index].tx = 0.0f;
+		modelDrawInfo.pVertices[index].ty = 0.0f;
+		modelDrawInfo.pVertices[index].tz = 0.0f;
+
+		modelDrawInfo.pVertices[index].bx = 0.0f;
+		modelDrawInfo.pVertices[index].by = 0.0f;
+		modelDrawInfo.pVertices[index].bz = 0.0f;
 
 
 		// Only has xyz, so stop here
@@ -396,7 +405,8 @@ bool cVAOManager::m_readPlyFile_XYZ_Normal_UV(sModelDrawInfo& modelDrawInfo)
 
 
 	//	modelDrawInfo.pVertices = new sVertex_SHADER_FORMAT_xyz_rgb_N[modelDrawInfo.numberOfVertices];
-	modelDrawInfo.pVertices = new sVertex_SHADER_FORMAT_xyz_rgb_N_UV[modelDrawInfo.numberOfVertices];
+	//  modelDrawInfo.pVertices = new sVertex_SHADER_FORMAT_xyz_rgb_N_UV[modelDrawInfo.numberOfVertices];
+	modelDrawInfo.pVertices = new sVertex_SHADER_FORMAT_xyz_rgb_N_UV_TanBi[modelDrawInfo.numberOfVertices];
 
 	// end_header
 	// -0.0369122 0.127512 0.00276757 0.850855 0.5
@@ -418,6 +428,14 @@ bool cVAOManager::m_readPlyFile_XYZ_Normal_UV(sModelDrawInfo& modelDrawInfo)
 		// Load the texture coordinates, too
 		plyFile >> modelDrawInfo.pVertices[index].u;
 		plyFile >> modelDrawInfo.pVertices[index].v;
+
+		modelDrawInfo.pVertices[index].tx = 0.0f;
+		modelDrawInfo.pVertices[index].ty = 0.0f;
+		modelDrawInfo.pVertices[index].tz = 0.0f;
+
+		modelDrawInfo.pVertices[index].bx = 0.0f;
+		modelDrawInfo.pVertices[index].by = 0.0f;
+		modelDrawInfo.pVertices[index].bz = 0.0f;
 
 
 		// Only has xyz, so stop here
@@ -501,8 +519,12 @@ bool cVAOManager::m_CopyLoadedModelToVAO(
 	//				  sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N) * drawInfo.numberOfVertices,	// ::g_NumberOfVertsToDraw,	// sizeof(vertices), 
 	//				  (GLvoid*) drawInfo.pVertices,							// pVertices,			//vertices, 
 	//				  GL_STATIC_DRAW );
+	//	glBufferData(GL_ARRAY_BUFFER,
+	//		sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV) * drawInfo.numberOfVertices,	// ::g_NumberOfVertsToDraw,	// sizeof(vertices), 
+	//		(GLvoid*)drawInfo.pVertices,							// pVertices,			//vertices, 
+	//		GL_STATIC_DRAW);
 	glBufferData(GL_ARRAY_BUFFER,
-		sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV) * drawInfo.numberOfVertices,	// ::g_NumberOfVertsToDraw,	// sizeof(vertices), 
+		sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV_TanBi) * drawInfo.numberOfVertices,	// ::g_NumberOfVertsToDraw,	// sizeof(vertices), 
 		(GLvoid*)drawInfo.pVertices,							// pVertices,			//vertices, 
 		GL_STATIC_DRAW);
 
@@ -527,6 +549,8 @@ bool cVAOManager::m_CopyLoadedModelToVAO(
 	GLint vcol_location = glGetAttribLocation(shaderProgramID, "vCol");			// in vec3 vCol;
 	GLint vnorm_location = glGetAttribLocation(shaderProgramID, "vNormal");		// in vec3 vNormal;
 	GLint vUV_location = glGetAttribLocation(shaderProgramID, "vUV");			// in vec2 vUV;
+	GLint vTangent_location = glGetAttribLocation(shaderProgramID, "vTangent");		// in vec3 vTangent;
+	GLint vBiTangent_location = glGetAttribLocation(shaderProgramID, "vBiTangent");	// in vec3 vBiTangent;
 
 
 	//struct sVertex_SHADER_FORMAT_xyz_rgb_XXXXXXXXX
@@ -544,37 +568,48 @@ bool cVAOManager::m_CopyLoadedModelToVAO(
 		GL_FLOAT, GL_FALSE,
 		//						   sizeof(sVertex_SHADER_FORMAT_xyz_rgb),	//  sizeof(float) * 6,		// Stride
 		//						   sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N),	//  sizeof(float) * 6,		// Stride
-		sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV),	//  sizeof(float) * 6,		// Stride
+		//						   sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV),	//  sizeof(float) * 6,		// Stride
+		sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV_TanBi),	//  sizeof(float) * 6,		// Stride
 		//						   ( void* )offsetof(sVertex_SHADER_FORMAT_xyz_rgb, x) );				// Offset
 		//						   ( void* )offsetof(sVertex_SHADER_FORMAT_xyz_rgb_N, x) );				// Offset
-		(void*)offsetof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV, x));				// Offset
+		//						   ( void* )offsetof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV, x));			// Offset
+		(void*)offsetof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV_TanBi, x));				// Offset
 
 	glEnableVertexAttribArray(vcol_location);	// vCol
 	glVertexAttribPointer(vcol_location,
 		3,		// vCol
 		GL_FLOAT, GL_FALSE,
-		//		                   sizeof(sVertex_SHADER_FORMAT_xyz_rgb),						// sizeof(float) * 6,
-		//		                   sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N),			//( void* )( sizeof(float) * 3 ));
-		sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV),			//( void* )( sizeof(float) * 3 ));
-		//		                   sizeof(sVertex_SHADER_FORMAT_xyz_rgb),						// sizeof(float) * 6,
-		//		                   (void*)offsetof(sVertex_SHADER_FORMAT_xyz_rgb_N, r));			//( void* )( sizeof(float) * 3 ));
-		(void*)offsetof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV, r));			//( void* )( sizeof(float) * 3 ));
+		sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV_TanBi),			//( void* )( sizeof(float) * 3 ));
+		(void*)offsetof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV_TanBi, r));			//( void* )( sizeof(float) * 3 ));
 
 	glEnableVertexAttribArray(vnorm_location);	// vNormal
 	glVertexAttribPointer(vnorm_location,
 		3,		// vNormal
 		GL_FLOAT, GL_FALSE,
-		//	                       sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N),			//( void* )( sizeof(float) * 3 ));
-		sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV),			//( void* )( sizeof(float) * 3 ));
-		//		                   (void*)offsetof(sVertex_SHADER_FORMAT_xyz_rgb_N, nx));			//( void* )( sizeof(float) * 3 ));
-		(void*)offsetof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV, nx));			//( void* )( sizeof(float) * 3 ));
+		sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV_TanBi),			//( void* )( sizeof(float) * 3 ));
+		(void*)offsetof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV_TanBi, nx));			//( void* )( sizeof(float) * 3 ));
 
 	glEnableVertexAttribArray(vUV_location);	// vUV
 	glVertexAttribPointer(vUV_location,
 		2,		// in vec2 vUV;
 		GL_FLOAT, GL_FALSE,
-		sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV),
-		(void*)offsetof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV, u));
+		sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV_TanBi),
+		(void*)offsetof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV_TanBi, u));
+
+	glEnableVertexAttribArray(vTangent_location);	// vTangent
+	glVertexAttribPointer(vTangent_location,
+		3,		// in vec3 vTangent;
+		GL_FLOAT, GL_FALSE,
+		sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV_TanBi),
+		(void*)offsetof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV_TanBi, tx));
+
+	glEnableVertexAttribArray(vBiTangent_location);	// vBiTangent
+	glVertexAttribPointer(vBiTangent_location,
+		3,		// in vec3 vBiTangent;
+		GL_FLOAT, GL_FALSE,
+		sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV_TanBi),
+		(void*)offsetof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV_TanBi, bx));
+
 
 
 	// Now that all the parts are set up, set the VAO to zero
@@ -587,6 +622,8 @@ bool cVAOManager::m_CopyLoadedModelToVAO(
 	glDisableVertexAttribArray(vcol_location);
 	glDisableVertexAttribArray(vnorm_location);
 	glDisableVertexAttribArray(vUV_location);
+	glDisableVertexAttribArray(vTangent_location);
+	glDisableVertexAttribArray(vBiTangent_location);
 
 	// Indicate that model is in VAO
 	drawInfo.bIsCopiedToVAO = true;
@@ -855,4 +892,21 @@ bool cVAOManager::getTriangleMeshInfo(
 
 
 	return true;
+}
+
+
+// Takes a 'raw' drawInfo item (say from the assimp loader)
+//	and stores it into a VAO for later drawing
+bool cVAOManager::AddModelToVAO(
+	sModelDrawInfo& drawInfo,		// Takes model name from draw info
+	unsigned int shaderProgramID)
+{
+	if (drawInfo.meshName == "")
+	{
+		return false;
+	}
+
+	drawInfo.bIsLoaded = true;
+
+	return this->m_CopyLoadedModelToVAO(drawInfo, shaderProgramID);
 }

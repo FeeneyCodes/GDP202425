@@ -1,0 +1,26 @@
+# Blender 4.1.1 MTL File: 'None'
+# www.blender.org
+
+newmtl Set1
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd D:/PLY_Resources/Dungeon Essential Kit/dungeon-essential-kit/source/Textures/Dungeon_Set1_AlbedoTransparency.png
+map_Ns D:/PLY_Resources/Dungeon Essential Kit/dungeon-essential-kit/source/Textures/Dungeon_Set1_Roughness.png
+map_refl D:/PLY_Resources/Dungeon Essential Kit/dungeon-essential-kit/source/Textures/Dungeon_Set1_Metallic.png
+map_Bump -bm 1.000000 D:/PLY_Resources/Dungeon Essential Kit/dungeon-essential-kit/source/Textures/Dungeon_Set1_Normal.png
+
+newmtl Set2.001
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd D:/PLY_Resources/Dungeon Essential Kit/dungeon-essential-kit/source/Textures/Dungeon_Set2_AlbedoTransparency.png
+map_Ns D:/PLY_Resources/Dungeon Essential Kit/dungeon-essential-kit/source/Textures/Dungeon_Set2_Roughness.png
+map_refl D:/PLY_Resources/Dungeon Essential Kit/dungeon-essential-kit/source/Textures/Dungeon_Set2_Metallic.png
+map_Bump -bm 1.000000 D:/PLY_Resources/Dungeon Essential Kit/dungeon-essential-kit/source/Textures/Dungeon_Set2_Normal.png

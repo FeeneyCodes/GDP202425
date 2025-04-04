@@ -51,8 +51,34 @@ bool sMesh::loadState(std::string newState)
 	return true;
 }
 
+void sMesh::setRotationEuler(glm::vec3 newRotation)
+{
+	// glm::quat qRotation;
+	// 
+	// In glm, one of the constructors takes Euler angles
+	this->qRotation = glm::quat(newRotation);
+	return;
+}
+
+void sMesh::adjustRotationEuler(glm::vec3 newDeltaRotation)
+{
+	glm::quat qAdjust = glm::quat(newDeltaRotation);
+	//
+	// Apply this to the current location
+	// (just like a matrix)
+	this->qRotation *= qAdjust;
+	return;
+}
+
+glm::vec3 sMesh::getEulerFromQuaternion(void)
+{
+	return glm::eulerAngles(this->qRotation);
+}
+
+
+
 // This was taken from the DrawMesh() call:
-glm::mat4 sMesh::calcMatModel(void)
+glm::mat4 sMesh::calcLocalMatModel(void)
 {
 	glm::mat4 matModel = glm::mat4(1.0f);
 

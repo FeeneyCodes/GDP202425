@@ -17,7 +17,8 @@ bool cVAOManager::CloneMeshToDynamicVAO(
 	// Update the cloned stuff
 	cloneMeshDrawInfo.meshName = newMeshName;
 
-	cloneMeshDrawInfo.pVertices = new sVertex_SHADER_FORMAT_xyz_rgb_N_UV[drawInfo.numberOfVertices];
+//	cloneMeshDrawInfo.pVertices = new sVertex_SHADER_FORMAT_xyz_rgb_N_UV[drawInfo.numberOfVertices];
+	cloneMeshDrawInfo.pVertices = new sVertex_SHADER_FORMAT_xyz_rgb_N_UV_TanBi[drawInfo.numberOfVertices];
 	for (unsigned int index = 0; index != drawInfo.numberOfVertices; index++)
 	{
 		cloneMeshDrawInfo.pVertices[index] = drawInfo.pVertices[index];
@@ -38,7 +39,8 @@ bool cVAOManager::CloneMeshToDynamicVAO(
 
 	glBindBuffer(GL_ARRAY_BUFFER, cloneMeshDrawInfo.VertexBufferID);
 	glBufferData(GL_ARRAY_BUFFER,
-		sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV) * cloneMeshDrawInfo.numberOfVertices,
+//		sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV) * cloneMeshDrawInfo.numberOfVertices,
+		sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV_TanBi) * cloneMeshDrawInfo.numberOfVertices,
 		(GLvoid*)cloneMeshDrawInfo.pVertices,
 // ************************************************
 		GL_DYNAMIC_DRAW);			// <-- KEY CHANGE (GL_STATIC_DRAW)
@@ -57,6 +59,8 @@ bool cVAOManager::CloneMeshToDynamicVAO(
 	GLint vcol_location = glGetAttribLocation(shaderProgramID, "vCol");			// in vec3 vCol;
 	GLint vnorm_location = glGetAttribLocation(shaderProgramID, "vNormal");		// in vec3 vNormal;
 	GLint vUV_location = glGetAttribLocation(shaderProgramID, "vUV");			// in vec2 vUV;
+	GLint vTangent_location = glGetAttribLocation(shaderProgramID, "vTangent");		// in vec3 vTangent;
+	GLint vBiTangent_location = glGetAttribLocation(shaderProgramID, "vBiTangent");	// in vec3 vBiTangent;
 
 
 	// Set the vertex attributes for this shader
@@ -64,29 +68,44 @@ bool cVAOManager::CloneMeshToDynamicVAO(
 	glVertexAttribPointer(vpos_location,	// vPos
 		3,		
 		GL_FLOAT, GL_FALSE,
-		sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV),	
-		(void*)offsetof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV, x));			
+//		sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV),	
+		sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV_TanBi),
+		(void*)offsetof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV_TanBi, x));
 
 	glEnableVertexAttribArray(vcol_location);	// vCol
 	glVertexAttribPointer(vcol_location,
 		3,		// vCol
 		GL_FLOAT, GL_FALSE,
-		sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV),			
-		(void*)offsetof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV, r));			
+		sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV_TanBi),
+		(void*)offsetof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV_TanBi, r));
 
 	glEnableVertexAttribArray(vnorm_location);	// vNormal
 	glVertexAttribPointer(vnorm_location,
 		3,		
 		GL_FLOAT, GL_FALSE,
-		sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV),			
-		(void*)offsetof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV, nx));			
+		sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV_TanBi),
+		(void*)offsetof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV_TanBi, nx));
 
 	glEnableVertexAttribArray(vUV_location);	// vUV
 	glVertexAttribPointer(vUV_location,
 		2,		// in vec2 vUV;
 		GL_FLOAT, GL_FALSE,
-		sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV),
-		(void*)offsetof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV, u));
+		sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV_TanBi),
+		(void*)offsetof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV_TanBi, u));
+
+	glEnableVertexAttribArray(vTangent_location);	// vTangent
+	glVertexAttribPointer(vTangent_location,
+		3,		// in vec3 vTangent;
+		GL_FLOAT, GL_FALSE,
+		sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV_TanBi),
+		(void*)offsetof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV_TanBi, tx));
+
+	glEnableVertexAttribArray(vBiTangent_location);	// vBiTangent
+	glVertexAttribPointer(vBiTangent_location,
+		3,		// in vec3 vBiTangent;
+		GL_FLOAT, GL_FALSE,
+		sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV_TanBi),
+		(void*)offsetof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV_TanBi, bx));
 
 
 	// Now that all the parts are set up, set the VAO to zero
@@ -99,6 +118,8 @@ bool cVAOManager::CloneMeshToDynamicVAO(
 	glDisableVertexAttribArray(vcol_location);
 	glDisableVertexAttribArray(vnorm_location);
 	glDisableVertexAttribArray(vUV_location);
+	glDisableVertexAttribArray(vTangent_location);
+	glDisableVertexAttribArray(vBiTangent_location);
 
 
 	// Store the draw information into the map
@@ -144,7 +165,8 @@ bool cVAOManager::UpdateDynamicMesh(
 	glBufferSubData(GL_ARRAY_BUFFER,		// GLenum target --> vertex buffer
 		0,									// GLintptr offset
 		// GLsizeiptr size: number of BYTES
-		sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV) * updatedDrawInfo.numberOfVertices,	
+//		sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV) * updatedDrawInfo.numberOfVertices,	
+		sizeof(sVertex_SHADER_FORMAT_xyz_rgb_N_UV_TanBi) * updatedDrawInfo.numberOfVertices,
 		(GLvoid*)updatedDrawInfo.pVertices);			// const void* data);
 
 	return true;

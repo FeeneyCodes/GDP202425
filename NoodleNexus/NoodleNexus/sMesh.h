@@ -7,6 +7,8 @@
 #include <glm/glm.hpp>
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/quaternion.hpp>
 #include <vector>
 #include <string>
 
@@ -16,8 +18,45 @@ struct sMesh
 	std::string modelFileName;			// "bunny.ply"
 	std::string uniqueFriendlyName;		// "Fred", "Ali", "Bunny_007"
 
+	// Stores the mesh we are drawing at a certain distance
+	struct sLODInfo
+	{
+		sLODInfo(std::string _modelName, float _maxDistance, unsigned int _numTris)
+		{
+			this->modelName = _modelName;
+			this->maxDistance = _maxDistance;
+			this->numTris = _numTris;
+		}
+		std::string modelName = "";
+		float maxDistance = FLT_MAX;
+		unsigned int numTris = 0;	// This is for debug triangle count info
+	};
+	// The idea is that if this vector has anything in it, then
+	//	we will use this vector to find the mesh to draw,
+	//	otherwise we'll just use the modelFileName.
+	//
+	// NOTE: These are listed from closest to farthest
+	// So that we can scan through the vector until we are "far enough"
+	std::vector<sLODInfo> vecLODInfos;
+
+
+//	glm::mat4 matModel;
 	glm::vec3 positionXYZ;
+//
 	glm::vec3 rotationEulerXYZ;		// 90 degrees around the x axis
+
+//	void setRotationEuler(glm::vec3 newRotation);
+//	void adjustRotationEuler(glm::vec3 newDeltaRotation);
+//	glm::mat4 matRotation;
+
+	void setRotationEuler(glm::vec3 newRotation);
+	void adjustRotationEuler(glm::vec3 newDeltaRotation);
+	glm::quat qRotation;
+	
+	glm::vec3 getEulerFromQuaternion(void);
+
+
+
 	float uniformScale = 1.0f;				// Same for each axis
 
 	// These two matrices are going to be used before 
@@ -29,7 +68,10 @@ struct sMesh
 	//	relative to the parent
 	glm::mat4 matPostParentRelative = glm::mat4(1.0f);
 
-	glm::mat4 calcMatModel(void);
+	// This is the model matrix of the last time this was rendered
+	glm::mat4 matModel_LastCalculated = glm::mat4(1.0f);
+
+	glm::mat4 calcLocalMatModel(void);
 
 	glm::vec4 objectColourRGBA;		// 0 - 1.0 
 	// If true, it uses the colour above
@@ -51,6 +93,9 @@ public:
 	static const unsigned int MAX_NUM_TEXTURES = 8;
 	std::string textures[MAX_NUM_TEXTURES];
 	float blendRatio[MAX_NUM_TEXTURES];
+
+	// If blank we are NOT using a normal map
+	std::string normalMap = "";
 
 	// 0.0 = invisible
 	// 1.0 = solid 

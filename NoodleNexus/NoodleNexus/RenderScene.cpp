@@ -284,8 +284,8 @@ void RenderScene(
     {
         cLightHelper TheLightHelper;
 
-        DrawDebugSphere(::g_pLightManager->theLights[::g_selectedLightIndex].position,
-            glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), 0.1f, program);
+//        DrawDebugSphere(::g_pLightManager->theLights[::g_selectedLightIndex].position,
+//            glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), 0.1f, program);
 
         const float DEBUG_LIGHT_BRIGHTNESS = 0.3f;
 
@@ -335,7 +335,24 @@ void RenderScene(
             distance_05_percent,
             program);
 
-    }
+    }//if (::g_bShowDebugSpheres)
+
+    if (::g_bShowLightBulbs)
+    {
+        sMesh* pLightBulb = ::g_pFindMeshByFriendlyName("LightBulb");
+        
+        pLightBulb->bIsVisible = true;
+        pLightBulb->positionXYZ = ::g_pLightManager->theLights[::g_selectedLightIndex].position;
+
+        if (pLightBulb)
+        {
+            DrawMesh(pLightBulb, glm::mat4(1.0f), program, false);
+        }
+
+        pLightBulb->bIsVisible = false;
+
+    }//if (::g_bShowLightBulbs)
+  
     // **********************************************************************************
 
 

@@ -345,5 +345,8 @@
     <None Include="assets\shaders\geom_pass_through.glsl">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="assets\shaders\geom_split_triangle.glsl">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

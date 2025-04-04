@@ -4,6 +4,9 @@ in vec3 fColour;			// Actual 3D model colour (from vertex buffer)
 in vec4 fvertexWorldLocation;
 in vec4 fvertexNormal;
 in vec2 fUV;				// Texture (UV) coordinates
+in vec3 fTangent;
+in vec3 fBiTangent;
+in mat3 f_matTBN;
 
 uniform vec4 objectColour;			// Override colour 
 uniform bool bUseObjectColour;
@@ -83,6 +86,11 @@ uniform sampler2D texture01;
 uniform sampler2D texture02;
 uniform sampler2D texture03;
 uniform vec4 texRatio_0_to_3;	// x index 0, y index 1, etc/
+
+// For normal mapping
+uniform sampler2D textNormalMap;
+uniform bool bUseNormalMap;
+
 //uniform float texRatio[4];
 uniform bool bUseTextureAsColour;	// If true, then sample the texture
 
@@ -150,11 +158,26 @@ void Pass_1_DeferredGBuffer(void)
 	vertexWorldLocationXYZ.xyz = fvertexWorldLocation.xyz;	
 	vertexWorldLocationXYZ.w = 1.0f;	// Not being used, so set to 1.0f
 	
-	// GL_COLOR_ATTACHMENT1
-	vertexNormalXYZ.xyz = fvertexNormal.xyz;
 	// Default is vertex is to be lit
 	vertexNormalXYZ.w = 1.0f;	// 1 is lit, 0 is not lit
 
+	// GL_COLOR_ATTACHMENT1
+	if ( ! bUseNormalMap )
+	{
+		// Ignore bump-normal map
+		// i.e. just pass through the normal as is
+		vertexNormalXYZ.xyz = fvertexNormal.xyz;
+	}
+	else
+	{
+		// ADJUST normal with normal map
+		// Sample normal in 0.0 to 1.0 range:
+		vec3 theNormal = texture( textNormalMap, fUV ).xyz;
+		// Scale to -1.0 to 1.0 range:
+		theNormal = (theNormal * 2.0f) - 1.0f;
+		// Tansform from tangent to world space
+		vertexNormalXYZ.xyz = normalize(f_matTBN * theNormal);
+	}
 	
 	// *********************************************
 	// Calcuate the colour (material) of this vertex

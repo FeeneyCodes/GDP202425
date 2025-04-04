@@ -84,6 +84,8 @@ extern cViperFlagConnector* g_pViperFlagConnector;
 //cParticleEmitter* g_pParticles = NULL;
 cParticleEmitter_2* g_pParticles = NULL;
 
+unsigned int g_numLODTrisDrawnThisFrame = 0;
+
 //cLightManager* g_pLightManager = NULL;
 
 void AddModelsToScene(cVAOManager* pMeshManager, GLuint shaderProgram);
@@ -200,14 +202,36 @@ std::string g_getStringVec3(glm::vec3 theVec3)
     return ssVec.str();
 }
 
+sMesh* g_pFindChildMeshByFriendlyName(sMesh* pParent, std::string theNameToFind)
+{
+    for (unsigned int index = 0; index != pParent->vec_pChildMeshes.size(); index++)
+    {
+        if (pParent->vec_pChildMeshes[index]->uniqueFriendlyName == theNameToFind)
+        {
+            return pParent->vec_pChildMeshes[index];
+        }
+        sMesh* pChildFound = g_pFindChildMeshByFriendlyName(pParent->vec_pChildMeshes[index], theNameToFind);
+        if (pChildFound)
+        {
+            return pChildFound;
+        }
+    }
+    return NULL;
+}
+
 // Returns NULL if NOT found
-sMesh* g_pFindMeshByFriendlyName(std::string theNameToFind)
+sMesh* g_pFindMeshByFriendlyName(std::string theNameToFind, bool bSearchChildrenToo)
 {
     for (unsigned int index = 0; index != ::g_vecMeshesToDraw.size(); index++)
     {
         if (::g_vecMeshesToDraw[index]->uniqueFriendlyName == theNameToFind)
         {
             return ::g_vecMeshesToDraw[index];
+        }
+        sMesh* pChildFound = g_pFindChildMeshByFriendlyName(::g_vecMeshesToDraw[index], theNameToFind);
+        if (pChildFound)
+        {
+            return pChildFound;
         }
     }
     // Didn't find it
@@ -277,8 +301,8 @@ int main(void)
     vertexShader.fileName = "assets/shaders/vertex01.glsl";
 
     cShaderManager::cShader geometryShader;
-//    geometryShader.fileName = "assets/shaders/geom_pass_through.glsl";
-    geometryShader.fileName = "assets/shaders/geom_split_triangle.glsl";
+    geometryShader.fileName = "assets/shaders/geom_pass_through.glsl";
+//    geometryShader.fileName = "assets/shaders/geom_split_triangle.glsl";
 //    geometryShader.fileName = "assets/shaders/geom_DrawNormal_lines.glsl";
 
     cShaderManager::cShader fragmentShader;
@@ -376,7 +400,8 @@ int main(void)
     // https://registry.khronos.org/OpenGL-Refpages/gl4/html/glEnable.xhtml
     glEnable(GL_DEPTH_TEST);
 
-    cLowPassFilter frameTimeFilter;
+    cLowPassFilter frameTimeFilter;         // clamped to 60 Hz or something
+    cLowPassFilter frameTimeFilterACTUAL;
 //    frameTimeFilter.setNumSamples(30000);
 
     double currentFrameTime = glfwGetTime();
@@ -392,14 +417,13 @@ int main(void)
     ::g_pLightManager->loadUniformLocations(program);
 
     // Set up one of the lights in the scene
-    ::g_pLightManager->theLights[0].position = glm::vec4(25'000.0f, 50'000.0f, -100'000.0f, 1.0f);
+    ::g_pLightManager->theLights[0].position = glm::vec4(39.0f, -9.3f, -26.5f, 1.0f);
     ::g_pLightManager->theLights[0].diffuse = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-    ::g_pLightManager->theLights[0].atten.y = 0.000006877f;
-    ::g_pLightManager->theLights[0].atten.z = 0.0000000001184f;
+    ::g_pLightManager->theLights[0].atten.y = 0.00273342f;
+    ::g_pLightManager->theLights[0].atten.z = 0.00202404f;
 
     ::g_pLightManager->theLights[0].param1.x = 0.0f;    // Point light (see shader)
     ::g_pLightManager->theLights[0].param2.x = 1.0f;    // Turn on (see shader)
-
 
     // Set up one of the lights in the scene
     ::g_pLightManager->theLights[1].position = glm::vec4(0.0f, 20.0f, 0.0f, 1.0f);
@@ -439,8 +463,16 @@ int main(void)
     ::g_pTextures->Create2DTextureFromBMPFile("Chinese_Flag_Texture.bmp");
     //
     ::g_pTextures->Create2DTextureFromBMPFile("solid_black.bmp");
+    ::g_pTextures->Create2DTextureFromBMPFile("solid_white.bmp");
     //
     ::g_pTextures->Create2DTextureFromBMPFile("SpidermanUV_square.bmp");
+
+    // Barrel (normal mapped)
+    ::g_pTextures->SetBasePath("assets/models/Wooden barrel (has normal map)/Barrel_textures/barrel");
+    ::g_pTextures->Create2DTextureFromBMPFile("barrel_BaseColor.bmp");
+    ::g_pTextures->Create2DTextureFromBMPFile("barrel_BaseColor - Inverted_Y.bmp");
+    ::g_pTextures->Create2DTextureFromBMPFile("barrel_Normal.bmp");
+    ::g_pTextures->Create2DTextureFromBMPFile("barrel_Normal - Inverted_Y.bmp");
 
     // Load the space skybox
     std::string errorString;
@@ -583,13 +615,17 @@ int main(void)
 
         ratio = width / (float)height;
 
-
+        // Clear the LOD debug info
+        ::g_numLODTrisDrawnThisFrame = 0;
 
         // Calculate elapsed time
         // We'll enhance this
         currentFrameTime = glfwGetTime();
         double tempDeltaTime = currentFrameTime - lastFrameTime;
         lastFrameTime = currentFrameTime;
+
+        // save the ACTUAL frame time (even if it sucks)
+        frameTimeFilterACTUAL.addSample(tempDeltaTime);
 
         // Set a limit on the maximum frame time
         const double MAX_FRAME_TIME = 1.0 / 60.0;   // 60Hz (16 ms)
@@ -976,6 +1012,26 @@ int main(void)
 
         ssTitle << " BP tris: " << numberOfNarrowPhaseTrianglesInAABB_BroadPhaseThing;
 
+        ssTitle << " LOD tris: " << ::g_numLODTrisDrawnThisFrame;
+
+//        // Where is spiderman's left hand?
+//        sMesh* pTipOfHand = ::g_pFindMeshByFriendlyName("Forward Kinematic tip of hand", true);
+//        if ( pTipOfHand )
+//        {
+//            glm::mat4 matModel = pTipOfHand->matModel_LastCalculated;
+//            //
+//            glm::vec4 positionXYZ = glm::vec4(pTipOfHand->positionXYZ, 1.0f);
+//            // Perform transform
+//
+//            glm::vec4 handLastXYZ = matModel * positionXYZ;
+//
+//
+//            ssTitle << " hand: "
+//                << handLastXYZ.x << ", "
+//                << handLastXYZ.y << ", "
+//                << handLastXYZ.z;
+//        }
+
         // Add the viper info, too
         cPhysics::sPhysInfo* pViperPhys = ::g_pPhysicEngine->pFindAssociateMeshByFriendlyName("New_Viper_Player");
         if (pViperPhys)
@@ -988,8 +1044,17 @@ int main(void)
         }//if (pViperPhys)
 
         // Show frame time
-        ssTitle << " deltaTime = " << deltaTime
-            << " FPS: " << 1.0 / deltaTime;
+        double ACTUAL_deltaTime = frameTimeFilterACTUAL.getAverage();
+        ssTitle << " deltaTime = " << ACTUAL_deltaTime;
+        if (ACTUAL_deltaTime < 1000)
+        {
+            ssTitle << " FPS: " << 1.0 / ACTUAL_deltaTime;
+        }
+        else
+        {
+            // Frame taking more than 1 second
+            ssTitle << " Frame time: " << ACTUAL_deltaTime << " seconds!";
+        }
 
  //       std::cout << " deltaTime = " << deltaTime << " FPS: " << 1.0 / deltaTime << std::endl;
 

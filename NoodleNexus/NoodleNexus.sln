@@ -4,8 +4,14 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.10.35122.118
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NoodleNexus", "NoodleNexus\NoodleNexus.vcxproj", "{B7807F07-F50E-48BC-9F82-EDDC2888CDB6}"
+	ProjectSection(ProjectDependencies) = postProject
+		{43F3DA70-5AB7-41C4-B40F-850859DDEE95} = {43F3DA70-5AB7-41C4-B40F-850859DDEE95}
+		{8FF83EFA-72E9-4E48-B232-E696682D0FAF} = {8FF83EFA-72E9-4E48-B232-E696682D0FAF}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cPhysXWraper", "cPhysXWraper\cPhysXWraper.vcxproj", "{43F3DA70-5AB7-41C4-B40F-850859DDEE95}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AssimpFileHelper", "AssimpFileHelper\AssimpFileHelper.vcxproj", "{8FF83EFA-72E9-4E48-B232-E696682D0FAF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -31,6 +37,14 @@ Global
 		{43F3DA70-5AB7-41C4-B40F-850859DDEE95}.Release|x64.Build.0 = Release|x64
 		{43F3DA70-5AB7-41C4-B40F-850859DDEE95}.Release|x86.ActiveCfg = Release|Win32
 		{43F3DA70-5AB7-41C4-B40F-850859DDEE95}.Release|x86.Build.0 = Release|Win32
+		{8FF83EFA-72E9-4E48-B232-E696682D0FAF}.Debug|x64.ActiveCfg = Debug|x64
+		{8FF83EFA-72E9-4E48-B232-E696682D0FAF}.Debug|x64.Build.0 = Debug|x64
+		{8FF83EFA-72E9-4E48-B232-E696682D0FAF}.Debug|x86.ActiveCfg = Debug|Win32
+		{8FF83EFA-72E9-4E48-B232-E696682D0FAF}.Debug|x86.Build.0 = Debug|Win32
+		{8FF83EFA-72E9-4E48-B232-E696682D0FAF}.Release|x64.ActiveCfg = Release|x64
+		{8FF83EFA-72E9-4E48-B232-E696682D0FAF}.Release|x64.Build.0 = Release|x64
+		{8FF83EFA-72E9-4E48-B232-E696682D0FAF}.Release|x86.ActiveCfg = Release|Win32
+		{8FF83EFA-72E9-4E48-B232-E696682D0FAF}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

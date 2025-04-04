@@ -26,12 +26,22 @@
 //	float nx, ny, nz;	// in vec3 vNormal;
 //};
 
-struct sVertex_SHADER_FORMAT_xyz_rgb_N_UV
+//struct sVertex_SHADER_FORMAT_xyz_rgb_N_UV
+//{
+//	float x, y, z;		// in vec3 vPos;
+//	float r, g, b;		// in vec3 vCol;
+//	float nx, ny, nz;	// in vec3 vNormal;
+//	float u, v;			// in vec2 vUV;
+//};
+
+struct sVertex_SHADER_FORMAT_xyz_rgb_N_UV_TanBi
 {
 	float x, y, z;		// in vec3 vPos;
 	float r, g, b;		// in vec3 vCol;
 	float nx, ny, nz;	// in vec3 vNormal;
 	float u, v;			// in vec2 vUV;
+	float tx, ty, tz;	// Tangent
+	float bx, by, bz;	// Bi-Tangent (or Bi-Normal)
 };
 
 
@@ -55,7 +65,8 @@ struct sModelDrawInfo
 	// The "local" (i.e. "CPU side" temporary array)
 //	sVertex_SHADER_FORMAT_xyz_rgb* pVertices;	//  = 0;
 //	sVertex_SHADER_FORMAT_xyz_rgb_N* pVertices;	//  = 0;
-	sVertex_SHADER_FORMAT_xyz_rgb_N_UV* pVertices;	//  = 0;
+//	sVertex_SHADER_FORMAT_xyz_rgb_N_UV* pVertices;	//  = 0;
+	sVertex_SHADER_FORMAT_xyz_rgb_N_UV_TanBi* pVertices;	//  = 0;
 	// The index buffer (CPU side)
 	unsigned int* pIndices;
 	// 
@@ -95,6 +106,12 @@ public:
 	bool LoadModelIntoVAO_Async(std::string fileName, 
 						  sModelDrawInfo &drawInfo, 
 						  unsigned int shaderProgramID);
+
+	// Takes a 'raw' drawInfo item (say from the assimp loader)
+	//	and stores it into a VAO for later drawing
+	// Note: Takes model name from the drawInfo 
+	bool AddModelToVAO(sModelDrawInfo& drawInfo,
+	                   unsigned int shaderProgramID);
 
 
 	// This is called every frame to deal with 

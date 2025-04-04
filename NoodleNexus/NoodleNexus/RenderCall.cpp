@@ -5,6 +5,9 @@
 #include <glm/vec4.hpp> // glm::vec4
 #include <glm/mat4x4.hpp> // glm::mat4
 #include <glm/gtc/matrix_transform.hpp> 
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/quaternion.hpp>
+
 #include "sMesh.h"
 #include "cVAOManager/cVAOManager.h"
 #include "cBasicTextureManager/cBasicTextureManager.h"
@@ -12,6 +15,7 @@
 extern cVAOManager* g_pMeshManager;
 extern cBasicTextureManager* g_pTextures;
 
+extern unsigned int g_numLODTrisDrawnThisFrame;
 
 //RenderCall
 
@@ -88,6 +92,24 @@ void SetUpTextures(sMesh* pCurMesh, GLuint program)
         pCurMesh->blendRatio[1],
         pCurMesh->blendRatio[2],
         pCurMesh->blendRatio[3]);
+
+
+    // Normal map, if needed
+    if (pCurMesh->normalMap != "")
+    {
+        GLuint normalMap_ID = ::g_pTextures->getTextureIDFromName(pCurMesh->normalMap);
+        if (normalMap_ID == 0)
+        {
+            normalMap_ID = MissingTexture_ID;
+
+        }
+        // Arbitrarily pick texture unit 15
+        const GLint NORMAL_MAP_TEXTURE_UNIT = 15;
+        glActiveTexture(GL_TEXTURE0 + NORMAL_MAP_TEXTURE_UNIT);
+        glBindTexture(GL_TEXTURE_2D, normalMap_ID);
+        GLint textNormalMap_UL = glGetUniformLocation(program, "textNormalMap");
+        glUniform1i(textNormalMap_UL, NORMAL_MAP_TEXTURE_UNIT);       // <-- Note we use the NUMBER, not the GL_TEXTURE3 here
+    }
     
     return;
 }
@@ -102,11 +124,111 @@ void DrawMesh(
     GLuint program, 
     bool SetTexturesFromMeshInfo = true)
 {
+
+    // Calculate transformation even if model is NOT visible
+
+    // Translation (movement, position, placement...)
+    glm::mat4 matTranslate
+        = glm::translate(glm::mat4(1.0f),
+            glm::vec3(pCurMesh->positionXYZ.x,
+                pCurMesh->positionXYZ.y,
+                pCurMesh->positionXYZ.z));
+
+    // Rotation...
+    // Caculate 3 Euler acix matrices...
+    glm::mat4 matRotateX =
+        glm::rotate(glm::mat4(1.0f),
+            glm::radians(pCurMesh->rotationEulerXYZ.x), // Angle in radians
+            glm::vec3(1.0f, 0.0, 0.0f));
+
+    //    //
+    //    glm::quat qRotation = glm::quat(glm::vec3(0.0f, 15.0f, 0.0f));
+    //    // Make matrix 15 degrees around y
+    //    glm::mat4 matRotation = glm::mat4(qRotation);
+    //    // Rotate it 15 degrees around Y FROM WHERE IS WAY
+    //    matRotation *= glm::mat4(qRotation);
+
+    glm::mat4 matRotateY =
+        glm::rotate(glm::mat4(1.0f),
+            glm::radians(pCurMesh->rotationEulerXYZ.y), // Angle in radians
+            glm::vec3(0.0f, 1.0, 0.0f));
+
+    glm::mat4 matRotateZ =
+        glm::rotate(glm::mat4(1.0f),
+            glm::radians(pCurMesh->rotationEulerXYZ.z), // Angle in radians
+            glm::vec3(0.0f, 0.0, 1.0f));
+
+
+    // Scale
+    glm::mat4 matScale = glm::scale(glm::mat4(1.0f),
+        glm::vec3(pCurMesh->uniformScale,
+            pCurMesh->uniformScale,
+            pCurMesh->uniformScale));
+
+
+    // Calculate the final model/world matrix
+
+    // In matrix math, the last thing multipled is the 1st thing mathematically
+    // Apply any POST transformation
+    matModel *= pCurMesh->matPostParentRelative;
+
+
+    matModel *= matTranslate;     // matModel = matModel * matTranslate;
+    matModel *= matRotateX;
+    matModel *= matRotateY;
+    matModel *= matRotateZ;
+    matModel *= matScale;
+
+
+    // In matrix math, the last thing multipled is the 1st thing mathematically
+    // Apply any PRE transformation
+    matModel *= pCurMesh->matPreParentRelative;
+
+
+    //           matRoationOnly = matModel * matRotateX * matRotateY * matRotateZ;
+
+
+               //mat4x4_mul(mvp, p, m);
+               //mvp = p * v * m;
+   //            glm::mat4 matMVP = matProjection * matView * matModel;
+
+               //const GLint mvp_location = glGetUniformLocation(program, "MVP");
+               //glUniformMatrix4fv(mvp_location, 
+               //    1,
+               //    GL_FALSE,
+               //    (const GLfloat*)&matMVP);
+
+    // Save the last matrix that was rendered on this object
+    pCurMesh->matModel_LastCalculated = matModel;
+
+
+
     // Is it visible? 
     if (!pCurMesh->bIsVisible)
     {
         // Continue in loops jumps to the end of this loop
         // (for, while, do)
+
+        // If there's a lot of invisible child objects
+        // then you may want to call the render on the child objects, too
+        // 
+        //// Check if there are child meshes
+        for (unsigned int childIndex = 0; childIndex != pCurMesh->vec_pChildMeshes.size(); childIndex++)
+        {
+            // sMesh* pCurMesh, 
+            // glm::mat4 matModel,         // "parent" or initial model matrix
+
+            sMesh* pChildMesh = pCurMesh->vec_pChildMeshes[childIndex];
+
+            // note that we DON'T reset the model matrix to the indenty
+            //  matrix (setting it back to the origin). Instead we 
+            //  pass THIS current matrix (wherever it is) as 
+            //  the STARTING point.
+            //
+            DrawMesh(pChildMesh, matModel, program);
+        }
+
+        // DON'T draw this mesh
         return;
     }
 
@@ -160,6 +282,17 @@ void DrawMesh(
         SetUpTextures(pCurMesh, program);
     }
 
+    // See if we are using a normal map
+    GLint bUseNormalMap_UL = glGetUniformLocation(program, "bUseNormalMap");
+
+    if (pCurMesh->normalMap == "")
+    {
+        glUniform1f(bUseNormalMap_UL, (GLfloat)GL_FALSE);
+    }
+    else
+    {
+        glUniform1f(bUseNormalMap_UL, (GLfloat)GL_TRUE);
+    }
 
 
     // Could be called the "model" or "world" matrix
@@ -168,69 +301,7 @@ void DrawMesh(
 
 
 
-    // Translation (movement, position, placement...)
-    glm::mat4 matTranslate
-        = glm::translate(glm::mat4(1.0f),
-            glm::vec3(pCurMesh->positionXYZ.x,
-                pCurMesh->positionXYZ.y,
-                pCurMesh->positionXYZ.z));
 
-    // Rotation...
-    // Caculate 3 Euler acix matrices...
-    glm::mat4 matRotateX =
-        glm::rotate(glm::mat4(1.0f),
-            glm::radians(pCurMesh->rotationEulerXYZ.x), // Angle in radians
-            glm::vec3(1.0f, 0.0, 0.0f));
-
-    glm::mat4 matRotateY =
-        glm::rotate(glm::mat4(1.0f),
-            glm::radians(pCurMesh->rotationEulerXYZ.y), // Angle in radians
-            glm::vec3(0.0f, 1.0, 0.0f));
-
-    glm::mat4 matRotateZ =
-        glm::rotate(glm::mat4(1.0f),
-            glm::radians(pCurMesh->rotationEulerXYZ.z), // Angle in radians
-            glm::vec3(0.0f, 0.0, 1.0f));
-
-
-    // Scale
-    glm::mat4 matScale = glm::scale(glm::mat4(1.0f),
-        glm::vec3(pCurMesh->uniformScale,
-            pCurMesh->uniformScale,
-            pCurMesh->uniformScale));
-
-
-    // Calculate the final model/world matrix
-
-    // In matrix math, the last thing multipled is the 1st thing mathematically
-    // Apply any POST transformation
-    matModel *= pCurMesh->matPostParentRelative;
-
-
-    matModel *= matTranslate;     // matModel = matModel * matTranslate;
-    matModel *= matRotateX;
-    matModel *= matRotateY;
-    matModel *= matRotateZ;
-    matModel *= matScale;
-
-
-    // In matrix math, the last thing multipled is the 1st thing mathematically
-    // Apply any PRE transformation
-    matModel *= pCurMesh->matPreParentRelative;
-
-
-    //           matRoationOnly = matModel * matRotateX * matRotateY * matRotateZ;
-
-
-               //mat4x4_mul(mvp, p, m);
-               //mvp = p * v * m;
-   //            glm::mat4 matMVP = matProjection * matView * matModel;
-
-               //const GLint mvp_location = glGetUniformLocation(program, "MVP");
-               //glUniformMatrix4fv(mvp_location, 
-               //    1,
-               //    GL_FALSE,
-               //    (const GLfloat*)&matMVP);
 
     const GLint mvp_location = glGetUniformLocation(program, "matModel");
     glUniformMatrix4fv(mvp_location, 1, GL_FALSE, (const GLfloat*)&matModel);
@@ -287,11 +358,36 @@ void DrawMesh(
 //            glDrawArrays(GL_TRIANGLES, 0, numberOfVertices_TO_DRAW);
 
 
+    // Update for the LOD rendering
+    //
+    std::string meshToDraw = pCurMesh->modelFileName;
 
+    // Does it have an LOD list? 
+    if (!pCurMesh->vecLODInfos.empty())
+    {
+        // Calculate distance from camera
+        float cameraDist = glm::distance(pCurMesh->positionXYZ, ::g_pFlyCamera->getEyeLocation());
+
+        // Scan through this from begining to end.
+        // This is important because the 1st item that is "close enough" will be chosen
+        //  so the vector should be loaded from closest to farthest away
+        for (sMesh::sLODInfo& LODinfo : pCurMesh->vecLODInfos)
+        {
+            // Close enough (within range?)?
+            if (cameraDist < LODinfo.maxDistance)
+            {
+                // Yes, so use this model
+                meshToDraw = LODinfo.modelName;
+                ::g_numLODTrisDrawnThisFrame += LODinfo.numTris;
+                break;  // Exit loop
+            }
+        }
+    }//if (!pCurMesh->vecLODInfos.empty())
 
 
     sModelDrawInfo meshToDrawInfo;
-    if (::g_pMeshManager->FindDrawInfoByModelName(pCurMesh->modelFileName, meshToDrawInfo))
+//    if (::g_pMeshManager->FindDrawInfoByModelName(pCurMesh->modelFileName, meshToDrawInfo))
+    if (::g_pMeshManager->FindDrawInfoByModelName(meshToDraw, meshToDrawInfo))
     {
         // Found the model
         glBindVertexArray(meshToDrawInfo.VAO_ID); 		// enable VAO(and everything else)

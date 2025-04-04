@@ -40,7 +40,8 @@ public:
 	void SatisfyConstraints(void);
 
 
-	typedef sVertex_SHADER_FORMAT_xyz_rgb_N_UV sVertex;
+//	typedef sVertex_SHADER_FORMAT_xyz_rgb_N_UV sVertex;
+	typedef sVertex_SHADER_FORMAT_xyz_rgb_N_UV_TanBi sVertex;
 
 	// This represents a vertex or point or whatever in the soft body
 	struct sParticle

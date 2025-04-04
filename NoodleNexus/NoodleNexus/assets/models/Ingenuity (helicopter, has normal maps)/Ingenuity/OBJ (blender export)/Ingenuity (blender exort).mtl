@@ -1,0 +1,105 @@
+# Blender 4.0.2 MTL File: 'Ingenuity.blend'
+# www.blender.org
+
+newmtl aluminum
+Ns 522.334717
+Ka 1.000000 1.000000 1.000000
+Kd 0.964686 0.964686 0.964686
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+
+newmtl binoculars
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd C:/z_FS/PLY_Resources/Ingenuity (helicopter)/Ingenuity/textures/cameras_diff.jpg
+map_Ns C:/z_FS/PLY_Resources/Ingenuity (helicopter)/Ingenuity/textures/cameras_rough.jpg
+map_refl C:/z_FS/PLY_Resources/Ingenuity (helicopter)/Ingenuity/textures/cameras_metal.jpg
+
+newmtl blades
+Ns 0.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 1
+map_Kd C:/z_FS/PLY_Resources/Ingenuity (helicopter)/Ingenuity/textures/blade.jpg
+
+newmtl carbon_fiber
+Ka 0.104545 0.104545 0.104545
+Ks 0.054545 0.054545 0.054545
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd C:/z_FS/PLY_Resources/Ingenuity (helicopter)/Ingenuity/textures/CarbonFiber_albedo2.jpg
+map_Ns C:/z_FS/PLY_Resources/Ingenuity (helicopter)/Ingenuity/textures/CarbonFiber_roughness2.jpg
+map_Bump -bm 0.750000 C:/z_FS/PLY_Resources/Ingenuity (helicopter)/Ingenuity/textures/CarbonFiber_normal.jpg
+
+newmtl chopper_sp
+Ns 360.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+
+newmtl foil_silver
+Ns 490.000000
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 0.999999 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+map_Bump -bm 2.000000 C:/z_FS/PLY_Resources/Ingenuity (helicopter)/Ingenuity/textures/foil_n.jpg
+
+newmtl gold
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 0.630757 0.051270
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+
+newmtl grey_brushed
+Ns 2.975201
+Ka 1.000000 1.000000 1.000000
+Kd 0.606921 0.606921 0.606921
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+
+newmtl gunmetal
+Ns 422.499969
+Ka 1.000000 1.000000 1.000000
+Kd 0.300544 0.283149 0.283149
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+
+newmtl gunmetal_dark
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Kd 0.082834 0.078355 0.078355
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3

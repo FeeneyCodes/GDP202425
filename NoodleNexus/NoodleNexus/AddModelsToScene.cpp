@@ -5,16 +5,156 @@
 #include "cViperFlagConnector.h"
 #include <glm/gtc/matrix_transform.hpp> 
 
+#include "cAssimpHelper/cAssimpHelper.h"
+
 extern std::vector<sMesh*> g_vecMeshesToDraw;
 extern cPhysics* g_pPhysicEngine;
 extern cVAOManager* g_pMeshManager;
 extern cBasicTextureManager* g_pTextures;
 cViperFlagConnector* g_pViperFlagConnector = NULL;
+AH::cFileLoader* g_pAssimp = NULL;
 
-
+bool Convert_AssimpHelperMesh_to_sModelDrawInfo(AH::cMesh* pAHMesh, sModelDrawInfo& DrawInfo);
 
 void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
 {
+    ::g_pAssimp = new AH::cFileLoader();
+
+    ::g_pAssimp->SetBasePath("assets/models/Wooden barrel (has normal map)");
+    AH::cFileLoader::sPostProcessFlags postProcessingNormalMaps;
+    postProcessingNormalMaps.bProcess_CalcTangentSpace = true;
+    postProcessingNormalMaps.bProcess_FlipUVs = true;
+    postProcessingNormalMaps.bProcess_Triangulate = true;
+
+    if (::g_pAssimp->Load3DModelFile("Barrel_OBJ.obj", postProcessingNormalMaps))
+    {
+        AH::cScene* pSceneWithBarrel = ::g_pAssimp->pGetScenePointer("Barrel_OBJ.obj");
+        if (pSceneWithBarrel)
+        {
+            // Find "barrel"
+            AH::cMesh* pBarrel = NULL;
+            for (AH::cMesh* pCurMesh : pSceneWithBarrel->vecMeshes)
+            {
+                if (pCurMesh->name == "barrel")
+                {
+                    pBarrel = pCurMesh;
+                    break;
+                }
+            }
+            if (pBarrel)
+            {
+                sModelDrawInfo barrelDrawInfo;
+                if (Convert_AssimpHelperMesh_to_sModelDrawInfo(pBarrel, barrelDrawInfo))
+                {
+                    // Change the name to the file name (it's "barrel" in the OBJ model
+                    barrelDrawInfo.meshName = "Barrel_OBJ.obj";
+
+                    barrelDrawInfo.calculateExtents();
+
+                    ::g_pMeshManager->AddModelToVAO(barrelDrawInfo, program);
+                }
+                else
+                {
+                    std::cout << "Error: Could not convert assimp model to VAO model" << std::endl;
+                }
+            }//if (pBarrel)
+        }//if (pSceneWithBarrel)
+
+        sMesh* pBarrel = new sMesh();
+        pBarrel->modelFileName = "Barrel_OBJ.obj";
+        pBarrel->uniqueFriendlyName = "Barrel";
+        pBarrel->textures[0] = "SpidermanUV_square.bmp";
+//        pBarrel->textures[0] = "barrel_BaseColor - Inverted_Y.bmp";
+        pBarrel->blendRatio[0] = 1.0f;
+        //
+ //       pBarrel->normalMap = "barrel_Normal - Inverted_Y.bmp";
+
+        pBarrel->uniformScale = 10.0f;
+        pBarrel->positionXYZ.x = 20.0f;
+        pBarrel->positionXYZ.y = -30.0f;
+        pBarrel->positionXYZ.z = -10.0f;
+//        pBarrel->bIsWireframe = true;
+        //pBarrel->bDoNotLight = true;
+        ::g_vecMeshesToDraw.push_back(pBarrel);
+
+    }// if (!::g_pAssimp->Load3DModelFile("Barrel_OBJ.obj"
+
+    sModelDrawInfo lightDrawInfo;
+    if (::g_pMeshManager->LoadModelIntoVAO("assets/models/Lightbulb/lightbulb (unit size, inverted normals).ply", lightDrawInfo, program))
+    {
+        std::cout << "Loaded " << lightDrawInfo.meshName << " OK" << std::endl;
+
+        sMesh* pLightBulb = new sMesh();
+        pLightBulb->modelFileName = "assets/models/Lightbulb/lightbulb (unit size, inverted normals).ply";
+        pLightBulb->uniqueFriendlyName = "LightBulb";
+        pLightBulb->textures[0] = "solid_white.bmp";
+        pLightBulb->blendRatio[0] = 1.0f;
+        pLightBulb->bIsWireframe = true;
+        pLightBulb->uniformScale = 3.0f;
+        //pLightBulb->bDoNotLight = true;
+        pLightBulb->bIsVisible = false;
+        ::g_vecMeshesToDraw.push_back(pLightBulb);
+    }
+
+
+
+    std::vector< std::pair<std::string, bool> > vecLODBunnies;
+    vecLODBunnies.push_back(std::pair<std::string, bool>("bun_zipper_LOD_res1_n_uv (69,451 tris).ply", false));
+    vecLODBunnies.push_back(std::pair<std::string, bool>("bun_zipper_LOD_res2_n_uv (16,301 tris).ply", false));
+    vecLODBunnies.push_back(std::pair<std::string, bool>("bun_zipper_LOD_res3_n_uv (3,851 tris).ply", false));
+    vecLODBunnies.push_back(std::pair<std::string, bool>("bun_zipper_LOD_res4_n_uv (948 tris).ply", false));
+
+    if (!::g_pMeshManager->LoadModelsIntoVAO("assets/models/", vecLODBunnies, program))
+    {
+        std::cout << "Some of the LOD bunnies didn't load" << std::endl;
+    }
+    else
+    {
+        std::cout << "LOD bunnies loaded OK" << std::endl;
+    }
+
+//    const float MAX_EXTENT = 250.0f @ 25.0 spacing --> around 1 FPS at highest res
+//    const float MAX_EXTENT = 300.0f;        // 8X more bunnies
+//    const float STEP = 25.0f;
+//    unsigned int bunnyCount = 0;
+//    for (float x = -MAX_EXTENT; x <= MAX_EXTENT; x += STEP)
+//    {
+//        for (float y = -MAX_EXTENT; y <= MAX_EXTENT; y += STEP)
+//        {
+//            for (float z = -MAX_EXTENT; z <= MAX_EXTENT; z += STEP)
+//            {
+//                sMesh* pLODBunny = new sMesh();
+////                pLODBunny->modelFileName = "bun_zipper_LOD_res1_n_uv (69,451 tris).ply";
+////                pLODBunny->modelFileName = "bun_zipper_LOD_res4_n_uv (948 tris).ply";
+//                pLODBunny->textures[0] = "SpidermanUV_square.bmp";
+//                pLODBunny->blendRatio[0] = 1.0f;
+//                pLODBunny->uniformScale = 75.0f;
+//                pLODBunny->positionXYZ.x = x;
+//                pLODBunny->positionXYZ.y = y;
+//                pLODBunny->positionXYZ.z = z;
+//
+//
+//                // Add LOD information
+//                pLODBunny->vecLODInfos.push_back(sMesh::sLODInfo("bun_zipper_LOD_res1_n_uv (69,451 tris).ply",
+//                     20, 69451));     // Up to 25 units from the camera
+//                pLODBunny->vecLODInfos.push_back(sMesh::sLODInfo("bun_zipper_LOD_res2_n_uv (16,301 tris).ply",
+//                    75.0f, 16301));     // Up to 75 units from the camera
+//                pLODBunny->vecLODInfos.push_back(sMesh::sLODInfo("bun_zipper_LOD_res3_n_uv (3,851 tris).ply",
+//                    150.0f, 3851));     // Up to 150 units from the camera
+//                pLODBunny->vecLODInfos.push_back(sMesh::sLODInfo("bun_zipper_LOD_res4_n_uv (948 tris).ply",
+//                    FLT_MAX, 948));     // Up to 'infinity' units from the camera
+//                                                                  
+//
+//                ::g_vecMeshesToDraw.push_back(pLODBunny);   
+//                bunnyCount++;
+//            }
+//        }
+//    }
+//    std::cout << "Created " << bunnyCount << " LOD bunnies." << std::endl;
+
+
+
+
     // Spiderman: This model has parts all relative to 
     //  the origin in model space
     std::vector< std::pair<std::string, bool> > vecSpiderManMeshes;
@@ -164,6 +304,34 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
 
 //        p_legospiderman_Hips->vec_pChildMeshes.push_back(legospiderman_Left_hand);
         legospiderman_Left_arm->vec_pChildMeshes.push_back(legospiderman_Left_hand);
+
+
+        // Add a mesh that's at the "tip" of Spiderman's hand
+        // Using meshlab, that's (1.0, 0.5, 0.0) from
+        //  the base of the hand mesh
+        sMesh* pMeshAtHandTip = new sMesh();
+        // I'm using the sphere, but it doesn't have to be anything
+        pMeshAtHandTip->modelFileName = "assets/models/Sphere_radius_1_xyz_N_uv.ply";
+        pMeshAtHandTip->bIsWireframe = true;
+        pMeshAtHandTip->bIsVisible = false;
+        pMeshAtHandTip->uniformScale = 0.5f;
+        pMeshAtHandTip->uniqueFriendlyName = "Forward Kinematic tip of hand";
+        pMeshAtHandTip->textures[0] = "SpidermanUV_square.bmp";
+        pMeshAtHandTip->blendRatio[0] = 1.0f;
+        //
+
+        // Translate: (0.0, -1.0, -2.0)
+        pMeshAtHandTip->matPreParentRelative
+            = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -1.0f, -2.0f));
+        // The reverse of that...
+        // ...which we don't really need because we aren't altering it
+        pMeshAtHandTip->matPostParentRelative
+            = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 1.0f, 2.0f));
+
+
+        // note it's added to his HAND, not arm
+        legospiderman_Left_hand->vec_pChildMeshes.push_back(pMeshAtHandTip);
+
 
 
         sMesh* legospiderman_Right_arm = new sMesh();
@@ -993,3 +1161,93 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
     return;
 }
 
+bool Convert_AssimpHelperMesh_to_sModelDrawInfo(AH::cMesh* pAHMesh, sModelDrawInfo& DrawInfo)
+{
+    DrawInfo.meshName = pAHMesh->name;
+
+    DrawInfo.numberOfTriangles = (unsigned int)pAHMesh->vecFaces.size();
+    DrawInfo.numberOfVertices = (unsigned int)pAHMesh->vecPositions.size();
+    DrawInfo.numberOfIndices = (unsigned int)pAHMesh->vecIndices.size();
+
+    DrawInfo.pVertices = new sVertex_SHADER_FORMAT_xyz_rgb_N_UV_TanBi[DrawInfo.numberOfVertices];
+    for (unsigned int vecIndex = 0; vecIndex != pAHMesh->vecPositions.size(); vecIndex++)
+    {
+        DrawInfo.pVertices[vecIndex].x = pAHMesh->vecPositions[vecIndex].x;
+        DrawInfo.pVertices[vecIndex].y = pAHMesh->vecPositions[vecIndex].y;
+        DrawInfo.pVertices[vecIndex].z = pAHMesh->vecPositions[vecIndex].z;
+
+        if ( ! pAHMesh->vecColourSetsRGBA.empty() )
+        {
+            DrawInfo.pVertices[vecIndex].r = pAHMesh->vecColourSetsRGBA[0][vecIndex].r;
+            DrawInfo.pVertices[vecIndex].g = pAHMesh->vecColourSetsRGBA[0][vecIndex].g;
+            DrawInfo.pVertices[vecIndex].b = pAHMesh->vecColourSetsRGBA[0][vecIndex].b;
+        }
+        else
+        {
+            DrawInfo.pVertices[vecIndex].r = 0.0f;
+            DrawInfo.pVertices[vecIndex].g = 0.0f;
+            DrawInfo.pVertices[vecIndex].b = 0.0f;
+        }
+
+        if (!pAHMesh->vecNormals.empty())
+        {
+            DrawInfo.pVertices[vecIndex].nx = pAHMesh->vecNormals[vecIndex].x;
+            DrawInfo.pVertices[vecIndex].ny = pAHMesh->vecNormals[vecIndex].y;
+            DrawInfo.pVertices[vecIndex].nz = pAHMesh->vecNormals[vecIndex].z;
+        }
+        else
+        {
+            DrawInfo.pVertices[vecIndex].nx = 0.0f;
+            DrawInfo.pVertices[vecIndex].ny = 0.0f;
+            DrawInfo.pVertices[vecIndex].nz = 0.0f;
+        }
+
+        if (!pAHMesh->vecTextureChannels.empty())
+        {
+            DrawInfo.pVertices[vecIndex].u = pAHMesh->vecTextureChannels[0].vecUVs[vecIndex].x;
+            DrawInfo.pVertices[vecIndex].v = pAHMesh->vecTextureChannels[0].vecUVs[vecIndex].y;
+        }
+        else
+        {
+            DrawInfo.pVertices[vecIndex].u = 0.0f;
+            DrawInfo.pVertices[vecIndex].v = 0.0f;
+        }
+
+        if (!pAHMesh->vecTangents.empty())
+        {
+            DrawInfo.pVertices[vecIndex].tx = pAHMesh->vecTangents[vecIndex].x;
+            DrawInfo.pVertices[vecIndex].ty = pAHMesh->vecTangents[vecIndex].y;
+            DrawInfo.pVertices[vecIndex].tz = pAHMesh->vecTangents[vecIndex].z;
+        }
+        else
+        {
+            DrawInfo.pVertices[vecIndex].tx = 0.0f;
+            DrawInfo.pVertices[vecIndex].ty = 0.0f;
+            DrawInfo.pVertices[vecIndex].tz = 0.0f;
+        }
+
+        if (!pAHMesh->vecBiTangents.empty())
+        {
+            DrawInfo.pVertices[vecIndex].bx = pAHMesh->vecBiTangents[vecIndex].x;
+            DrawInfo.pVertices[vecIndex].by = pAHMesh->vecBiTangents[vecIndex].y;
+            DrawInfo.pVertices[vecIndex].bz = pAHMesh->vecBiTangents[vecIndex].z;
+        }
+        else
+        {
+            DrawInfo.pVertices[vecIndex].bx = 0.0f;
+            DrawInfo.pVertices[vecIndex].by = 0.0f;
+            DrawInfo.pVertices[vecIndex].bz = 0.0f;
+        }
+
+    }// for (unsigned int vecIndex
+
+
+    DrawInfo.pIndices = new unsigned int[DrawInfo.numberOfIndices];
+    for (unsigned int index = 0; index != pAHMesh->vecIndices.size(); index++)
+    {
+        DrawInfo.pIndices[index] = pAHMesh->vecIndices[index];
+    }
+
+
+    return true;
+}

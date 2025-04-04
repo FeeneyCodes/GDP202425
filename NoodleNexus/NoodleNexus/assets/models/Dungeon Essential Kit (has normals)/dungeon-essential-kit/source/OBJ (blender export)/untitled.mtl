@@ -1,0 +1,122 @@
+# Blender 4.1.1 MTL File: 'None'
+# www.blender.org
+
+newmtl D_Arch_Floor_Set
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd D:/PLY_Resources/Dungeon Essential Kit/dungeon-essential-kit/source/Textures/D_Arch_Floor_Set/Arch_Floor_Set_D_Arch_Floor_Set_AlbedoTransparency.png
+map_Ns D:/PLY_Resources/Dungeon Essential Kit/dungeon-essential-kit/source/Textures/D_Arch_Floor_Set/Arch_Floor_Set_D_Arch_Floor_Set_Roughness.png
+map_refl D:/PLY_Resources/Dungeon Essential Kit/dungeon-essential-kit/source/Textures/D_Arch_Floor_Set/Arch_Floor_Set_D_Arch_Floor_Set_Metallic.png
+map_Bump -bm 1.000000 D:/PLY_Resources/Dungeon Essential Kit/dungeon-essential-kit/source/Textures/D_Arch_Floor_Set/Arch_Floor_Set_D_Arch_Floor_Set_Normal.png
+
+newmtl Dungeon_Props1
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd D:/PLY_Resources/Dungeon Essential Kit/dungeon-essential-kit/source/Textures/Dungeon_Props1/Dungeon_Props_1_D_Props_1_AlbedoTransparency.png
+map_Ns D:/PLY_Resources/Dungeon Essential Kit/dungeon-essential-kit/source/Textures/Dungeon_Props1/Dungeon_Props_1_D_Props_1_Roughness.png
+map_refl D:/PLY_Resources/Dungeon Essential Kit/dungeon-essential-kit/source/Textures/Dungeon_Props1/Dungeon_Props_1_D_Props_1_Metallic.png
+map_Ke D:/PLY_Resources/Dungeon Essential Kit/dungeon-essential-kit/source/Textures/Dungeon_Props1/Dungeon_Props_1_D_Props_1_Emission.png
+map_Bump -bm 1.000000 D:/PLY_Resources/Dungeon Essential Kit/dungeon-essential-kit/source/Textures/Dungeon_Props1/Dungeon_Props_1_D_Props_1_Normal.png
+
+newmtl Dwarf
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd C:/Users/raksh/OneDrive/Documents/Blender/Dwarf/Textures/Dwarf_Dwarf_AlbedoTransparency.png
+map_refl C:/Users/raksh/OneDrive/Documents/Blender/Dwarf/Textures/Dwarf_Dwarf_MetallicSmoothness.png
+map_Bump C:/Users/raksh/OneDrive/Documents/Blender/Dwarf/Textures/Dwarf_Dwarf_Normal.png
+
+newmtl Set1
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd D:/PLY_Resources/Dungeon Essential Kit/dungeon-essential-kit/source/Textures/Dungeon_Set1_AlbedoTransparency.png
+map_Ns D:/PLY_Resources/Dungeon Essential Kit/dungeon-essential-kit/source/Textures/Dungeon_Set1_Roughness.png
+map_refl D:/PLY_Resources/Dungeon Essential Kit/dungeon-essential-kit/source/Textures/Dungeon_Set1_Metallic.png
+map_Bump -bm 1.000000 D:/PLY_Resources/Dungeon Essential Kit/dungeon-essential-kit/source/Textures/Dungeon_Set1_Normal.png
+
+newmtl Set1.001
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd D:/PLY_Resources/Dungeon Essential Kit/dungeon-essential-kit/source/Textures/Dungeon_Set1_AlbedoTransparency.png
+map_Ns D:/PLY_Resources/Dungeon Essential Kit/dungeon-essential-kit/source/Textures/Dungeon_Set1_Roughness.png
+map_refl D:/PLY_Resources/Dungeon Essential Kit/dungeon-essential-kit/source/Textures/Dungeon_Set1_Metallic.png
+map_Bump -bm 1.000000 D:/PLY_Resources/Dungeon Essential Kit/dungeon-essential-kit/source/Textures/Dungeon_Set1_Normal.png
+
+newmtl Set2
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd D:/PLY_Resources/Dungeon Essential Kit/dungeon-essential-kit/source/Textures/Dungeon_Set2_AlbedoTransparency.png
+map_Ns D:/PLY_Resources/Dungeon Essential Kit/dungeon-essential-kit/source/Textures/Dungeon_Set2_Roughness.png
+map_refl D:/PLY_Resources/Dungeon Essential Kit/dungeon-essential-kit/source/Textures/Dungeon_Set2_Metallic.png
+map_Bump -bm 1.000000 D:/PLY_Resources/Dungeon Essential Kit/dungeon-essential-kit/source/Textures/Dungeon_Set2_Normal.png
+
+newmtl Set2.001
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd D:/PLY_Resources/Dungeon Essential Kit/dungeon-essential-kit/source/Textures/Dungeon_Set2_AlbedoTransparency.png
+map_Ns D:/PLY_Resources/Dungeon Essential Kit/dungeon-essential-kit/source/Textures/Dungeon_Set2_Roughness.png
+map_refl D:/PLY_Resources/Dungeon Essential Kit/dungeon-essential-kit/source/Textures/Dungeon_Set2_Metallic.png
+map_Bump -bm 1.000000 D:/PLY_Resources/Dungeon Essential Kit/dungeon-essential-kit/source/Textures/Dungeon_Set2_Normal.png
+
+newmtl Set3
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd D:/PLY_Resources/Dungeon Essential Kit/dungeon-essential-kit/source/Textures/Dungeon_Set3_AlbedoTransparency.png
+map_Ns D:/PLY_Resources/Dungeon Essential Kit/dungeon-essential-kit/source/Textures/Dungeon_Set3_Roughness.png
+map_refl D:/PLY_Resources/Dungeon Essential Kit/dungeon-essential-kit/source/Textures/Dungeon_Set3_Metallic.png
+map_Bump -bm 1.000000 D:/PLY_Resources/Dungeon Essential Kit/dungeon-essential-kit/source/Textures/Dungeon_Set3_Normal.png
+
+newmtl Set4
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd D:/PLY_Resources/Dungeon Essential Kit/dungeon-essential-kit/source/Textures/Set4/Set4_Set4_AlbedoTransparency.png
+map_Ns D:/PLY_Resources/Dungeon Essential Kit/dungeon-essential-kit/source/Textures/Set4/Set4_Set4_Roughness.png
+map_refl D:/PLY_Resources/Dungeon Essential Kit/dungeon-essential-kit/source/Textures/Set4/Set4_Set4_Metallic.png
+map_Bump -bm 1.000000 D:/PLY_Resources/Dungeon Essential Kit/dungeon-essential-kit/source/Textures/Set4/Set4_Set4_Normal.png
+
+newmtl Set5
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd D:/PLY_Resources/Dungeon Essential Kit/dungeon-essential-kit/source/Textures/Set5/Set5_Set5_AlbedoTransparency.png
+map_Ns D:/PLY_Resources/Dungeon Essential Kit/dungeon-essential-kit/source/Textures/Set5/Set5_Set5_Roughness.png
+map_refl D:/PLY_Resources/Dungeon Essential Kit/dungeon-essential-kit/source/Textures/Set5/Set5_Set5_Metallic.png
+map_Ke D:/PLY_Resources/Dungeon Essential Kit/dungeon-essential-kit/source/Textures/Set5/Set5_Set5_Emission.png
+map_Bump -bm 1.000000 D:/PLY_Resources/Dungeon Essential Kit/dungeon-essential-kit/source/Textures/Set5/Set5_Set5_Normal.png

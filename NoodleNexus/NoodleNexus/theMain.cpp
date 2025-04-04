@@ -469,9 +469,9 @@ int main(void)
 
     // Barrel (normal mapped)
     ::g_pTextures->SetBasePath("assets/models/Wooden barrel (has normal map)/Barrel_textures/barrel");
-    ::g_pTextures->Create2DTextureFromBMPFile("barrel_BaseColor.bmp");
+//    ::g_pTextures->Create2DTextureFromBMPFile("barrel_BaseColor.bmp");
     ::g_pTextures->Create2DTextureFromBMPFile("barrel_BaseColor - Inverted_Y.bmp");
-    ::g_pTextures->Create2DTextureFromBMPFile("barrel_Normal.bmp");
+//    ::g_pTextures->Create2DTextureFromBMPFile("barrel_Normal.bmp");
     ::g_pTextures->Create2DTextureFromBMPFile("barrel_Normal - Inverted_Y.bmp");
 
     // Load the space skybox

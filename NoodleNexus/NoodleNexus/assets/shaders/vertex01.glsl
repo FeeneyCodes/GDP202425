@@ -29,11 +29,16 @@ void main()
 	mat4 matMVP = matProjection * matView * matModel;
 	gl_Position = matMVP * vec4(finalVert, 1.0);
 	
+//	gl_Position = matModel * vec4(finalVert, 1.0);
+//	gl_Position = matView * vec4(gl_Position);
+//	gl_Position = matProjection * vec4(gl_Position);
+	
+	
 	// Calculate location of the vertex in the "world"
 	gVertexWorldLocation = matModel * vec4(finalVert, 1.0);
 	
 	// Calculatte the vertex normal
-	// Don't wank scaling or translation
+	// Don't want scaling or translation
 	//fvertexNormal = matRoationOnly * vec4(vNormal, 1.0);
 	mat4 matInvTransModel = inverse(transpose(matModel));	
 	vec3 vNormNormalize = normalize(vNormal.xyz);

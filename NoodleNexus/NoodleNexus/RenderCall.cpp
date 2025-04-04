@@ -22,10 +22,12 @@ extern unsigned int g_numLODTrisDrawnThisFrame;
 sMesh* pDebugSphere = NULL;
 
 
+
 // Texture set up
 void SetUpTextures(sMesh* pCurMesh, GLuint program)
 {
     GLuint MissingTexture_ID = ::g_pTextures->getTextureIDFromName("UV_Test_750x750.bmp");
+
 
 
     {
@@ -95,13 +97,15 @@ void SetUpTextures(sMesh* pCurMesh, GLuint program)
 
 
     // Normal map, if needed
+    GLint bUseNormalMap_UL = glGetUniformLocation(program, "bUseNormalMap");
+    glUniform1f(bUseNormalMap_UL, (GLfloat)GL_FALSE);
+
     if (pCurMesh->normalMap != "")
     {
         GLuint normalMap_ID = ::g_pTextures->getTextureIDFromName(pCurMesh->normalMap);
         if (normalMap_ID == 0)
         {
             normalMap_ID = MissingTexture_ID;
-
         }
         // Arbitrarily pick texture unit 15
         const GLint NORMAL_MAP_TEXTURE_UNIT = 15;
@@ -109,8 +113,10 @@ void SetUpTextures(sMesh* pCurMesh, GLuint program)
         glBindTexture(GL_TEXTURE_2D, normalMap_ID);
         GLint textNormalMap_UL = glGetUniformLocation(program, "textNormalMap");
         glUniform1i(textNormalMap_UL, NORMAL_MAP_TEXTURE_UNIT);       // <-- Note we use the NUMBER, not the GL_TEXTURE3 here
+
+        glUniform1f(bUseNormalMap_UL, (GLfloat)GL_TRUE);
     }
-    
+
     return;
 }
 
@@ -282,17 +288,17 @@ void DrawMesh(
         SetUpTextures(pCurMesh, program);
     }
 
-    // See if we are using a normal map
-    GLint bUseNormalMap_UL = glGetUniformLocation(program, "bUseNormalMap");
+    //// See if we are using a normal map
+    //GLint bUseNormalMap_UL = glGetUniformLocation(program, "bUseNormalMap");
 
-    if (pCurMesh->normalMap == "")
-    {
-        glUniform1f(bUseNormalMap_UL, (GLfloat)GL_FALSE);
-    }
-    else
-    {
-        glUniform1f(bUseNormalMap_UL, (GLfloat)GL_TRUE);
-    }
+    //if (pCurMesh->normalMap == "")
+    //{
+    //    glUniform1f(bUseNormalMap_UL, (GLfloat)GL_FALSE);
+    //}
+    //else
+    //{
+    //    glUniform1f(bUseNormalMap_UL, (GLfloat)GL_TRUE);
+    //}
 
 
     // Could be called the "model" or "world" matrix

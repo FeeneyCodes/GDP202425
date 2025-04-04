@@ -172,11 +172,14 @@ void Pass_1_DeferredGBuffer(void)
 	{
 		// ADJUST normal with normal map
 		// Sample normal in 0.0 to 1.0 range:
+		// This is the ADJUSTMENT to the 'base' normal:
 		vec3 theNormal = texture( textNormalMap, fUV ).xyz;
 		// Scale to -1.0 to 1.0 range:
 		theNormal = (theNormal * 2.0f) - 1.0f;
 		// Tansform from tangent to world space
 		vertexNormalXYZ.xyz = normalize(f_matTBN * theNormal);
+		vertexNormalXYZ.xyz *= 0.001f;
+		vertexNormalXYZ.xyz += fvertexNormal.xyz;
 	}
 	
 	// *********************************************
@@ -244,6 +247,13 @@ void Pass_1_DeferredGBuffer(void)
 	
 
 	}//if ( bIsSkyBoxObject )
+	
+//	vertexDiffuseRGB.rgb *= 0.01f; 	// black
+//	vertexDiffuseRGB.rgb += fTangent.xyz;
+//	vertexDiffuseRGB.rgb += fBiTangent.xyz;
+//	vertexDiffuseRGB.rgb += fvertexNormal.xyz;
+	
+	
 		
 	return;
 }

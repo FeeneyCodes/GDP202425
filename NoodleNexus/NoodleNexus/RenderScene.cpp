@@ -65,6 +65,7 @@ void RenderScene(
     glm::vec3 eyeLocation)
 {
 
+
     GLint matProjection_UL = glGetUniformLocation(program, "matProjection");
     //glUniformMatrix4fv(matProjection_UL, 1, GL_FALSE, (const GLfloat*)&matProjection);
 

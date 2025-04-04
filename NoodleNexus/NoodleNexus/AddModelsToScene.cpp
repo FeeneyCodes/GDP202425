@@ -20,11 +20,17 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
 {
     ::g_pAssimp = new AH::cFileLoader();
 
-    ::g_pAssimp->SetBasePath("assets/models/Wooden barrel (has normal map)");
     AH::cFileLoader::sPostProcessFlags postProcessingNormalMaps;
     postProcessingNormalMaps.bProcess_CalcTangentSpace = true;
     postProcessingNormalMaps.bProcess_FlipUVs = true;
     postProcessingNormalMaps.bProcess_Triangulate = true;
+
+
+    ::g_pAssimp->SetBasePath("assets/models/Ingenuity (helicopter, has normal maps)/Ingenuity/OBJ (blender export)");
+    ::g_pAssimp->Load3DModelFile("Ingenuity (blender exort).obj", postProcessingNormalMaps);
+
+
+    ::g_pAssimp->SetBasePath("assets/models/Wooden barrel (has normal map)");
 
     if (::g_pAssimp->Load3DModelFile("Barrel_OBJ.obj", postProcessingNormalMaps))
     {
@@ -63,11 +69,11 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
         sMesh* pBarrel = new sMesh();
         pBarrel->modelFileName = "Barrel_OBJ.obj";
         pBarrel->uniqueFriendlyName = "Barrel";
-        pBarrel->textures[0] = "SpidermanUV_square.bmp";
-//        pBarrel->textures[0] = "barrel_BaseColor - Inverted_Y.bmp";
+//        pBarrel->textures[0] = "SpidermanUV_square.bmp";
+        pBarrel->textures[0] = "barrel_BaseColor - Inverted_Y.bmp";
         pBarrel->blendRatio[0] = 1.0f;
         //
- //       pBarrel->normalMap = "barrel_Normal - Inverted_Y.bmp";
+        pBarrel->normalMap = "barrel_Normal - Inverted_Y.bmp";
 
         pBarrel->uniformScale = 10.0f;
         pBarrel->positionXYZ.x = 20.0f;

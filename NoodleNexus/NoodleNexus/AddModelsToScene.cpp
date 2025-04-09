@@ -76,9 +76,11 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
         pBarrel->normalMap = "barrel_Normal - Inverted_Y.bmp";
 
         pBarrel->uniformScale = 10.0f;
-        pBarrel->positionXYZ.x = 20.0f;
-        pBarrel->positionXYZ.y = -30.0f;
-        pBarrel->positionXYZ.z = -10.0f;
+//         pWarehouse->positionXYZ = glm::vec3(-50.0f, -50.0f, 0.0f);
+        pBarrel->positionXYZ = glm::vec3(-50.0f, -50.0f, 0.0f);
+        //pBarrel->positionXYZ.x = 20.0f;
+        //pBarrel->positionXYZ.y = -30.0f;
+        //pBarrel->positionXYZ.z = -10.0f;
 //        pBarrel->bIsWireframe = true;
         //pBarrel->bDoNotLight = true;
         ::g_vecMeshesToDraw.push_back(pBarrel);
@@ -95,9 +97,11 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
         pLightBulb->uniqueFriendlyName = "LightBulb";
         pLightBulb->textures[0] = "solid_white.bmp";
         pLightBulb->blendRatio[0] = 1.0f;
+        pLightBulb->bOverrideObjectColour = true;
+        pLightBulb->objectColourRGBA = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
         pLightBulb->bIsWireframe = true;
         pLightBulb->uniformScale = 3.0f;
-        //pLightBulb->bDoNotLight = true;
+        pLightBulb->bDoNotLight = true;
         pLightBulb->bIsVisible = false;
         ::g_vecMeshesToDraw.push_back(pLightBulb);
     }
@@ -202,8 +206,13 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
         p_legospiderman_Hips->textures[0] = "SpidermanUV_square.bmp";
         p_legospiderman_Hips->blendRatio[0] = 1.0f;
 //        p_legospiderman_Hips->uniformScale = 10.0f;
-        p_legospiderman_Hips->positionXYZ.x = 20.0f;
-        p_legospiderman_Hips->positionXYZ.y = -20.0f;
+//        p_legospiderman_Hips->positionXYZ.x = 20.0f;
+//        p_legospiderman_Hips->positionXYZ.y = -20.0f;
+// 
+//         pWarehouse->positionXYZ = glm::vec3(-50.0f, -50.0f, 0.0f);
+//
+        p_legospiderman_Hips->positionXYZ = glm::vec3(-55.0f, -30.0f, 0.0f);
+
         p_legospiderman_Hips->rotationEulerXYZ.x = -90.0f;
 //        p_legospiderman_Hips->rotationEulerXYZ.y = +90.0f;
         p_legospiderman_Hips->rotationEulerXYZ.z = +90.0f;
@@ -695,7 +704,7 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
     {
         sModelDrawInfo warehouseModel;
         //    ::g_pMeshManager->LoadModelIntoVAO("assets/models/Warehouse_xyz_n.ply",
-        ::g_pMeshManager->LoadModelIntoVAO_Async("assets/models/Warehouse_xyz_n_uv.ply",
+        ::g_pMeshManager->LoadModelIntoVAO_Async("assets/models/Warehouse_xyz_n_uv (wall removed).ply",
             warehouseModel, program);
         std::cout << warehouseModel.numberOfVertices << " vertices loaded" << std::endl;
     }
@@ -926,9 +935,9 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
         //                                                                
         sMesh* pWarehouse = new sMesh();
         //        pWarehouse->modelFileName = "assets/models/Warehouse_xyz_n.ply";
-        pWarehouse->modelFileName = "assets/models/Warehouse_xyz_n_uv.ply";
-        pWarehouse->positionXYZ = glm::vec3(-200.0f, 5.0f, 0.0f);
-        pWarehouse->rotationEulerXYZ.y = -90.0f;
+        pWarehouse->modelFileName = "assets/models/Warehouse_xyz_n_uv (wall removed).ply";
+        pWarehouse->positionXYZ = glm::vec3(-50.0f, -48.0f, 0.0f);
+        pWarehouse->rotationEulerXYZ.y = +90.0f;
         pWarehouse->objectColourRGBA = glm::vec4(0.6f, 0.6f, 0.6f, 1.0f);
         //pWarehouse->bIsWireframe = true;
         pWarehouse->bOverrideObjectColour = true;
@@ -945,7 +954,7 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
         //   |_|   |_| |_|\__, |___/_|\___|___/  \___/|_.__// |\___|\___|\__|
         //                |___/                           |__/               
         ::g_pPhysicEngine->addTriangleMesh(
-            "assets/models/Warehouse_xyz_n_uv.ply",
+            "assets/models/Warehouse_xyz_n_uv (wall removed).ply",
             pWarehouse->positionXYZ,
             pWarehouse->rotationEulerXYZ,
             pWarehouse->uniformScale);

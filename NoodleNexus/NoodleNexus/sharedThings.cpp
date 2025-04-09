@@ -3,7 +3,7 @@
 cBasicFlyCamera* g_pFlyCamera = NULL;
 
 cLightManager* g_pLightManager = NULL;
-unsigned int g_selectedLightIndex = 0;
+unsigned int g_selectedLightIndex = 1;
 bool g_bShowDebugSpheres = false;
 bool g_bShowLightBulbs = true;
 

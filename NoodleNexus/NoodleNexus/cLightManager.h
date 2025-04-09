@@ -7,6 +7,9 @@
 #include <vector>
 #include <string>  
 
+// Added a "depth only" shadow map FBO
+#include "cFBO/cFBO_Depth_Only.h"
+
 class cLightManager
 {
 public:
@@ -47,6 +50,9 @@ public:
         // 2 = directional light
         glm::vec4 param2;	// x = 0 for off, 1 for on
         // yzw are TBD
+
+        // Added a shadow FBO
+        cFBO_Depth_Only* pShadowMap = NULL;
 
         void setLinearAtten(float newLinear)
         {

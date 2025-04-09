@@ -47,6 +47,9 @@
 // Deferred render FBO
 #include "cFBO/cFBO_deferred.h"
 
+// Shadow map FBO
+#include "cFBO/cFBO_Depth_Only.h"
+
 #include "cViperFlagConnector.h"
 
 #include "PhysXWraper/cPhysXWraper.h"
@@ -381,7 +384,8 @@ int main(void)
     
      
     ::g_pFlyCamera = new cBasicFlyCamera();
-    ::g_pFlyCamera->setEyeLocation(glm::vec3(0.0f, -25.0f, -75.0f));
+//    ::g_pFlyCamera->setEyeLocation(glm::vec3(0.0f, -25.0f, -75.0f));
+    ::g_pFlyCamera->setEyeLocation(glm::vec3(-42.4f, -20.2f, -83.0f));        // Warehouse
 
 // To see the terrain from high above
 //    ::g_pFlyCamera->setEyeLocation(glm::vec3(72.2f, 1270.0f, -1123.0f));
@@ -426,20 +430,30 @@ int main(void)
     ::g_pLightManager->theLights[0].param2.x = 1.0f;    // Turn on (see shader)
 
     // Set up one of the lights in the scene
-    ::g_pLightManager->theLights[1].position = glm::vec4(0.0f, 20.0f, 0.0f, 1.0f);
+    ::g_pLightManager->theLights[1].position = glm::vec4(-73.3f, -16.8f, 2.10f, 1.0f);
     ::g_pLightManager->theLights[1].diffuse = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-    ::g_pLightManager->theLights[1].atten.y = 0.01f;
-    ::g_pLightManager->theLights[1].atten.z = 0.001f;
+    ::g_pLightManager->theLights[1].atten.y = 0.00469647f;
+    ::g_pLightManager->theLights[1].atten.z = 0.00036973f;
 
     ::g_pLightManager->theLights[1].param1.x = 1.0f;    // Spot light (see shader)
     ::g_pLightManager->theLights[1].direction = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
-    ::g_pLightManager->theLights[1].param1.y = 5.0f;   //  y = inner angle
-    ::g_pLightManager->theLights[1].param1.z = 10.0f;  //  z = outer angle
+    ::g_pLightManager->theLights[1].param1.y = 26.2f;   //  y = inner angle
+    ::g_pLightManager->theLights[1].param1.z = 35.4f;  //  z = outer angle
 
     ::g_pLightManager->theLights[1].param2.x = 1.0f;    // Turn on (see shader)
 
-
-
+    // Add a shadowmap texture
+    ::g_pLightManager->theLights[1].pShadowMap = new cFBO_Depth_Only();
+    // We'll pick a decent range here
+    std::string FBOShadowErrorString = "";
+    if (::g_pLightManager->theLights[1].pShadowMap->init(2048, 2048, FBOShadowErrorString))
+    {
+        std::cout << "Light #1 shadowmap created OK" << std::endl;
+    }
+    else
+    {
+        std::cout << "Can't create light shadowmap because: " << FBOShadowErrorString << std::endl;
+    }
 
     ::g_pTextures = new cBasicTextureManager();
 
@@ -762,16 +776,75 @@ int main(void)
 //    \____|         |____/ \__,_|_| |_|  \___|_|    | .__/ \__,_|___/___/
 //                                                   |_|                  
 // 
-        // Pass "1" for deferred G buffer pass
-        glUniform1i(renderPassNumber_UL, 1);
+//        // Pass "1" for deferred G buffer pass
+//        glUniform1i(renderPassNumber_UL, 1);
+//
+//        // Point the output to the G buffer...
+//        glBindFramebuffer(GL_FRAMEBUFFER, ::g_pFBO_G_Buffer->ID);
+//
+//        // Clear the buffers on the FBO
+//        // (remember that glClear() only works on the regular screen buffer)
+//        ::g_pFBO_G_Buffer->clearBuffers(true, true);
 
-        // Point the output to the G buffer...
-        glBindFramebuffer(GL_FRAMEBUFFER, ::g_pFBO_G_Buffer->ID);
 
-        // Clear the buffers on the FBO
-        // (remember that glClear() only works on the regular screen buffer)
-        ::g_pFBO_G_Buffer->clearBuffers(true, true);
 
+        // Shadow map pass
+        cFBO_Depth_Only* pShadowMap = ::g_pLightManager->theLights[1].pShadowMap;
+        if (pShadowMap)
+        {
+            // Point output to the shadow map
+            glBindFramebuffer(GL_FRAMEBUFFER, pShadowMap->ID);
+            // Get the viewport from the FBO not the actual screen
+            glViewport(0, 0, pShadowMap->width, pShadowMap->height);
+            pShadowMap->clearDepthBuffer();
+
+            //glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            //// These will ONLY work on the default framebuffer
+            //glViewport(0, 0, width, height);
+            //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            glm::vec3 lightLocation = glm::vec3(::g_pLightManager->theLights[1].position);
+
+            sMesh* pBarrel = ::g_pFindMeshByFriendlyName("Barrel");
+
+            // Calculate the view from the light to the barrel
+            // (Spot is looking at the barrel)
+            matView = glm::lookAt(
+                lightLocation,
+                pBarrel->positionXYZ,
+                upVector);
+
+            GLint eyeLocation_UL = glGetUniformLocation(program, "eyeLocation");
+            glUniform4f(eyeLocation_UL,
+                lightLocation.x,
+                lightLocation.y,
+                lightLocation.z, 1.0f);
+
+            // Warehouse is: 167 x 60 x 72
+            //
+            // So greatest possible distance INSIDE warehouse is about 170.
+            // We'll pick a far plane of 200
+
+            matProjection = glm::perspective(0.6f,
+                ratio,
+                0.1f,       // Very close to the light
+                200.0f);    // Mostly inside the warehouse
+
+
+            RenderScene(program, matProjection, matView, ratio, lightLocation);
+
+
+        }//if (pShadowMap)
+
+
+        // Point framebuffer back to the screen...
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        // These will ONLY work on the default framebuffer
+        glViewport(0, 0, width, height);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        // Pass "0" for regular forward rendering
+        glUniform1i(renderPassNumber_UL, 0);
 
         matView = glm::lookAt(
             ::g_pFlyCamera->getEyeLocation(),
@@ -783,6 +856,9 @@ int main(void)
             ::g_pFlyCamera->getEyeLocation().x,
             ::g_pFlyCamera->getEyeLocation().y, 
             ::g_pFlyCamera->getEyeLocation().z, 1.0f);
+
+        glfwGetFramebufferSize(window, &width, &height);
+        ratio = width / (float)height;
 
         matProjection = glm::perspective(0.6f,
             ratio,
@@ -840,11 +916,6 @@ int main(void)
 //            pFBOTextureMesh->bIsVisible = false;
 //        }
 
-        glUniform4f(eyeLocation_UL,
-            ::g_pFlyCamera->getEyeLocation().x,
-            ::g_pFlyCamera->getEyeLocation().y,
-            ::g_pFlyCamera->getEyeLocation().z, 1.0f);
-
         RenderScene(program, matProjection, matView, ratio, ::g_pFlyCamera->getEyeLocation());
  
 
@@ -866,120 +937,120 @@ int main(void)
 //                                                  |___/                   |___/  |_|                  
 
 // Point the output to the regular framebuffer (the screen)
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        // These will ONLY work on the default framebuffer
-        glViewport(0, 0, width, height);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        // Pass "3" for deferred lighting pass
-        glUniform1i(renderPassNumber_UL, 3);
-
-
-        // We can render any object
-//        sMesh* pFSQ = g_pFindMeshByFriendlyName("New_Viper_Player");
-        sMesh* pFSQ = g_pFindMeshByFriendlyName("Full_Screen_Quad");
-
-
-        // We are setting the camera (view) and projection matrix 
-        //  specifically for this shot of the FSQ
-
-        // In our case, the quad is 2x2 in size, centred at the origin
-        //  facing along the +ve z axis.
-        // It goes from -1.0 to 1.0 on the x and y axes
-
-        pFSQ->positionXYZ = glm::vec3(0.0f, 0.0f, 0.0f);
-        pFSQ->bIsVisible = true;
-       // pFSQ->rotationEulerXYZ.y += 0.1f;
-        // 
-        // 
-        // Set the camera 
-        //
-        // ...We could make the quad bigger or move closer
-        //
-        // The key is we want to the full screen quad to be "too" big,
-        //  like it's completely filling the creen and going off the edges
-        // (that way whatever resolution or window size, we'll be OK)
-        //
-        matView = glm::lookAt(
-            glm::vec3(0.0f, 0.0f, +1.0f),  // +1 units along the z
-            glm::vec3(0.0f, 0.0f, 0.0f),    // Looking at the origin 
-            glm::vec3(0.0f, 1.0f, 0.0f));   // "up" is +ve Y
-
-        GLint matView_UL = glGetUniformLocation(program, "matView");
-        glUniformMatrix4fv(matView_UL, 1, GL_FALSE, (const GLfloat*)&matView);
-
-        // glm::ortho(
-        
-        // Watch the near and far plane as we are REALLY close to the quad...
-        matProjection = glm::perspective(0.6f,
-            ratio,
-            0.1f, 2.0f);       // FSQ is 10 units from the camera 
-                                // (and it's a flat object)
-
-        GLint matProjection_UL = glGetUniformLocation(program, "matProjection");
-        glUniformMatrix4fv(matProjection_UL, 1, GL_FALSE, (const GLfloat*)&matProjection);
-
-
-
-
-        // Connect the FBO deferred textures to the textures in our final salighting pass
-        //    uniform sampler2D vertexWorldLocationXYZ_texture;
-        //    uniform sampler2D vertexNormalXYZ_texture;
-        //    uniform sampler2D vertexDiffuseRGB_texture;
-        //    uniform sampler2D vertexSpecularRGA_P_texture;
-        //
-        // Note here I'm picking texture unit numbers for not particular 
-        //  reason. i.e. they don't have to be zero, or match the FBO, or 
-        //  even in any order. They are independent of all that
-        {
-            glActiveTexture(GL_TEXTURE0 + 13);
-            glBindTexture(GL_TEXTURE_2D, g_pFBO_G_Buffer->vertexWorldLocationXYZ);
-            GLint vertexWorldLocationXYZ_texture_UL 
-                = glGetUniformLocation(program, "vertexWorldLocationXYZ_texture");
-            glUniform1i(vertexWorldLocationXYZ_texture_UL, 13);       // <-- Note we use the NUMBER, not the GL_TEXTURE3 here
-        }
-        {
-            glActiveTexture(GL_TEXTURE0 + 14);
-            glBindTexture(GL_TEXTURE_2D, g_pFBO_G_Buffer->vertexNormalXYZ);
-            GLint vertexNormalXYZ_texture_UL
-                = glGetUniformLocation(program, "vertexNormalXYZ_texture");
-            glUniform1i(vertexNormalXYZ_texture_UL, 14);       // <-- Note we use the NUMBER, not the GL_TEXTURE3 here
-        }
-        {
-            glActiveTexture(GL_TEXTURE0 + 15);
-            glBindTexture(GL_TEXTURE_2D, g_pFBO_G_Buffer->vertexDiffuseRGB);
-            GLint vertexDiffuseRGB_texture_UL
-                = glGetUniformLocation(program, "vertexDiffuseRGB_texture");
-            glUniform1i(vertexDiffuseRGB_texture_UL, 15);       // <-- Note we use the NUMBER, not the GL_TEXTURE3 here
-        }
-        {
-            glActiveTexture(GL_TEXTURE0 + 16);
-            glBindTexture(GL_TEXTURE_2D, g_pFBO_G_Buffer->vertexSpecularRGA_P);
-            GLint vertexSpecularRGA_P_texture_UL
-                = glGetUniformLocation(program, "vertexSpecularRGA_P_texture");
-            glUniform1i(vertexSpecularRGA_P_texture_UL, 16);       // <-- Note we use the NUMBER, not the GL_TEXTURE3 here
-        }
-
-        // Also pass the current screen size
-        // uniform vec2 screenSize_width_height
-        int screen_width, height_height;
-        glfwGetFramebufferSize(window, &screen_width, &height_height);
-
-        GLint screenSize_width_height_UL
-            = glGetUniformLocation(program, "screenSize_width_height");
-
-        glUniform2f(screenSize_width_height_UL, 
-                     (GLfloat)screen_width, 
-                     (GLfloat)height_height);
-
-
-        glm::mat4 matModel = glm::mat4(1.0f);   // Identity
-        DrawMesh(pFSQ, matModel, program, false);
-
-        // Hide the quad from rendering anywhere else
-        pFSQ->bIsVisible = false;
-
-// **************************************************
+//        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+//        // These will ONLY work on the default framebuffer
+//        glViewport(0, 0, width, height);
+//        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//
+//        // Pass "3" for deferred lighting pass
+//        glUniform1i(renderPassNumber_UL, 3);
+//
+//
+//        // We can render any object
+////        sMesh* pFSQ = g_pFindMeshByFriendlyName("New_Viper_Player");
+//        sMesh* pFSQ = g_pFindMeshByFriendlyName("Full_Screen_Quad");
+//
+//
+//        // We are setting the camera (view) and projection matrix 
+//        //  specifically for this shot of the FSQ
+//
+//        // In our case, the quad is 2x2 in size, centred at the origin
+//        //  facing along the +ve z axis.
+//        // It goes from -1.0 to 1.0 on the x and y axes
+//
+//        pFSQ->positionXYZ = glm::vec3(0.0f, 0.0f, 0.0f);
+//        pFSQ->bIsVisible = true;
+//       // pFSQ->rotationEulerXYZ.y += 0.1f;
+//        // 
+//        // 
+//        // Set the camera 
+//        //
+//        // ...We could make the quad bigger or move closer
+//        //
+//        // The key is we want to the full screen quad to be "too" big,
+//        //  like it's completely filling the creen and going off the edges
+//        // (that way whatever resolution or window size, we'll be OK)
+//        //
+//        matView = glm::lookAt(
+//            glm::vec3(0.0f, 0.0f, +1.0f),  // +1 units along the z
+//            glm::vec3(0.0f, 0.0f, 0.0f),    // Looking at the origin 
+//            glm::vec3(0.0f, 1.0f, 0.0f));   // "up" is +ve Y
+//
+//        GLint matView_UL = glGetUniformLocation(program, "matView");
+//        glUniformMatrix4fv(matView_UL, 1, GL_FALSE, (const GLfloat*)&matView);
+//
+//        // glm::ortho(
+//        
+//        // Watch the near and far plane as we are REALLY close to the quad...
+//        matProjection = glm::perspective(0.6f,
+//            ratio,
+//            0.1f, 2.0f);       // FSQ is 10 units from the camera 
+//                                // (and it's a flat object)
+//
+//        GLint matProjection_UL = glGetUniformLocation(program, "matProjection");
+//        glUniformMatrix4fv(matProjection_UL, 1, GL_FALSE, (const GLfloat*)&matProjection);
+//
+//
+//
+//
+//        // Connect the FBO deferred textures to the textures in our final salighting pass
+//        //    uniform sampler2D vertexWorldLocationXYZ_texture;
+//        //    uniform sampler2D vertexNormalXYZ_texture;
+//        //    uniform sampler2D vertexDiffuseRGB_texture;
+//        //    uniform sampler2D vertexSpecularRGA_P_texture;
+//        //
+//        // Note here I'm picking texture unit numbers for not particular 
+//        //  reason. i.e. they don't have to be zero, or match the FBO, or 
+//        //  even in any order. They are independent of all that
+//        {
+//            glActiveTexture(GL_TEXTURE0 + 13);
+//            glBindTexture(GL_TEXTURE_2D, g_pFBO_G_Buffer->vertexWorldLocationXYZ);
+//            GLint vertexWorldLocationXYZ_texture_UL 
+//                = glGetUniformLocation(program, "vertexWorldLocationXYZ_texture");
+//            glUniform1i(vertexWorldLocationXYZ_texture_UL, 13);       // <-- Note we use the NUMBER, not the GL_TEXTURE3 here
+//        }
+//        {
+//            glActiveTexture(GL_TEXTURE0 + 14);
+//            glBindTexture(GL_TEXTURE_2D, g_pFBO_G_Buffer->vertexNormalXYZ);
+//            GLint vertexNormalXYZ_texture_UL
+//                = glGetUniformLocation(program, "vertexNormalXYZ_texture");
+//            glUniform1i(vertexNormalXYZ_texture_UL, 14);       // <-- Note we use the NUMBER, not the GL_TEXTURE3 here
+//        }
+//        {
+//            glActiveTexture(GL_TEXTURE0 + 15);
+//            glBindTexture(GL_TEXTURE_2D, g_pFBO_G_Buffer->vertexDiffuseRGB);
+//            GLint vertexDiffuseRGB_texture_UL
+//                = glGetUniformLocation(program, "vertexDiffuseRGB_texture");
+//            glUniform1i(vertexDiffuseRGB_texture_UL, 15);       // <-- Note we use the NUMBER, not the GL_TEXTURE3 here
+//        }
+//        {
+//            glActiveTexture(GL_TEXTURE0 + 16);
+//            glBindTexture(GL_TEXTURE_2D, g_pFBO_G_Buffer->vertexSpecularRGA_P);
+//            GLint vertexSpecularRGA_P_texture_UL
+//                = glGetUniformLocation(program, "vertexSpecularRGA_P_texture");
+//            glUniform1i(vertexSpecularRGA_P_texture_UL, 16);       // <-- Note we use the NUMBER, not the GL_TEXTURE3 here
+//        }
+//
+//        // Also pass the current screen size
+//        // uniform vec2 screenSize_width_height
+//        int screen_width, height_height;
+//        glfwGetFramebufferSize(window, &screen_width, &height_height);
+//
+//        GLint screenSize_width_height_UL
+//            = glGetUniformLocation(program, "screenSize_width_height");
+//
+//        glUniform2f(screenSize_width_height_UL, 
+//                     (GLfloat)screen_width, 
+//                     (GLfloat)height_height);
+//
+//
+//        glm::mat4 matModel = glm::mat4(1.0f);   // Identity
+//        DrawMesh(pFSQ, matModel, program, false);
+//
+//        // Hide the quad from rendering anywhere else
+//        pFSQ->bIsVisible = false;
+//
+//// **************************************************
 
         
         // Load any outstanding models async...
@@ -1005,10 +1076,19 @@ int main(void)
             << ::g_pLightManager->theLights[g_selectedLightIndex].position.y << ", "
             << ::g_pLightManager->theLights[g_selectedLightIndex].position.z
             << "   "
-            << "linear: " << ::g_pLightManager->theLights[0].atten.y
+            << "linear: " << ::g_pLightManager->theLights[g_selectedLightIndex].atten.y
             << "   "
-            << "quad: " << ::g_pLightManager->theLights[0].atten.z
-            << " particles:" << ::g_pParticles->GetNumberOfLiveParticles();
+            << "quad: " << ::g_pLightManager->theLights[g_selectedLightIndex].atten.z;
+
+        if (::g_pLightManager->theLights[g_selectedLightIndex].param1.x = 1.0f)
+        {
+            // It's a spot light
+            ssTitle
+                << " Spot (in, out): " << ::g_pLightManager->theLights[g_selectedLightIndex].param1.y
+                << ", " << ::g_pLightManager->theLights[g_selectedLightIndex].param1.z;
+        }
+
+        ssTitle << " particles:" << ::g_pParticles->GetNumberOfLiveParticles();
 
         ssTitle << " BP tris: " << numberOfNarrowPhaseTrianglesInAABB_BroadPhaseThing;
 

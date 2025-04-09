@@ -325,20 +325,20 @@ void DrawMesh(
     {
         // bool doesn't really exist, it's a float...
         glUniform1f(bUseObjectColour, (GLfloat)GL_TRUE);    // or 1.0f
-    }
+        // Set the object colour
+        // uniform vec4 objectColour;
+        GLint objectColour_UL = glGetUniformLocation(program, "objectColour");
+        glUniform4f(objectColour_UL,
+            pCurMesh->objectColourRGBA.r,
+            pCurMesh->objectColourRGBA.g,
+            pCurMesh->objectColourRGBA.b,
+            1.0f);    }
     else
     {
         glUniform1f(bUseObjectColour, (GLfloat)GL_FALSE);   // or 0.0f
     }
 
-    // Set the object colour
-    // uniform vec4 objectColour;
-    GLint objectColour_UL = glGetUniformLocation(program, "objectColour");
-    glUniform4f(objectColour_UL,
-        pCurMesh->objectColourRGBA.r,
-        pCurMesh->objectColourRGBA.g,
-        pCurMesh->objectColourRGBA.b,
-        1.0f);
+
 
 
     ///uniform float wholeObjectTransparencyAlpha;

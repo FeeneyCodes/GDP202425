@@ -212,6 +212,9 @@
     <ClCompile Include="cParticleEmitter.cpp">
       <Filter>Phsyics_Stuff\cParticleEmitter</Filter>
     </ClCompile>
+    <ClCompile Include="cFBO\cFBO_Depth_Only.cpp">
+      <Filter>FBO</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PlyFileLoaders.h">
@@ -333,6 +336,9 @@
     </ClInclude>
     <ClInclude Include="cParticleEmitter_2.h">
       <Filter>Phsyics_Stuff\cParticleEmitter</Filter>
+    </ClInclude>
+    <ClInclude Include="cFBO\cFBO_Depth_Only.h">
+      <Filter>FBO</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

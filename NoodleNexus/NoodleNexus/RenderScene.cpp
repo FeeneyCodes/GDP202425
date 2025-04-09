@@ -342,15 +342,15 @@ void RenderScene(
     {
         sMesh* pLightBulb = ::g_pFindMeshByFriendlyName("LightBulb");
         
-        pLightBulb->bIsVisible = true;
-        pLightBulb->positionXYZ = ::g_pLightManager->theLights[::g_selectedLightIndex].position;
-
         if (pLightBulb)
         {
+            pLightBulb->rotationEulerXYZ.y += 0.01f;
+            pLightBulb->bIsVisible = true;
+            pLightBulb->positionXYZ = ::g_pLightManager->theLights[::g_selectedLightIndex].position;
             DrawMesh(pLightBulb, glm::mat4(1.0f), program, false);
+            pLightBulb->bIsVisible = false;
         }
 
-        pLightBulb->bIsVisible = false;
 
     }//if (::g_bShowLightBulbs)
   
@@ -358,7 +358,47 @@ void RenderScene(
 
 
 
+    // If light #1 has a shadowmap, draw it on a quad
+    cFBO_Depth_Only* pShadowMap = ::g_pLightManager->theLights[1].pShadowMap;
+    if (pShadowMap)
+    {
+        sMesh* pFSQ = ::g_pFindMeshByFriendlyName("Full_Screen_Quad");
 
+        // Save mesh values
+        glm::vec3 oldPosition = pFSQ->positionXYZ;
+        glm::vec3 oldOrientation = pFSQ->rotationEulerXYZ;
+        float oldScale = pFSQ->uniformScale;
+        pFSQ->bIsVisible = true;
+
+        // uniform sampler2D shadowDepthMap;
+        // uniform bool bShowShadowDepthMap;	// For debugging
+        GLint shadowDepthMap_UL = glGetUniformLocation(program, "shadowDepthMap");
+        GLint bShowShadowDepthMap_UL = glGetUniformLocation(program, "bShowShadowDepthMap");
+
+        const GLint SHADOW_MAP_TEXTURE_UNIT = 17;
+        glActiveTexture(GL_TEXTURE0 + SHADOW_MAP_TEXTURE_UNIT);
+        glBindTexture(GL_TEXTURE_2D, ::g_pLightManager->theLights[1].pShadowMap->ID);
+        glUniform1i(shadowDepthMap_UL, SHADOW_MAP_TEXTURE_UNIT);       // <-- Note we use the NUMBER, not the GL_TEXTURE3 here
+
+        glUniform1f(bShowShadowDepthMap_UL, (GLfloat)GL_TRUE);
+
+        //pBarrel->positionXYZ = glm::vec3(-50.0f, -50.0f, 0.0f);
+        pFSQ->positionXYZ = glm::vec3(-30.0f, -40.0f, 0.0f);
+        pFSQ->uniformScale = 50.0f;
+        //pFSQ->rotationEulerXYZ.y = 180.0f;
+        pFSQ->bIsWireframe = false;
+        pFSQ->bDoNotLight = true;
+
+        DrawMesh(pFSQ, glm::mat4(1.0f), false);
+
+        glUniform1f(bShowShadowDepthMap_UL, (GLfloat)GL_FALSE);
+
+        // Restore mesh values
+        pFSQ->bIsVisible = false;
+        pFSQ->positionXYZ = oldPosition;
+        pFSQ->rotationEulerXYZ = oldOrientation;
+        pFSQ->uniformScale = oldScale;
+    }//pShadowMap
 
 
 
@@ -378,12 +418,15 @@ void RenderScene(
     // Don't update the y - keep the shadow near the plane
 
 
-    // Point the spot light to the ball
-    sMesh* pBouncy_5_Ball = ::g_pFindMeshByFriendlyName("Bouncy_5");
-    if (pBouncy_5_Ball)
+//    // Point the spot light to the ball
+//    sMesh* pBouncy_5_Ball = ::g_pFindMeshByFriendlyName("Bouncy_5");
+
+    // Point the spot light at the barrel in the warehouse
+    sMesh* pBarrel = ::g_pFindMeshByFriendlyName("Barrel");
+    if (pBarrel)
     {
         glm::vec3 directionToBal
-            = pBouncy_5_Ball->positionXYZ - glm::vec3(::g_pLightManager->theLights[1].position);
+            = pBarrel->positionXYZ - glm::vec3(::g_pLightManager->theLights[1].position);
 
         // Normalize to get the direction only
         directionToBal = glm::normalize(directionToBal);

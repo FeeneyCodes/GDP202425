@@ -21,6 +21,8 @@ uniform mat4 matView;
 uniform mat4 matProjection;
 uniform mat4 matModel;
 
+uniform bool bUseNormalMap;
+
 void main()
 {
 	vec3 finalVert = vPos;	
@@ -40,18 +42,21 @@ void main()
 	// Calculatte the vertex normal
 	// Don't want scaling or translation
 	//fvertexNormal = matRoationOnly * vec4(vNormal, 1.0);
-	mat4 matInvTransModel = inverse(transpose(matModel));	
-	vec3 vNormNormalize = normalize(vNormal.xyz);
-	gVertexNormal = matInvTransModel * vec4(vNormNormalize, 1.0);
-	// Just in case
-	gVertexNormal.xyz = normalize(gVertexNormal.xyz);
+	mat3 matInvTransModel = inverse(transpose(mat3(matModel)));	
 	
-	mat3 matInvTransModel_3x3 = mat3(matInvTransModel);
-	vec3 T = normalize(matInvTransModel_3x3 * gTangent);
-	vec3 B = normalize(matInvTransModel_3x3 * gBiTangent);
-	//vec3 N = normalize(matInvTransModel_3x3 * vNormNormalize);
-	// We already have this, tho: gVertexNormal
-	g_matTBN = mat3( T, B, gVertexNormal);
+	gVertexNormal.xyz = normalize(matInvTransModel * vNormal.xyz);
+	
+	g_matTBN = mat3(1.0f);
+	
+	if ( bUseNormalMap )
+	{
+		//vec3 N = normalize(matInvTransModel * vNormal.xyz);
+		vec3 T = normalize(matInvTransModel * vTangent);
+		vec3 B = normalize(matInvTransModel * vBiTangent);
+		//vec3 N = normalize(matInvTransModel_3x3 * vNormNormalize);
+		// We already have this, tho: gVertexNormal
+		g_matTBN = mat3( T, B, gVertexNormal.xyz);
+	}
 	
 	gColour = vCol;
 	gUV = vUV;			// Sent UVs to fragment shader

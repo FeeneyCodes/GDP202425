@@ -1,5 +1,5 @@
-#ifndef _FBO_HG_
-#define _FBO_HG_
+#ifndef _cFBO_RGB_depth_HG_
+#define _cFBO_RGB_depth_HG_
 
 #include <string>
 #include <glad/glad.h>

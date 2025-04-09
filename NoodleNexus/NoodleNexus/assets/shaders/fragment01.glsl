@@ -91,6 +91,9 @@ uniform vec4 texRatio_0_to_3;	// x index 0, y index 1, etc/
 uniform sampler2D textNormalMap;
 uniform bool bUseNormalMap;
 
+uniform sampler2D shadowDepthMap;
+uniform bool bShowShadowDepthMap;	// For debugging
+
 //uniform float texRatio[4];
 uniform bool bUseTextureAsColour;	// If true, then sample the texture
 
@@ -162,6 +165,7 @@ void Pass_1_DeferredGBuffer(void)
 	vertexNormalXYZ.w = 1.0f;	// 1 is lit, 0 is not lit
 
 	// GL_COLOR_ATTACHMENT1
+	
 	if ( ! bUseNormalMap )
 	{
 		// Ignore bump-normal map
@@ -198,6 +202,14 @@ void Pass_1_DeferredGBuffer(void)
 			discard;	// don't draw this pixel
 		}
 	}
+	
+	// Use lighting?
+	if ( bDoNotLight )  // Debug objects, for example
+	{
+		// Indicate that this it NOT to be lit (do lighting calculation in later pass)
+		vertexNormalXYZ.w = 0.0f;	// 1 is lit, 0 is not lit
+	}
+
 
 	// For the skybox object
 	if ( bIsSkyBoxObject )
@@ -233,13 +245,6 @@ void Pass_1_DeferredGBuffer(void)
 		vertexDiffuseRGB.rgb = vertexColour.rgb;
 		vertexDiffuseRGB.a = 1.0f;
 		
-		// Use lighting?
-		if ( bDoNotLight )  // Debug objects, for example
-		{
-			// Indicate that this it NOT to be lit (do lighting calculation in later pass)
-			vertexNormalXYZ.w = 0.0f;	// 1 is lit, 0 is not lit
-			return;
-		}
 
 		// GL_COLOR_ATTACHMENT3
 		vec4 vertexSpecular = vec4(1.0f, 1.0f, 1.0f, 100.0f);	// w = power
@@ -248,6 +253,7 @@ void Pass_1_DeferredGBuffer(void)
 
 	}//if ( bIsSkyBoxObject )
 	
+
 //	vertexDiffuseRGB.rgb *= 0.01f; 	// black
 //	vertexDiffuseRGB.rgb += fTangent.xyz;
 //	vertexDiffuseRGB.rgb += fBiTangent.xyz;
@@ -335,6 +341,19 @@ void Pass_3_DeferredLightingToFSQ(void)
 void Pass_0_RegularForward(void)
 {
 
+
+	if ( bShowShadowDepthMap )
+	{
+		// Show the shadow map
+		vertexWorldLocationXYZ.rgb = texture( shadowDepthMap, fUV.st ).rgb;
+		vertexWorldLocationXYZ.rgb *= 0.0001f;
+		vertexWorldLocationXYZ.g += 1.0f;
+		vertexWorldLocationXYZ.a = 1.0f;
+		return;
+	}
+
+
+
 	// discard transparency
 	// uniform sampler2D stencilTexture;
 	// uniform bool bUseStencilTexture;
@@ -409,7 +428,7 @@ void Pass_0_RegularForward(void)
 		// ++O++
 		// +++++
 		// +++++
-		
+//		
 		// ....+.....
 		// ....+.....
 		// ....+.....
@@ -417,7 +436,7 @@ void Pass_0_RegularForward(void)
 		// ....+.....
 		// ....+.....
 		// ....+.....
-		
+//		
 		// Note: While you CAN pass multi-dimensional arrays
 		//       through uniform variables, you CAN'T as constant arrays.
 		//
@@ -428,7 +447,7 @@ void Pass_0_RegularForward(void)
 		{
 			int column[5];
 		};
-		
+//		
 		sRow gaussian_5x5[5];
 		// I took the 5x5 kernel from here:
 //		// https://en.wikipedia.org/wiki/Kernel_(image_processing)
@@ -494,13 +513,30 @@ void Pass_0_RegularForward(void)
 		return;
 	}
 	
+	
+	vec3 vertexNormalFinal = fvertexNormal.xyz;
+	
+	if ( bUseNormalMap )
+	{
+		// ADJUST normal with normal map
+		// Sample normal in 0.0 to 1.0 range:
+		// This is the ADJUSTMENT to the 'base' normal:
+		vec3 theNormal = texture( textNormalMap, fUV ).xyz;
+		// Scale to -1.0 to 1.0 range:
+		theNormal = (theNormal * 2.0f) - 1.0f;
+		// Tansform from tangent to world space
+		vertexNormalFinal.xyz = normalize(f_matTBN * theNormal);
+//		vertexNormalXYZ.xyz *= 0.001f;
+//		vertexNormalXYZ.xyz += fvertexNormal.xyz;
+	}
+	
 	// Gold colour and highlight
 	//https://i.pinimg.com/736x/49/71/e1/4971e1a994f6a208e04b53a2b98968d4.jpg
 //	vertexColour.rgb = vec3(212.0f/255.0f, 175.0f/255.0f, 55.0f/255.0f);
 //	vertexSpecular.rgba = vec4(255.0f/255.0f, 223.0f/255.0f, 0.0f/255.0f, 100.0f);
 
 	vec4 pixelColour = calculateLightContrib( vertexColour.rgb, 
-	                                          fvertexNormal.xyz, 
+	                                          vertexNormalFinal.xyz, 
 	                                          fvertexWorldLocation.xyz, 
 											  vertexSpecular );
 

@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef _FBO_HG_
-#define _FBO_HG_
+#ifndef _cFBO_deferred_HG_
+#define _cFBO_deferred_HG_
 
 #include <string>
 #include <glad/glad.h>

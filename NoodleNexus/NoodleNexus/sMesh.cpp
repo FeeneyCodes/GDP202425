@@ -137,3 +137,46 @@ sMesh* sMesh::pFindChildMeshByFriendlyName(std::string theNameToFind)
 	// Didn't find it
 	return NULL;
 }
+
+
+void sMesh::saveState(void)
+{
+	this->old_state_positionXYZ = this->positionXYZ;
+	this->old_state_rotationEulerXYZ = this->rotationEulerXYZ;
+	this->old_state_qRotation = this->qRotation;
+	this->old_state_uniformScale = this->uniformScale;
+	this->old_state_objectColourRGBA = this->objectColourRGBA;
+	this->old_state_bOverrideObjectColour = this->bOverrideObjectColour;
+	this->old_state_bIsWireframe = this->bIsWireframe;
+	this->old_state_bIsVisible = this->bIsVisible;
+	this->old_state_bDoNotLight = this->bDoNotLight;
+	for (unsigned int index = 0; index != MAX_NUM_TEXTURES; index++)
+	{
+		this->old_state_textures[index] = this->textures[index];
+		this->old_state_blendRatio[index] = this->blendRatio[index];
+	}
+	this->old_state_normalMap = this->normalMap;
+	this->old_state_alphaTransparency = this->alphaTransparency;
+	return;
+}
+
+void sMesh::restoreState(void)
+{
+	this->positionXYZ = this->old_state_positionXYZ;
+	this->rotationEulerXYZ = this->old_state_rotationEulerXYZ;
+	this->qRotation = this->old_state_qRotation;
+	this->uniformScale = this->old_state_uniformScale;
+	this->objectColourRGBA = this->old_state_objectColourRGBA;
+	this->bOverrideObjectColour = this->old_state_bOverrideObjectColour;
+	this->bIsWireframe = this->old_state_bIsWireframe;
+	this->bIsVisible = this->old_state_bIsVisible;
+	this->bDoNotLight = this->old_state_bDoNotLight;
+	for (unsigned int index = 0; index != MAX_NUM_TEXTURES; index++)
+	{
+		this->textures[index] = this->old_state_textures[index];
+		this->blendRatio[index] = this->old_state_blendRatio[index];
+	}
+	this->normalMap = this->old_state_normalMap;
+	this->alphaTransparency = this->old_state_alphaTransparency;
+	return;
+}

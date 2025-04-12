@@ -380,7 +380,18 @@ void AddModelsToScene(cVAOManager* pMeshManager, GLuint program)
     }
 
 
-
+    {// General debug 2-sided textured quad
+        sModelDrawInfo twoSidedQuad;
+        ::g_pMeshManager->LoadModelIntoVAO("assets/models/2x2_2-sided_Quad_xyz_n_uv.ply",
+            twoSidedQuad, program);
+        std::cout << twoSidedQuad.numberOfVertices << " vertices loaded" << std::endl;
+        //
+        sMesh* p2SidedQuad = new sMesh();
+        p2SidedQuad->modelFileName = "assets/models/2x2_2-sided_Quad_xyz_n_uv.ply";
+        p2SidedQuad->uniqueFriendlyName = "2-sided quad";
+        p2SidedQuad->bIsVisible = false;
+        ::g_vecMeshesToDraw.push_back(p2SidedQuad);
+    }
 
 
 

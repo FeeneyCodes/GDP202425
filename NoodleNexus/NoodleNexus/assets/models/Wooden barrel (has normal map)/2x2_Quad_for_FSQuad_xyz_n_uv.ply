@@ -1,7 +1,6 @@
 ply
 format ascii 1.0
 comment VCGLIB generated
-comment TextureFile UV_Test_750x750.png
 element vertex 4
 property float x
 property float y

@@ -127,6 +127,7 @@ void RenderScene(
 
     glUniform1f(bIsSkyBoxObject_UL, (GLfloat)GL_FALSE);
 
+
     glEnable(GL_CULL_FACE);
     // Enable depth test and write to depth buffer (normal rendering)
     glEnable(GL_DEPTH_TEST);
@@ -210,7 +211,7 @@ void RenderScene(
     }
      
 
-    // Draw everything again, but this time far away things
+    // Draw everything
     for (unsigned int meshIndex = 0; meshIndex != ::g_vecMeshesToDraw.size(); meshIndex++)
     {
         //            sMesh* pCurMesh = ::g_myMeshes[meshIndex];
@@ -344,14 +345,14 @@ void RenderScene(
         
         if (pLightBulb)
         {
+            pLightBulb->saveState();
             pLightBulb->rotationEulerXYZ.y += 0.01f;
             pLightBulb->bIsVisible = true;
             pLightBulb->positionXYZ = ::g_pLightManager->theLights[::g_selectedLightIndex].position;
             DrawMesh(pLightBulb, glm::mat4(1.0f), program, false);
             pLightBulb->bIsVisible = false;
+            pLightBulb->restoreState();
         }
-
-
     }//if (::g_bShowLightBulbs)
   
     // **********************************************************************************
@@ -359,46 +360,46 @@ void RenderScene(
 
 
     // If light #1 has a shadowmap, draw it on a quad
+    GLint bDEBUGShowShadowDepthMap_UL = glGetUniformLocation(program, "bDEBUGShowShadowDepthMap");
     cFBO_Depth_Only* pShadowMap = ::g_pLightManager->theLights[1].pShadowMap;
     if (pShadowMap)
     {
-        sMesh* pFSQ = ::g_pFindMeshByFriendlyName("Full_Screen_Quad");
+        sMesh* p2sidedQuad = ::g_pFindMeshByFriendlyName("2-sided quad");
 
         // Save mesh values
-        glm::vec3 oldPosition = pFSQ->positionXYZ;
-        glm::vec3 oldOrientation = pFSQ->rotationEulerXYZ;
-        float oldScale = pFSQ->uniformScale;
-        pFSQ->bIsVisible = true;
+        p2sidedQuad->saveState();
+
+        p2sidedQuad->bIsVisible = true;
+        p2sidedQuad->textures[0] = "SpidermanUV_square.bmp";
+        p2sidedQuad->blendRatio[0] = 1.0f;
+        p2sidedQuad->bOverrideObjectColour = false;
+        p2sidedQuad->objectColourRGBA = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+        p2sidedQuad->uniformScale = 5.0f;
+        p2sidedQuad->bIsWireframe = false;
+        p2sidedQuad->bDoNotLight = true;
 
         // uniform sampler2D shadowDepthMap;
         // uniform bool bShowShadowDepthMap;	// For debugging
         GLint shadowDepthMap_UL = glGetUniformLocation(program, "shadowDepthMap");
-        GLint bShowShadowDepthMap_UL = glGetUniformLocation(program, "bShowShadowDepthMap");
 
         const GLint SHADOW_MAP_TEXTURE_UNIT = 17;
         glActiveTexture(GL_TEXTURE0 + SHADOW_MAP_TEXTURE_UNIT);
         glBindTexture(GL_TEXTURE_2D, ::g_pLightManager->theLights[1].pShadowMap->ID);
         glUniform1i(shadowDepthMap_UL, SHADOW_MAP_TEXTURE_UNIT);       // <-- Note we use the NUMBER, not the GL_TEXTURE3 here
 
-        glUniform1f(bShowShadowDepthMap_UL, (GLfloat)GL_TRUE);
+        glUniform1f(bDEBUGShowShadowDepthMap_UL, (GLfloat)GL_TRUE);
 
         //pBarrel->positionXYZ = glm::vec3(-50.0f, -50.0f, 0.0f);
-        pFSQ->positionXYZ = glm::vec3(-30.0f, -40.0f, 0.0f);
-        pFSQ->uniformScale = 50.0f;
-        //pFSQ->rotationEulerXYZ.y = 180.0f;
-        pFSQ->bIsWireframe = false;
-        pFSQ->bDoNotLight = true;
+        p2sidedQuad->positionXYZ = glm::vec3(-50.0f, -25.0f, 0.0f);
 
-        DrawMesh(pFSQ, glm::mat4(1.0f), false);
+        DrawMesh(p2sidedQuad, glm::mat4(1.0f), program, true);
 
-        glUniform1f(bShowShadowDepthMap_UL, (GLfloat)GL_FALSE);
 
         // Restore mesh values
-        pFSQ->bIsVisible = false;
-        pFSQ->positionXYZ = oldPosition;
-        pFSQ->rotationEulerXYZ = oldOrientation;
-        pFSQ->uniformScale = oldScale;
+        p2sidedQuad->restoreState();
     }//pShadowMap
+
+    glUniform1f(bDEBUGShowShadowDepthMap_UL, (GLfloat)GL_FALSE);
 
 
 

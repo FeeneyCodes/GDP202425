@@ -109,6 +109,22 @@ public:
 
 	sMesh* pFindChildMeshByFriendlyName(std::string theNameToFind);
 
+	void saveState(void);
+	void restoreState(void);
+private:
+	glm::vec3 old_state_positionXYZ;
+	glm::vec3 old_state_rotationEulerXYZ;		// 90 degrees around the x axis
+	glm::quat old_state_qRotation;
+	float old_state_uniformScale;				// Same for each axis
+	glm::vec4 old_state_objectColourRGBA;		// 0 - 1.0 
+	bool old_state_bOverrideObjectColour = true;
+	bool old_state_bIsWireframe = false;
+	bool old_state_bIsVisible = true;
+	bool old_state_bDoNotLight = false;
+	std::string old_state_textures[MAX_NUM_TEXTURES];
+	float old_state_blendRatio[MAX_NUM_TEXTURES];
+	std::string old_state_normalMap = "";
+	float old_state_alphaTransparency = 1.0f;
 
 	// I'm going to remove this...
 	// //

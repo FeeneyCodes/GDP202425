@@ -263,7 +263,9 @@ int main(void)
 //    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     //glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
 
-    GLFWwindow* window = glfwCreateWindow(640, 480, "OpenGL Triangle", NULL, NULL);
+    // Make it 50% the size of 1920
+//    GLFWwindow* window = glfwCreateWindow(1440, 810, "OpenGL Triangle", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(800, 600, "OpenGL Triangle", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -786,22 +788,21 @@ int main(void)
 //        // (remember that glClear() only works on the regular screen buffer)
 //        ::g_pFBO_G_Buffer->clearBuffers(true, true);
 
-
+        // uniform bool bIsShadowMapPass;	
+        GLint bIsShadowMapPass_UL = glGetUniformLocation(program, "bIsShadowMapPass");
 
         // Shadow map pass
         cFBO_Depth_Only* pShadowMap = ::g_pLightManager->theLights[1].pShadowMap;
         if (pShadowMap)
         {
+            glUniform1f(bIsShadowMapPass_UL, (GLfloat)GL_TRUE);
+
             // Point output to the shadow map
             glBindFramebuffer(GL_FRAMEBUFFER, pShadowMap->ID);
             // Get the viewport from the FBO not the actual screen
             glViewport(0, 0, pShadowMap->width, pShadowMap->height);
             pShadowMap->clearDepthBuffer();
 
-            //glBindFramebuffer(GL_FRAMEBUFFER, 0);
-            //// These will ONLY work on the default framebuffer
-            //glViewport(0, 0, width, height);
-            //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             glm::vec3 lightLocation = glm::vec3(::g_pLightManager->theLights[1].position);
 
@@ -813,6 +814,8 @@ int main(void)
                 lightLocation,
                 pBarrel->positionXYZ,
                 upVector);
+            GLint matView_UL = glGetUniformLocation(program, "matView");
+            glUniformMatrix4fv(matView_UL, 1, GL_FALSE, (const GLfloat*)&matView);
 
             GLint eyeLocation_UL = glGetUniformLocation(program, "eyeLocation");
             glUniform4f(eyeLocation_UL,
@@ -829,19 +832,47 @@ int main(void)
                 ratio,
                 0.1f,       // Very close to the light
                 200.0f);    // Mostly inside the warehouse
+            GLint matProjection_UL = glGetUniformLocation(program, "matProjection");
+            glUniformMatrix4fv(matProjection_UL, 1, GL_FALSE, (const GLfloat*)&matProjection);
 
 
-            RenderScene(program, matProjection, matView, ratio, lightLocation);
+ //           RenderScene(program, matProjection, matView, ratio, lightLocation);
+            // Draw everything
+            for (unsigned int meshIndex = 0; meshIndex != ::g_vecMeshesToDraw.size(); meshIndex++)
+            {
+                //            sMesh* pCurMesh = ::g_myMeshes[meshIndex];
+                sMesh* pCurMesh = ::g_vecMeshesToDraw[meshIndex];
+                //            pCurMesh->bDoNotLight = true;
+
+                glm::mat4 matModel = glm::mat4(1.0f);   // identity matrix
+
+                DrawMesh(pCurMesh, matModel, program, true);
+
+            }//for (unsigned int meshIndex..
 
 
         }//if (pShadowMap)
 
 
+
+
+
         // Point framebuffer back to the screen...
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         // These will ONLY work on the default framebuffer
+        glfwGetFramebufferSize(window, &width, &height);
+
         glViewport(0, 0, width, height);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        glUniform1f(bIsShadowMapPass_UL, (GLfloat)GL_FALSE);
+
+        ratio = width / (float)height;
+
+        matProjection = glm::perspective(0.6f,
+            ratio,
+            1.0f,
+            50'000.0f);
 
         // Pass "0" for regular forward rendering
         glUniform1i(renderPassNumber_UL, 0);
@@ -857,13 +888,7 @@ int main(void)
             ::g_pFlyCamera->getEyeLocation().y, 
             ::g_pFlyCamera->getEyeLocation().z, 1.0f);
 
-        glfwGetFramebufferSize(window, &width, &height);
-        ratio = width / (float)height;
 
-        matProjection = glm::perspective(0.6f,
-            ratio,
-            1.0f,
-            50'000.0f);
 
 //        // Render the offscreen FBO texture onto where Dua Lipa was...
 //        sMesh* pFBOTextureMesh = ::g_pFindMeshByFriendlyName("WareHouseView");
@@ -935,7 +960,7 @@ int main(void)
 //   | |_| |  __/  _|  __/ |  | | |  __/ (_| | | | | (_| | | | | |_| | | | | (_| | | |_) | (_| \__ \__ \
 //   |____/ \___|_|  \___|_|  |_|  \___|\__,_| |_|_|\__, |_| |_|\__|_|_| |_|\__, | | .__/ \__,_|___/___/
 //                                                  |___/                   |___/  |_|                  
-
+//
 // Point the output to the regular framebuffer (the screen)
 //        glBindFramebuffer(GL_FRAMEBUFFER, 0);
 //        // These will ONLY work on the default framebuffer

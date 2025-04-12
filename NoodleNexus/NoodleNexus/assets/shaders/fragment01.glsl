@@ -92,7 +92,10 @@ uniform sampler2D textNormalMap;
 uniform bool bUseNormalMap;
 
 uniform sampler2D shadowDepthMap;
-uniform bool bShowShadowDepthMap;	// For debugging
+// If this is a "from the light" depth pass for the
+//	shadow map, then we only save the gl_Position and then exit
+uniform bool bIsShadowMapPass;	
+uniform bool bDEBUGShowShadowDepthMap;	// For debugging
 
 //uniform float texRatio[4];
 uniform bool bUseTextureAsColour;	// If true, then sample the texture
@@ -340,14 +343,35 @@ void Pass_3_DeferredLightingToFSQ(void)
 
 void Pass_0_RegularForward(void)
 {
+	// Save only depth when doing shadow pass from light view
+	if ( bIsShadowMapPass )
+	{
+		//gl_FragDepth = gl_FragCoord.z;
+		return;
+	}
 
-
-	if ( bShowShadowDepthMap )
+	if ( bDEBUGShowShadowDepthMap )
 	{
 		// Show the shadow map
-		vertexWorldLocationXYZ.rgb = texture( shadowDepthMap, fUV.st ).rgb;
-		vertexWorldLocationXYZ.rgb *= 0.0001f;
-		vertexWorldLocationXYZ.g += 1.0f;
+		float depthValue = texture( shadowDepthMap, fUV.st ).z;
+		// Make linear (far plane is 200.0f - warehouse is 170.0 units long)
+
+		float near = 0.1f; 
+		float far  = 200.0f; 
+  
+		float z = depthValue * 2.0f - 1.0f; // back to NDC 
+		float depthLinear0to1 = (2.0f * near * far) / (far + near - z * (far - near));
+
+		depthLinear0to1 /= far;
+		vertexWorldLocationXYZ.rgb = vec3(depthLinear0to1);
+
+		if ( depthLinear0to1 > 1.0f )
+		{
+			vertexWorldLocationXYZ.rgb = vec3(1.0f, 0.0f, 0.0f);
+		}
+//		vertexWorldLocationXYZ.r += 1.0f;
+//		vertexWorldLocationXYZ.rgb *= 0.0001f;
+//		vertexWorldLocationXYZ.g += 1.0f;
 		vertexWorldLocationXYZ.a = 1.0f;
 		return;
 	}

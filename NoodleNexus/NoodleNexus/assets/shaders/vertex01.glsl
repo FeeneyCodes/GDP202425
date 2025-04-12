@@ -22,6 +22,9 @@ uniform mat4 matProjection;
 uniform mat4 matModel;
 
 uniform bool bUseNormalMap;
+// If this is a "from the light" depth pass for the
+//	shadow map, then we only save the gl_Position and then exit
+uniform bool bIsShadowMapPass;	
 
 void main()
 {
@@ -30,6 +33,13 @@ void main()
 	// Screen space location of vertex
 	mat4 matMVP = matProjection * matView * matModel;
 	gl_Position = matMVP * vec4(finalVert, 1.0);
+	
+	if ( bIsShadowMapPass )
+	{
+		// Early exit, just writing to the depth buffer
+		return;
+	}
+
 	
 //	gl_Position = matModel * vec4(finalVert, 1.0);
 //	gl_Position = matView * vec4(gl_Position);

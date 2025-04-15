@@ -380,12 +380,12 @@ void RenderScene(
 
         // uniform sampler2D shadowDepthMap;
         // uniform bool bShowShadowDepthMap;	// For debugging
-        GLint shadowDepthMap_UL = glGetUniformLocation(program, "shadowDepthMap");
+        GLint shadowDepthMap_0_UL = glGetUniformLocation(program, "shadowDepthMap_0");
 
         const GLint SHADOW_MAP_TEXTURE_UNIT = 17;
         glActiveTexture(GL_TEXTURE0 + SHADOW_MAP_TEXTURE_UNIT);
         glBindTexture(GL_TEXTURE_2D, ::g_pLightManager->theLights[1].pShadowMap->ID);
-        glUniform1i(shadowDepthMap_UL, SHADOW_MAP_TEXTURE_UNIT);       // <-- Note we use the NUMBER, not the GL_TEXTURE3 here
+        glUniform1i(shadowDepthMap_0_UL, SHADOW_MAP_TEXTURE_UNIT);       // <-- Note we use the NUMBER, not the GL_TEXTURE3 here
 
         glUniform1f(bDEBUGShowShadowDepthMap_UL, (GLfloat)GL_TRUE);
 

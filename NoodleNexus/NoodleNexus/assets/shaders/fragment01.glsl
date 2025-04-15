@@ -7,6 +7,7 @@ in vec2 fUV;				// Texture (UV) coordinates
 in vec3 fTangent;
 in vec3 fBiTangent;
 in mat3 f_matTBN;
+in vec4 fFragPosLightSpace;
 
 uniform vec4 objectColour;			// Override colour 
 uniform bool bUseObjectColour;
@@ -66,18 +67,31 @@ struct sLight
 					// 1 = spot light
 					// 2 = directional light
 	vec4 param2;	// x = 0 for off, 1 for on
-	                // yzw are TBD
+	                // y, z, and w : TBD
+	vec4 shadowInfo;// x : shadow info: 0 = none (light doesn't cast shadow)
+					//                  1 = 2D (perspective), 
+					//                  2 = cubeMap (persepective)
+					// y : shadow sampler ID (integer)
+					// z : near plane
+					// w : far plane
+	mat4 lightSpaceShadowMatrix;
 };
 
-const int NUMBEROFLIGHTS = 20;
+const int NUMBEROFLIGHTS = 10;
 uniform sLight theLights[NUMBEROFLIGHTS]; 
 // uniform vec4 thelights[0].position;
 // uniform vec4 thelights[1].position;
 
 // Inspired by Mike Bailey's Graphic Shader, chapter 6
 // (you should read it. Yes, you)
-vec4 calculateLightContrib( vec3 vertexMaterialColour, vec3 vertexNormal, 
-                            vec3 vertexWorldPos, vec4 vertexSpecular );
+vec4 calculateLightContrib( 
+		vec3 vertexMaterialColour, vec3 vertexNormal, 
+		vec3 vertexWorldPos, vec4 vertexSpecular );
+
+// Uses param2 values (see above)							
+vec4 calculateLightContrib_with_Shadows( 
+		vec3 vertexMaterialColour, vec3 vertexNormal, 
+		vec3 vertexWorldPos, vec4 vertexSpecular );
 
 // Allows us to lookup the RGB colour from a 2D texture
 // Give it the UV and it returns the colour at that UV location
@@ -91,11 +105,23 @@ uniform vec4 texRatio_0_to_3;	// x index 0, y index 1, etc/
 uniform sampler2D textNormalMap;
 uniform bool bUseNormalMap;
 
-uniform sampler2D shadowDepthMap;
 // If this is a "from the light" depth pass for the
 //	shadow map, then we only save the gl_Position and then exit
 uniform bool bIsShadowMapPass;	
 uniform bool bDEBUGShowShadowDepthMap;	// For debugging
+// These are the stored shadow maps AFTER the shadow pass(es)
+uniform sampler2D shadowDepthMap_0;
+uniform sampler2D shadowDepthMap_1;
+uniform sampler2D shadowDepthMap_2;
+uniform sampler2D shadowDepthMap_3;
+uniform samplerCube shadowCubeMap_0;
+uniform samplerCube shadowCubeMap_1;
+uniform samplerCube shadowCubeMap_2;
+uniform samplerCube shadowCubeMap_3;
+const int SHADOW_TYPE_NONE = 0;
+const int SHADOW_TYPE_2D_PERSPECTIVE = 1;
+const int SHADOW_TYPE_CUBEMAP_PERSPECTIVE = 2;
+
 
 //uniform float texRatio[4];
 uniform bool bUseTextureAsColour;	// If true, then sample the texture
@@ -340,6 +366,14 @@ void Pass_3_DeferredLightingToFSQ(void)
 	return;
 }
 
+// Converts the non-linear depth values from a perspective projection
+//	to a linear value, based on the near and far plane
+float convertNonLinearDepthToLinear(float nonLinearDepth, float near, float far)
+{
+	float z = nonLinearDepth * 2.0f - 1.0f; // back to NDC 
+	float depthLinear = (2.0f * near * far) / (far + near - z * (far - near));
+	return depthLinear;
+}
 
 void Pass_0_RegularForward(void)
 {
@@ -353,25 +387,20 @@ void Pass_0_RegularForward(void)
 	if ( bDEBUGShowShadowDepthMap )
 	{
 		// Show the shadow map
-		float depthValue = texture( shadowDepthMap, fUV.st ).z;
+		float depthValue = texture( shadowDepthMap_0, fUV.st ).z;
 		// Make linear (far plane is 200.0f - warehouse is 170.0 units long)
 
 		float near = 0.1f; 
 		float far  = 200.0f; 
-  
-		float z = depthValue * 2.0f - 1.0f; // back to NDC 
-		float depthLinear0to1 = (2.0f * near * far) / (far + near - z * (far - near));
+//  
+//		float z = depthValue * 2.0f - 1.0f; // back to NDC 
+//		float depthLinear0to1 = (2.0f * near * far) / (far + near - z * (far - near));
 
-		depthLinear0to1 /= far;
+		float depthLinear = convertNonLinearDepthToLinear(depthValue, near, far);
+
+		float depthLinear0to1 = depthLinear / far;
 		vertexWorldLocationXYZ.rgb = vec3(depthLinear0to1);
 
-		if ( depthLinear0to1 > 1.0f )
-		{
-			vertexWorldLocationXYZ.rgb = vec3(1.0f, 0.0f, 0.0f);
-		}
-//		vertexWorldLocationXYZ.r += 1.0f;
-//		vertexWorldLocationXYZ.rgb *= 0.0001f;
-//		vertexWorldLocationXYZ.g += 1.0f;
 		vertexWorldLocationXYZ.a = 1.0f;
 		return;
 	}
@@ -435,95 +464,9 @@ void Pass_0_RegularForward(void)
 	} 
 	
 
-	if ( b_Is_FBO_Texture )
-	{
-//		vec3 texColour00 = texture( texture00, fUV.st ).rgb;
-//		vertexColour.rgb = texColour00.rgb;	
-		//     -1   0   +1
-		//  -1  .   +    .
-		//   0  +   O    +
-		//  +1  .   +    .
-		//
-		// Kernel size is 3 or 3x3 
-		// size of 5 would 5 samples x 5 samples = 25
-		// 
-		// +++++
-		// +++++
-		// ++O++
-		// +++++
-		// +++++
-//		
-		// ....+.....
-		// ....+.....
-		// ....+.....
-		// ++++O+++++
-		// ....+.....
-		// ....+.....
-		// ....+.....
-//		
-		// Note: While you CAN pass multi-dimensional arrays
-		//       through uniform variables, you CAN'T as constant arrays.
-		//
-		// int[5][5] gaussian_blur_5x5;		// Illegal
-		//
-		// So I'm doing this strange thing:
-		struct sRow
-		{
-			int column[5];
-		};
-//		
-		sRow gaussian_5x5[5];
-		// I took the 5x5 kernel from here:
-//		// https://en.wikipedia.org/wiki/Kernel_(image_processing)
-		gaussian_5x5[0].column = int[](1,  4,  6,  4, 1);	// Note strange array init
-		gaussian_5x5[1].column = int[](4, 16, 24, 16, 1);	// Note strange array init
-		gaussian_5x5[2].column = int[](6, 24, 36, 24, 6);	// Note strange array init
-		gaussian_5x5[3].column = int[](4, 16, 24, 16, 1);	// Note strange array init
-		gaussian_5x5[4].column = int[](1,  4,  6,  4, 1);	// Note strange array init
-		// There are a total of 256 samples in this gaussian 
-		
-		vertexColour = vec3(0.0f, 0.0f, 0.0f);	// black
-		
-		
-		
-		
-		
-		const float OFFSET_UV = 1.0f/1920.0f;	// Screen is 1920x1080
-		
-		int samplesTaken = 0;
-		
-		// 3x3 starts at -1 less than 2
-		// 5x5 starts at -2 less than 3
-		// 9x9 starts at -4 less than 5  --> 81 samples
-		for ( int xIndex = -2; xIndex < 3; xIndex++ )
-		{
-			for ( int yIndex = -2; yIndex < 3; yIndex++ )
-			{
-				vec2 UV_Offset = vec2(0.0f);
-				UV_Offset.s = fUV.s + (xIndex * OFFSET_UV);
-				UV_Offset.t = fUV.t + (yIndex * OFFSET_UV);
-				//vertexColour.rgb += texture( texture00, UV_Offset).rgb;
+//	if ( b_Is_FBO_Texture )
+// Moved to "fragment01 - only gausian blur part.glsl" file
 
-				// Multiple the sample by the value in the [x][y] gaussian matrix above
-				vec3 sampleColour = texture( texture00, UV_Offset).rgb;
-				int gassianWeight = gaussian_5x5[xIndex + 2].column[yIndex + 2];
-				vertexColour.rgb += ( sampleColour * gassianWeight );
-
-//				samplesTaken++;
-				samplesTaken += gassianWeight;
-				
-			}//for ( int yIndex...
-		}// for ( int xIndex...	
-
-		vertexColour.rgb /= float(samplesTaken);
-
-	}//if ( b_Is_FBO_Texture )
-
-	
-	
-//	finalPixelColour = vec4(finalColour, 1.0);
-
-//	vec3 fvertexNormal = vec3(0.0f, 1.0f, 0.0f);
 	vec4 vertexSpecular = vec4(1.0f, 1.0f, 1.0f, 100.0f);	
 
 
@@ -559,10 +502,15 @@ void Pass_0_RegularForward(void)
 //	vertexColour.rgb = vec3(212.0f/255.0f, 175.0f/255.0f, 55.0f/255.0f);
 //	vertexSpecular.rgba = vec4(255.0f/255.0f, 223.0f/255.0f, 0.0f/255.0f, 100.0f);
 
-	vec4 pixelColour = calculateLightContrib( vertexColour.rgb, 
-	                                          vertexNormalFinal.xyz, 
-	                                          fvertexWorldLocation.xyz, 
-											  vertexSpecular );
+//	vec4 pixelColour = calculateLightContrib( vertexColour.rgb, 
+//	                                          vertexNormalFinal.xyz, 
+//	                                          fvertexWorldLocation.xyz, 
+//											  vertexSpecular );
+
+	vec4 pixelColour = calculateLightContrib_with_Shadows( vertexColour.rgb, 
+	                                                       vertexNormalFinal.xyz, 
+	                                                       fvertexWorldLocation.xyz, 
+                                                           vertexSpecular );
 
 	vertexWorldLocationXYZ = pixelColour;
 	vertexWorldLocationXYZ.a = wholeObjectTransparencyAlpha;	// Set the alpha channel											
@@ -764,6 +712,233 @@ vec4 calculateLightContrib( vec3 vertexMaterialColour, vec3 vertexNormal,
 	return finalObjectColour;
 }
 
+
+// Uses param2 values (see above)							
+vec4 calculateLightContrib_with_Shadows( 
+		vec3 vertexMaterialColour, vec3 vertexNormal, 
+		vec3 vertexWorldPos, vec4 vertexSpecular )
+{			
+	vec3 norm = normalize(vertexNormal);
+	
+	vec4 finalObjectColour = vec4( 0.0f, 0.0f, 0.0f, 1.0f );
+	
+	for ( int index = 0; index < NUMBEROFLIGHTS; index++ )
+	{	
+		// ********************************************************
+		// is light "on"
+		if ( theLights[index].param2.x == 0.0f )
+		{	// it's off
+			continue;
+		}
+		
+		// Cast to an int (note with c'tor)
+		int intLightType = int(theLights[index].param1.x);
+		
+		// We will do the directional light here... 
+		// (BEFORE the attenuation, since sunlight has no attenuation, really)
+		if ( intLightType == DIRECTIONAL_LIGHT_TYPE )		// = 2
+		{
+			// This is supposed to simulate sunlight. 
+			// SO: 
+			// -- There's ONLY direction, no position
+			// -- Almost always, there's only 1 of these in a scene
+			// Cheapest light to calculate. 
+
+			vec3 lightContrib = theLights[index].diffuse.rgb;
+			
+			// Get the dot product of the light and normalize
+			float dotProduct = dot( -theLights[index].direction.xyz,  
+									   normalize(norm.xyz) );	// -1 to 1
+
+			dotProduct = max( 0.0f, dotProduct );		// 0 to 1
+		
+			lightContrib *= dotProduct;		
+			
+			finalObjectColour.rgb += (vertexMaterialColour.rgb * theLights[index].diffuse.rgb * lightContrib); 
+									 //+ (materialSpecular.rgb * lightSpecularContrib.rgb);
+			// NOTE: There isn't any attenuation, like with sunlight.
+			// (This is part of the reason directional lights are fast to calculate)
+
+			//return finalObjectColour;	
+			// Next light...
+			continue;
+		}
+		
+		// Assume it's a point light 
+		// intLightType = 0
+		
+		// Contribution for this light
+		vec3 vLightToVertex = theLights[index].position.xyz - vertexWorldPos.xyz;
+		float distanceToLight = length(vLightToVertex);	
+		vec3 lightVector = normalize(vLightToVertex);
+		float dotProduct = dot(lightVector, vertexNormal.xyz);	 
+		
+		// Cut off the light after the distance cut off 
+		if ( distanceToLight > theLights[index].atten.w )
+		{
+			//finalObjectColour = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+			//return finalObjectColour;
+			// Next light
+			continue;
+		}
+		
+		int shadowType = int(theLights[index].shadowInfo.x);
+		// Shadow?
+		switch (shadowType)
+		{
+		case SHADOW_TYPE_2D_PERSPECTIVE:
+			
+			
+			float near = theLights[index].shadowInfo.z;
+			float far  = theLights[index].shadowInfo.w;	
+			
+			float lightShadowNonLinearDepthValue = far;
+			
+			vec3 projCoords = fFragPosLightSpace.xyz / fFragPosLightSpace.w;
+			projCoords = projCoords * 0.5f + 0.5f; 
+
+			
+//			int shadowSamplerID = int(theLights[index].shadowInfo.y);
+//			switch (shadowSamplerID)
+//			{
+//			case 0:
+//				lightShadowNonLinearDepthValue = texture( shadowDepthMap_0, projCoords.st ).z;
+//				break;
+//			case 1:
+//				lightShadowNonLinearDepthValue = texture( shadowDepthMap_1, projCoords.st ).z;
+//				break;
+//			case 2:
+//				lightShadowNonLinearDepthValue = texture( shadowDepthMap_2, projCoords.st ).z;
+//				break;
+//			case 3:
+//				lightShadowNonLinearDepthValue = texture( shadowDepthMap_3, projCoords.st ).z;
+//				break;			
+//			}
+			
+			lightShadowNonLinearDepthValue = texture( shadowDepthMap_0, projCoords.st ).z;
+						
+//			// Distance from the light to this particular vertex
+//			float lightShadowDistanceWorld = convertNonLinearDepthToLinear(lightShadowNonLinearDepthValue, near, far);
+			
+			// lightShadowDistanceWorld
+
+			// In shadow?
+//			if ( distanceToLight > lightShadowDistanceWorld )
+
+			float currentDepth = projCoords.z; 
+			if ( currentDepth > lightShadowNonLinearDepthValue )
+			{
+				// It's in shadow
+				// Next light
+				finalObjectColour.rgb = vec3(1.0f, 0.0f, 0.0f);
+				return finalObjectColour;
+				//continue;
+			}
+			else
+			{
+				// It's NOT in shadow
+				finalObjectColour.rgb = vec3(0.0f, 1.0f, 0.0f);
+				return finalObjectColour;
+				//continue;
+			}
+
+			break;
+		case SHADOW_TYPE_CUBEMAP_PERSPECTIVE:
+		
+			break;
+		//default: SHADOW_TYPE_NONE
+		};//if ( ...!= SHADOW_TYPE_NONE
+		
+		dotProduct = max( 0.0f, dotProduct );	
+		
+		vec3 lightDiffuseContrib = dotProduct * theLights[index].diffuse.rgb;
+			
+
+		// Specular 
+		vec3 lightSpecularContrib = vec3(0.0f);
+			
+		vec3 reflectVector = reflect( -lightVector, normalize(norm.xyz) );
+
+		// Get eye or view vector
+		// The location of the vertex in the world to your eye
+		vec3 eyeVector = normalize(eyeLocation.xyz - vertexWorldPos.xyz);
+
+		// To simplify, we are NOT using the light specular value, just the object’s.
+		float objectSpecularPower = vertexSpecular.w; 
+		
+//		lightSpecularContrib = pow( max(0.0f, dot( eyeVector, reflectVector) ), objectSpecularPower )
+//			                   * vertexSpecular.rgb;	//* theLights[lightIndex].Specular.rgb
+		lightSpecularContrib = pow( max(0.0f, dot( eyeVector, reflectVector) ), objectSpecularPower )
+			                   * theLights[index].specular.rgb;
+							   
+		// Attenuation
+		float attenuation = 1.0f / 
+				( theLights[index].atten.x + 										
+				  theLights[index].atten.y * distanceToLight +						
+				  theLights[index].atten.z * distanceToLight*distanceToLight );  	
+				  
+		// total light contribution is Diffuse + Specular
+		lightDiffuseContrib *= attenuation;
+		lightSpecularContrib *= attenuation;
+		
+		
+		// But is it a spot light
+		if ( intLightType == SPOT_LIGHT_TYPE )		// = 1
+		{	
+		
+
+			// Yes, it's a spotlight
+			// Calcualate light vector (light to vertex, in world)
+			vec3 vertexToLight = vertexWorldPos.xyz - theLights[index].position.xyz;
+
+			vertexToLight = normalize(vertexToLight);
+
+			float currentLightRayAngle
+					= dot( vertexToLight.xyz, theLights[index].direction.xyz );
+					
+			currentLightRayAngle = max(0.0f, currentLightRayAngle);
+
+			//vec4 param1;	
+			// x = lightType, y = inner angle, z = outer angle, w = TBD
+
+			// Is this inside the cone? 
+			float outerConeAngleCos = cos(radians(theLights[index].param1.z));
+			float innerConeAngleCos = cos(radians(theLights[index].param1.y));
+							
+			// Is it completely outside of the spot?
+			if ( currentLightRayAngle < outerConeAngleCos )
+			{
+				// Nope. so it's in the dark
+				lightDiffuseContrib = vec3(0.0f, 0.0f, 0.0f);
+				lightSpecularContrib = vec3(0.0f, 0.0f, 0.0f);
+			}
+			else if ( currentLightRayAngle < innerConeAngleCos )
+			{
+				// Angle is between the inner and outer cone
+				// (this is called the penumbra of the spot light, by the way)
+				// 
+				// This blends the brightness from full brightness, near the inner cone
+				//	to black, near the outter cone
+				float penumbraRatio = (currentLightRayAngle - outerConeAngleCos) / 
+									  (innerConeAngleCos - outerConeAngleCos);
+									  
+				lightDiffuseContrib *= penumbraRatio;
+				lightSpecularContrib *= penumbraRatio;
+			}
+						
+		}// if ( intLightType == 1 )
+		
+		
+					
+		finalObjectColour.rgb += (vertexMaterialColour.rgb * lightDiffuseContrib.rgb)
+								  + (vertexSpecular.rgb  * lightSpecularContrib.rgb);
+
+	}//for(intindex=0...
+	
+	finalObjectColour.a = 1.0f;
+	
+	return finalObjectColour;
+}
 
 void Pass_2_Effects_Pass(void)
 {

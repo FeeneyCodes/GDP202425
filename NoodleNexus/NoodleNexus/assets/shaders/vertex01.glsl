@@ -15,11 +15,38 @@ out vec2 gUV;				// Texture coordinates (to the fragment shader)
 out vec3 gTangent;
 out vec3 gBiTangent;
 out mat3 g_matTBN;		// TBN matrix for normal mapping
+// For shadows
+out vec4 gFragPosLightSpace;
 
 //uniform mat4 MVP;
 uniform mat4 matView;
 uniform mat4 matProjection;
 uniform mat4 matModel;
+
+struct sLight
+{
+	vec4 position;			
+	vec4 diffuse;	
+	vec4 specular;	// rgb = highlight colour, w = power
+	vec4 atten;		// x = constant, y = linear, z = quadratic, w = DistanceCutOff
+	vec4 direction;	// Spot, directional lights
+	vec4 param1;	// x = lightType, y = inner angle, z = outer angle, w = TBD
+	                // 0 = pointlight
+					// 1 = spot light
+					// 2 = directional light
+	vec4 param2;	// x = 0 for off, 1 for on
+	                // y, z, and w : TBD
+	vec4 shadowInfo;// x : shadow info: 0 = none (light doesn't cast shadow)
+					//                  1 = 2D (perspective), 
+					//                  2 = cubeMap (persepective)
+					// y : shadow sampler ID (integer)
+					// z : near plane
+					// w : far plane
+	mat4 lightSpaceShadowMatrix;
+};
+
+const int NUMBEROFLIGHTS = 10;
+uniform sLight theLights[NUMBEROFLIGHTS]; 
 
 uniform bool bUseNormalMap;
 // If this is a "from the light" depth pass for the
@@ -48,6 +75,9 @@ void main()
 	
 	// Calculate location of the vertex in the "world"
 	gVertexWorldLocation = matModel * vec4(finalVert, 1.0);
+	
+	// Shadows
+	gFragPosLightSpace = (theLights[1].lightSpaceShadowMatrix * matModel) * vec4(finalVert, 1.0);
 	
 	// Calculatte the vertex normal
 	// Don't want scaling or translation

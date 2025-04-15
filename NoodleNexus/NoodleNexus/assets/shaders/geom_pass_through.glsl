@@ -13,6 +13,7 @@ in vec2 gUV[];
 in vec3 gTangent[];
 in vec3 gBiTangent[];
 in mat3 g_matTBN[];
+in vec4 gFragPosLightSpace[];
 
 // 'f' for 'going to the Fragment shader'
 out vec3 fColour;			
@@ -22,6 +23,7 @@ out vec2 fUV;
 out vec3 fTangent;
 out vec3 fBiTangent;
 out mat3 f_matTBN;
+out vec4 fFragPosLightSpace;
 
 void main()
 {
@@ -33,6 +35,7 @@ void main()
 	fTangent = gTangent[0];
 	fBiTangent = gBiTangent[0];
 	f_matTBN = g_matTBN[0];
+	fFragPosLightSpace = gFragPosLightSpace[0];
 	EmitVertex();
 
 	gl_Position = gl_in[1].gl_Position;
@@ -43,6 +46,7 @@ void main()
 	fTangent = gTangent[1];
 	fBiTangent = gBiTangent[1];
 	f_matTBN = g_matTBN[1];
+		fFragPosLightSpace = gFragPosLightSpace[1];
 	EmitVertex();
 
 	gl_Position = gl_in[2].gl_Position;
@@ -53,6 +57,7 @@ void main()
 	fTangent = gTangent[2];
 	fBiTangent = gBiTangent[2];
 	f_matTBN = g_matTBN[2];
+	fFragPosLightSpace = gFragPosLightSpace[2];
 	EmitVertex();
 
 	EndPrimitive();

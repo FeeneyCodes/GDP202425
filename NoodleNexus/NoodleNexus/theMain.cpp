@@ -437,7 +437,7 @@ int main(void)
     ::g_pLightManager->theLights[1].atten.y = 0.00469647f;
     ::g_pLightManager->theLights[1].atten.z = 0.00036973f;
 
-    ::g_pLightManager->theLights[1].param1.x = 1.0f;    // Spot light (see shader)
+    ::g_pLightManager->theLights[1].param1.x = cLightManager::sLight::POINT_LIGHT;  // 1.0f;    // Spot light (see shader)
     ::g_pLightManager->theLights[1].direction = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
     ::g_pLightManager->theLights[1].param1.y = 26.2f;   //  y = inner angle
     ::g_pLightManager->theLights[1].param1.z = 35.4f;  //  z = outer angle
@@ -451,6 +451,11 @@ int main(void)
     if (::g_pLightManager->theLights[1].pShadowMap->init(2048, 2048, FBOShadowErrorString))
     {
         std::cout << "Light #1 shadowmap created OK" << std::endl;
+        // 
+        ::g_pLightManager->theLights[1].shadowInfo.x = cLightManager::sLight::PERSPECTIVE_2D;   // 1.0f, 2D (perspective)
+        ::g_pLightManager->theLights[1].shadowInfo.y = 0;   // shadow sampler ID (integer)
+        ::g_pLightManager->theLights[1].shadowInfo.z = 0.1f;    // Near plane
+        ::g_pLightManager->theLights[1].shadowInfo.w = 200.0f;  // Far plane
     }
     else
     {
@@ -810,12 +815,11 @@ int main(void)
 
             // Calculate the view from the light to the barrel
             // (Spot is looking at the barrel)
-            matView = glm::lookAt(
-                lightLocation,
-                pBarrel->positionXYZ,
-                upVector);
+            glm::mat4 matLightView = glm::lookAt(lightLocation,
+                                                 pBarrel->positionXYZ,
+                                                 upVector);
             GLint matView_UL = glGetUniformLocation(program, "matView");
-            glUniformMatrix4fv(matView_UL, 1, GL_FALSE, (const GLfloat*)&matView);
+            glUniformMatrix4fv(matView_UL, 1, GL_FALSE, (const GLfloat*)&matLightView);
 
             GLint eyeLocation_UL = glGetUniformLocation(program, "eyeLocation");
             glUniform4f(eyeLocation_UL,
@@ -828,13 +832,14 @@ int main(void)
             // So greatest possible distance INSIDE warehouse is about 170.
             // We'll pick a far plane of 200
 
-            matProjection = glm::perspective(0.6f,
-                ratio,
-                0.1f,       // Very close to the light
-                200.0f);    // Mostly inside the warehouse
+            glm::mat4 matLightProjection = glm::perspective(0.6f,
+                                                            ratio,
+                                                            ::g_pLightManager->theLights[1].shadowInfo.z,   // 0.1f; Very close to the light
+                                                            ::g_pLightManager->theLights[1].shadowInfo.w);  // 200.0f: Mostly inside the warehouse
             GLint matProjection_UL = glGetUniformLocation(program, "matProjection");
-            glUniformMatrix4fv(matProjection_UL, 1, GL_FALSE, (const GLfloat*)&matProjection);
+            glUniformMatrix4fv(matProjection_UL, 1, GL_FALSE, (const GLfloat*)&matLightProjection);
 
+            ::g_pLightManager->theLights[1].lightSpaceShadowMatrix = matLightProjection * matLightView;
 
  //           RenderScene(program, matProjection, matView, ratio, lightLocation);
             // Draw everything

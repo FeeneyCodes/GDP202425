@@ -48,6 +48,7 @@ void cLightManager::loadUniformLocations(GLuint shaderProgram)
 	this->theLights[0].direction_UL = glGetUniformLocation(shaderProgram, "theLights[0].direction");
 	this->theLights[0].param1_UL = glGetUniformLocation(shaderProgram, "theLights[0].param1");
 	this->theLights[0].param2_UL = glGetUniformLocation(shaderProgram, "theLights[0].param2");
+	this->theLights[0].shadowInfo_UL = glGetUniformLocation(shaderProgram, "theLights[0].shadowInfo");
 
 
 	this->theLights[1].position_UL = glGetUniformLocation(shaderProgram, "theLights[1].position");
@@ -57,8 +58,26 @@ void cLightManager::loadUniformLocations(GLuint shaderProgram)
 	this->theLights[1].direction_UL = glGetUniformLocation(shaderProgram, "theLights[1].direction");
 	this->theLights[1].param1_UL = glGetUniformLocation(shaderProgram, "theLights[1].param1");
 	this->theLights[1].param2_UL = glGetUniformLocation(shaderProgram, "theLights[1].param2");
+	this->theLights[1].shadowInfo_UL = glGetUniformLocation(shaderProgram, "theLights[1].shadowInfo");
 
 	// TODO: the rest of the lights... (2, 3, etc.)
+
+	// Doing it with a loop
+	for (unsigned int index = 0; index != cLightManager::NUMBEROFLIGHTS; index++)
+	{
+		std::stringstream ssBaseLightString;
+		ssBaseLightString << "theLights[" << index << "].";
+
+		this->theLights[index].position_UL = glGetUniformLocation(shaderProgram, (ssBaseLightString.str() + "position").c_str());
+		this->theLights[index].diffuse_UL = glGetUniformLocation(shaderProgram, (ssBaseLightString.str() + "diffuse").c_str());
+		this->theLights[index].specular_UL = glGetUniformLocation(shaderProgram, (ssBaseLightString.str() + "specular").c_str());
+		this->theLights[index].atten_UL = glGetUniformLocation(shaderProgram, (ssBaseLightString.str() + "atten").c_str());
+		this->theLights[index].direction_UL = glGetUniformLocation(shaderProgram, (ssBaseLightString.str() + "direction").c_str());
+		this->theLights[index].param1_UL = glGetUniformLocation(shaderProgram, (ssBaseLightString.str() + "param1").c_str());
+		this->theLights[index].param2_UL = glGetUniformLocation(shaderProgram, (ssBaseLightString.str() + "param2").c_str());
+		this->theLights[index].shadowInfo_UL = glGetUniformLocation(shaderProgram, (ssBaseLightString.str() + "shadowInfo").c_str());
+		this->theLights[index].lightSpaceShadowMatrix_UL = glGetUniformLocation(shaderProgram, (ssBaseLightString.str() + "lightSpaceShadowMatrix").c_str());
+	}
 
 	return;
 }
@@ -124,6 +143,18 @@ void cLightManager::updateShaderWithLightInfo(void)
 			this->theLights[index].param2.y,
 			this->theLights[index].param2.z,
 			this->theLights[index].param2.w);
+
+		// Now with more shadows!
+		glUniform4f(
+			this->theLights[index].shadowInfo_UL,
+			this->theLights[index].shadowInfo.x,
+			this->theLights[index].shadowInfo.y,
+			this->theLights[index].shadowInfo.z,
+			this->theLights[index].shadowInfo.w);
+
+		glUniform3fv(this->theLights[index].lightSpaceShadowMatrix_UL, 1, 
+			         (const GLfloat*)&(this->theLights[index].lightSpaceShadowMatrix));
+
 	}//for (unsigned int index...
 
 	return;
